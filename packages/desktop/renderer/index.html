@@ -1,0 +1,116 @@
+<!doctype html>
+<!--
+  Aster 桌面版渲染页（ADR-029 / 增补 M13b：**可交互**；M20：双主题 + 工具栏）。
+  安全基线（写死不许改）：CSP `default-src 'none'`（**连一次网络请求都发不出去**），脚本/样式只从**本地**加载；
+  renderer 拿不到 Node（`sandbox: true` + `contextIsolation: true`），只能调 preload 暴露的窄接口。
+-->
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'none'; connect-src 'none'"
+    />
+    <title>Aster</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">aster</div>
+      <div class="modes" id="mode-switch" role="group" aria-label="模式（plan 只读 / build 可写）">
+        <button type="button" data-mode="plan" aria-pressed="false">plan</button>
+        <button type="button" data-mode="build" aria-pressed="false">build</button>
+      </div>
+      <div class="spacer"></div>
+      <div class="meta">
+        <span class="label">数据目录</span>
+        <code id="data-dir">…</code>
+      </div>
+      <button type="button" id="settings-button" class="icon" title="模型接入设置（Base URL / API Key / 模型）">⚙</button>
+      <button type="button" id="theme-toggle" class="icon" title="切换深色 / 浅色（默认跟随系统）">
+        <span id="theme-icon" aria-hidden="true">◐</span>
+      </button>
+    </header>
+    <main>
+      <aside>
+        <h2>会话</h2>
+        <button id="new-session" type="button" class="ghost">＋ 新会话</button>
+        <input
+          id="search"
+          type="search"
+          placeholder="搜索标题 / 内容 / id"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <ul id="sessions"></ul>
+      </aside>
+      <section class="chat">
+        <div id="stream" aria-live="polite">
+          <div class="empty">
+            <p class="empty-title">还没有打开任何会话</p>
+            <p class="empty-hint">输入一条 prompt 开始，或点左侧任意一条已记录会话回放。数据根与 CLI / TUI 是同一个。</p>
+          </div>
+        </div>
+        <pre id="live" class="live" hidden></pre>
+        <div id="approval" class="approval" hidden>
+          <div class="approval-head">需要审批</div>
+          <pre id="approval-detail"></pre>
+          <div class="approval-actions">
+            <button type="button" data-choice="once">允许一次</button>
+            <button type="button" data-choice="always">本次会话始终允许</button>
+            <button type="button" data-choice="reject">拒绝</button>
+          </div>
+        </div>
+        <div id="panel" class="panel" hidden>
+          <div class="panel-head">规则 / 策略</div>
+          <ul id="panel-body"></ul>
+        </div>
+        <form id="composer">
+          <span class="prompt-mark">›</span>
+          <textarea id="prompt" rows="1" placeholder="输入 prompt（Enter 发送，Shift+Enter 换行）"></textarea>
+          <button type="submit" id="send">发送</button>
+          <button type="button" id="rules-button" class="ghost" title="本会话的审批规则 + 生效的「模式 → 权限」">规则/策略</button>
+          <button type="button" id="interrupt" class="ghost" title="中断当前回合（合成 SIGINT）" disabled>中断</button>
+        </form>
+      </section>
+    </main>
+    <footer>
+      <span id="session-id">（尚未开始）</span>
+      <div class="spacer"></div>
+      <span id="guarded">…</span>
+    </footer>
+    <!-- M21：模型接入设置（密钥只在 main 进程解密；界面永远拿不到密钥） -->
+    <div id="settings" class="sheet" hidden>
+      <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="sheet-head">
+          <span id="settings-title">模型接入</span>
+          <button type="button" id="settings-close" class="icon ghost" title="关闭">✕</button>
+        </div>
+        <p class="sheet-note">
+          OpenAI-compatible 端点。密钥用 Windows DPAPI 加密后存在本机，<b>不会进会话文件</b>；保存后需重启应用生效。
+        </p>
+        <label class="field">
+          <span>Base URL</span>
+          <input id="s-base-url" type="url" placeholder="https://api.openai.com/v1" autocomplete="off" spellcheck="false" />
+        </label>
+        <label class="field">
+          <span>API Key</span>
+          <input id="s-api-key" type="password" placeholder="sk-…（留空 = 沿用已保存的密钥）" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>模型</span>
+          <input id="s-model" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" />
+        </label>
+        <div id="s-status" class="sheet-status" hidden></div>
+        <div class="sheet-actions">
+          <button type="button" id="s-test">测试连接</button>
+          <button type="button" id="s-save">保存并重启</button>
+          <button type="button" id="s-cancel" class="ghost">取消</button>
+          <button type="button" id="s-clear" class="ghost" title="删除本机保存的端点与密钥，回到环境变量">清除设置</button>
+        </div>
+      </div>
+    </div>
+    <script src="markdown.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

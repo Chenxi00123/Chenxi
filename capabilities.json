@@ -1,0 +1,657 @@
+{
+  "$comment": "能力声明纪律（00 §3 / 05 §5）的机器可读清单。CI 门禁：README 中每条已声明能力必须在此有 status=stable + 非空 tests；removed 能力不得出现在 README；stable 能力不得含空桩。",
+  "version": "1.0.0",
+  "capabilities": [
+    {
+      "id": "session.event-sourced-log",
+      "claim": "会话是 append-only 事件日志，模型历史由 deriveMessages 投影得出（幂等、确定性）",
+      "status": "stable",
+      "adr": ["ADR-003"],
+      "tests": ["packages/runtime/test/m1-acceptance.test.ts"]
+    },
+    {
+      "id": "persist.jsonl-source-rebuildable-index",
+      "claim": "JSONL 是唯一事实源；SQLite 是可由 JSONL 全量重建的派生索引；支持 resume 与 rebuild-index",
+      "status": "stable",
+      "adr": ["ADR-008"],
+      "tests": ["packages/runtime/test/persist.test.ts", "packages/runtime/test/m1-acceptance.test.ts"]
+    },
+    {
+      "id": "events.waterfall-and-effect",
+      "claim": "事件总线提供 waterfall 中间件（不调 next() 即短路）与「注册即 effect」（卸载自动回滚）",
+      "status": "stable",
+      "adr": ["ADR-004"],
+      "tests": ["packages/runtime/test/events.test.ts"]
+    },
+    {
+      "id": "llm.openai-compatible-streaming",
+      "claim": "单一 openai-compatible 流式后端（SSE 分片解析、usage 映射、finish_reason 映射、tool_calls 聚合）",
+      "status": "stable",
+      "adr": ["ADR-001"],
+      "tests": ["packages/runtime/test/llm.test.ts"]
+    },
+    {
+      "id": "llm.api-key-not-leaked",
+      "claim": "API key 绝不写入会话日志、绝不打印；错误信息经脱敏",
+      "status": "stable",
+      "adr": ["ADR-001"],
+      "tests": ["packages/runtime/test/llm.test.ts"]
+    },
+    {
+      "id": "tools.output-schema-enforced",
+      "claim": "工具必须声明 output schema，注册期即校验；执行期强制校验，不符即拒绝并回灌可读错误",
+      "status": "stable",
+      "adr": ["ADR-005"],
+      "tests": ["packages/runtime/test/tools.test.ts"]
+    },
+    {
+      "id": "tools.execute-pipeline",
+      "claim": "工具执行流水线：resolveInput -> input 校验 -> beforeToolCall -> tools/execute waterfall -> execute -> output 校验 -> afterToolCall",
+      "status": "stable",
+      "adr": ["ADR-004", "ADR-005", "ADR-006"],
+      "tests": ["packages/runtime/test/tools.test.ts"]
+    },
+    {
+      "id": "tools.primitive-set",
+      "claim": "默认工具集只有 4 个原语：read / bash / edit / write（bash 覆盖搜索）；启用 subagents 后额外注册 task 工具（默认关闭，故默认仍是恰好 4 个）",
+      "status": "stable",
+      "adr": ["ADR-009", "ADR-017"],
+      "tests": [
+        "packages/runtime/test/tools.test.ts",
+        "packages/runtime/test/m3-acceptance.test.ts",
+        "packages/runtime/test/m8a-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "shell.bash-pwsh-dual",
+      "claim": "bash 工具经 shell provider 抽象选后端：类 Unix 用 bash，Windows 用 pwsh（接口一致）",
+      "status": "stable",
+      "adr": ["ADR-009"],
+      "tests": ["packages/runtime/test/shell.test.ts", "packages/runtime/test/m3-acceptance.test.ts"]
+    },
+    {
+      "id": "shell.unix-ism-hints",
+      "claim": "Windows/pwsh 下检测到 Unix 惯用法（ls/rg/cat 等）时给出可读替代提示而非硬失败",
+      "status": "stable",
+      "adr": ["ADR-009"],
+      "tests": ["packages/runtime/test/m3-acceptance.test.ts", "packages/runtime/test/shell.test.ts"]
+    },
+    {
+      "id": "loop.turn-loop-with-tools",
+      "claim": "回合制主循环：turn = 0..N step（采样 -> 工具 -> 回灌 -> 再采样），主循环不写死策略",
+      "status": "stable",
+      "adr": ["ADR-004"],
+      "tests": ["packages/runtime/test/loop.test.ts", "packages/runtime/test/m3-acceptance.test.ts"]
+    },
+    {
+      "id": "loop.truncation-batch-failure",
+      "claim": "stopReason=length 时该批 tool call 全部判失败、不执行并重发（截断整批失败）",
+      "status": "stable",
+      "adr": ["ADR-004"],
+      "tests": ["packages/runtime/test/m3-acceptance.test.ts"]
+    },
+    {
+      "id": "loop.readonly-parallel-write-serial",
+      "claim": "同一批工具调用：只读工具并发执行，写类工具串行执行；事件回灌顺序确定",
+      "status": "stable",
+      "adr": ["ADR-009"],
+      "tests": ["packages/runtime/test/m3-acceptance.test.ts"]
+    },
+    {
+      "id": "permission.metadata-source-of-truth",
+      "claim": "权限判定唯一事实源是工具元数据（readOnly/destructive/sideEffectScope/riskLevel/needsApproval），不依赖代码语义",
+      "status": "stable",
+      "adr": ["ADR-006"],
+      "tests": ["packages/runtime/test/m4-acceptance.test.ts", "packages/runtime/test/tools.test.ts"]
+    },
+    {
+      "id": "permission.monotonic-guard",
+      "claim": "guard 只能否决、不能放行（列表次序无法把 deny 翻成 allow）",
+      "status": "stable",
+      "adr": ["ADR-006"],
+      "tests": ["packages/runtime/test/m4-acceptance.test.ts"]
+    },
+    {
+      "id": "permission.fail-closed",
+      "claim": "ask 在无审批通道时 fail-closed 转为 deny",
+      "status": "stable",
+      "adr": ["ADR-007"],
+      "tests": ["packages/runtime/test/m4-acceptance.test.ts"]
+    },
+    {
+      "id": "modes.plan-build-default",
+      "claim": "默认双模式：plan 为默认启动模式且写操作一律 deny；build 允许 workspace 内写、workspace 外 ask；切换经 mode/changed 事件",
+      "status": "stable",
+      "adr": ["ADR-013"],
+      "tests": ["packages/runtime/test/m4-acceptance.test.ts"]
+    },
+    {
+      "id": "context.sectioned-prompt",
+      "claim": "系统提示词分节拼装（稳定段/动态段分离），且每次请求对账当前模式约束",
+      "status": "stable",
+      "adr": ["ADR-011", "ADR-013"],
+      "tests": ["packages/runtime/test/context.test.ts"]
+    },
+    {
+      "id": "extensions.tools-execute-seam",
+      "claim": "扩展缝可用：加载中间件即可在 tools/execute 上注入超时、或短路内置行为，且不改主循环",
+      "status": "stable",
+      "adr": ["ADR-004", "ADR-002"],
+      "tests": ["packages/runtime/test/extensions.test.ts"]
+    },
+    {
+      "id": "cli.repl-streaming",
+      "claim": "最小 REPL：流式打印 + 工具调用轨迹 + /history + /mode + /approvals + /policy + /exit（朴素、无差分渲染）",
+      "status": "stable",
+      "adr": ["ADR-002"],
+      "tests": [
+        "packages/runtime/test/m2-acceptance.test.ts",
+        "packages/runtime/test/m3-acceptance.test.ts",
+        "packages/runtime/test/m4-acceptance.test.ts",
+        "packages/runtime/test/m7a-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "cli.tool-approval-interactive",
+      "claim": "ask 请求现场征询用户：y=仅此次放行 / a=本会话内始终放行（沉淀为同工具同作用域的审批规则，不改变 guard 的单调否决）/ n=拒绝；无法识别一律 fail-closed 拒绝",
+      "status": "stable",
+      "adr": ["ADR-006", "ADR-007"],
+      "tests": ["packages/runtime/test/m6-acceptance.test.ts"]
+    },
+    {
+      "id": "cli.resume-latest",
+      "claim": "--resume latest 直接续上最近更新的会话（同一 sessionId，且退出前历史在恢复后可见）",
+      "status": "stable",
+      "adr": ["ADR-008"],
+      "tests": ["packages/runtime/test/m6-acceptance.test.ts"]
+    },
+    {
+      "id": "cli.sigint-graceful-abort",
+      "claim": "Ctrl+C 一次中止当前回合（落 turn/end{error}）或把当前审批判为拒绝；二次退出并落 session/end{interrupted}",
+      "status": "stable",
+      "tests": ["packages/runtime/test/m6-acceptance.test.ts"]
+    },
+    {
+      "id": "cli.doctor-self-check",
+      "claim": "--doctor 自检 Node 版本 / shell provider / node:sqlite / ASTER_HOME 可写 / 端点变量 set-unset / UTF-8 / 会话与索引状态；关键项全通过 exit 0，否则 exit 1；绝不打印密钥值",
+      "status": "stable",
+      "tests": ["packages/runtime/test/m6-acceptance.test.ts"]
+    },
+    {
+      "id": "tools.read-output-cap",
+      "claim": "read 输出按 UTF-8 字节上限（65536）截断并置 truncated 与 truncatedReason（window/bytes）",
+      "status": "stable",
+      "adr": ["ADR-009"],
+      "tests": ["packages/runtime/test/m6-acceptance.test.ts"]
+    },
+    {
+      "id": "config.layered-json-file",
+      "claim": "本地配置为分层 JSON（<home>/config.json -> <cwd>/aster.config.json，逐键合并且近者胜）；可用 --config（CLI）或 ASTER_CONFIG 显式指定并跳过自动发现；未知键 / 非法值 / 非法 JSON 一律快速失败且错误可读（含键名或键路径）；读取时容忍首个 UTF-8 BOM（Windows 记事本 / PowerShell 会写）",
+      "status": "stable",
+      "adr": ["ADR-014"],
+      "tests": [
+        "packages/runtime/test/m7a-acceptance.test.ts",
+        "packages/runtime/test/m11a-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "config.precedence-cli-env-file-default",
+      "claim": "配置优先级 CLI 参数 > 环境变量 > 配置文件 > 内置默认：--mode > ASTER_MODE > 配置 mode > 内置 plan；配置 model 仅在 ASTER_MODEL 未设置时兜底，绝不覆盖",
+      "status": "stable",
+      "adr": ["ADR-014"],
+      "tests": ["packages/runtime/test/m7a-acceptance.test.ts"]
+    },
+    {
+      "id": "config.mode-permission-override",
+      "claim": "配置文件可按模式整段替换「模式 -> 权限」规则（未提供的模式回退内置默认），且覆盖必须显式写出规则；guard 仍只能否决，plan 的安全默认不被隐式破坏；/policy 与 --doctor 让生效规则与配置来源可见",
+      "status": "stable",
+      "adr": ["ADR-006", "ADR-013", "ADR-014"],
+      "tests": ["packages/runtime/test/m7a-acceptance.test.ts"]
+    },
+    {
+      "id": "mcp.stdio-client",
+      "claim": "自写零依赖 MCP stdio 客户端（JSON-RPC 2.0 按行分隔）：initialize / tools/list / tools/call / close；请求 id 单调递增、超时与子进程退出都会清理待决请求，close 幂等，不引入 @modelcontextprotocol/sdk",
+      "status": "stable",
+      "adr": ["ADR-015"],
+      "tests": ["packages/runtime/test/mcp.test.ts"]
+    },
+    {
+      "id": "mcp.tool-bridge",
+      "claim": "MCP 工具以 mcp__<server>__<tool> 命名空间注册（重名即注册失败）；input 原样透传服务端 JSON Schema（按已声明子集校验），output 声明并强制校验 CallToolResult 内容信封（调和 ADR-005）",
+      "status": "stable",
+      "adr": ["ADR-005", "ADR-015"],
+      "tests": ["packages/runtime/test/mcp.test.ts", "packages/runtime/test/m7b-acceptance.test.ts"]
+    },
+    {
+      "id": "mcp.permission-integration",
+      "claim": "MCP 工具一律 sideEffectScope=host：plan 下被拒、build 下走 ask + 审批流；readOnly/destructive 取服务端注解且缺失按保守值（false/true）；判定落 permission/decision 事件",
+      "status": "stable",
+      "adr": ["ADR-006", "ADR-007", "ADR-015"],
+      "tests": ["packages/runtime/test/m7b-acceptance.test.ts"]
+    },
+    {
+      "id": "config.mcp-servers",
+      "claim": "配置文件 mcp.servers 声明 MCP 服务器：stdio `{name,command,args?,env?}` 或 Streamable HTTP `{name,url,headers?}`（ADR-035，**严格 union、键互斥**，url 必须 http(s)）——name 规则校验、未知键报错、服务器重名 fail-fast；mcp 为整段替换合并；加载期不 spawn，桥接失败只提示不阻塞启动",
+      "status": "stable",
+      "adr": ["ADR-014", "ADR-015", "ADR-035"],
+      "tests": ["packages/runtime/test/m7b-acceptance.test.ts", "packages/runtime/test/m18a-acceptance.test.ts"]
+    },
+    {
+      "id": "memory.injection-seam",
+      "claim": "记忆注入缝（before_turn）：检索结果先落 memory/injected 事件，再由投影成模型可见前缀；适配器报错或形状不符一律 fail-open（不落事件、不阻塞对话）；条数与单条长度上限生效",
+      "status": "stable",
+      "adr": ["ADR-011", "ADR-016"],
+      "tests": ["packages/runtime/test/m7b2-acceptance.test.ts"]
+    },
+    {
+      "id": "memory.single-injection-projection",
+      "claim": "deriveMessages 只投影最后一条 memory/injected，且仅当它晚于最后一条 user/message；作为该条消息的 content 前缀（更早回合不被回溯修改、注入不堆积），幂等与确定性保持",
+      "status": "stable",
+      "adr": ["ADR-003", "ADR-016"],
+      "tests": [
+        "packages/runtime/test/m7b2-acceptance.test.ts",
+        "packages/runtime/test/m1-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "memory.mcp-adapter",
+      "claim": "记忆适配器经 MCP 外挂复用已桥接连接：检索工具入参为 {query,limit,user,agent,session}，content[0].text 按 JSON 宽容解析（record 信封或裸数组；坏 JSON/缺 content 丢弃、缺 id 兜底）；可选字段（createdAt/validAt/invalidAt/provenance）服务端给了就原样携带、没给就不带、形状不符只丢该字段；**写入/失效工具可选**（ADR-033/034：配了 addTool 才可写、配了 invalidateTool 才有 invalidate；服务端 isError 或没有可用记录 ⇒ 如实失败；都没配时 add 仍显式拒绝，不是静默空操作）",
+      "status": "stable",
+      "adr": ["ADR-010", "ADR-016", "ADR-033", "ADR-034"],
+      "tests": ["packages/runtime/test/m7b2-acceptance.test.ts"]
+    },
+    {
+      "id": "config.memory-server-binding",
+      "claim": "配置 memory.{server,searchTool,limit,write}；server 必须指向已声明的 mcp.servers 之名，否则 fail-fast 并提示已声明清单；write.enabled=true 时 write.addTool 必填（否则 fail-fast，避免\"开了写入却永远写不进去\"）；服务器未桥接成功时明确报告并禁用记忆（fail-open）",
+      "status": "stable",
+      "adr": ["ADR-014", "ADR-016", "ADR-033"],
+      "tests": ["packages/runtime/test/m7b2-acceptance.test.ts", "packages/runtime/test/m17a-acceptance.test.ts"]
+    },
+    {
+      "id": "subagent.isolated-session",
+      "claim": "子代理 = 独立会话（独立 JSONL）：父会话只留该次派发的 tool/call 与 tool/result，父模型只看到 summary（隔离是结构性的，不靠投影过滤）；父子关系落子会话 session/start.parentSessionId",
+      "status": "stable",
+      "adr": ["ADR-003", "ADR-017"],
+      "tests": ["packages/runtime/test/m8a-acceptance.test.ts"]
+    },
+    {
+      "id": "subagent.depth-limit-no-recursion",
+      "claim": "靠「工具不存在」结构性防递归：depth+1 >= maxDepth 时子会话不再注册 task（行为可证：子代理内调用 task 得到 unknown_tool；maxDepth=2 时真的出现下一层子会话）",
+      "status": "stable",
+      "adr": ["ADR-017"],
+      "tests": ["packages/runtime/test/subagent.test.ts"]
+    },
+    {
+      "id": "subagent.permission-and-mode",
+      "claim": "task 元数据 readOnly=false / destructive=false / sideEffectScope=workspace -> plan 下被拒（且拒绝发生在执行前，不产生子会话）、build 下允许；模式与父会话 id 均取当次调用（context.mode / context.sessionId）；子代理内无审批通道，ask 一律 fail-closed deny",
+      "status": "stable",
+      "adr": ["ADR-006", "ADR-007", "ADR-017"],
+      "tests": ["packages/runtime/test/m8a-acceptance.test.ts"]
+    },
+    {
+      "id": "config.subagents-optin",
+      "claim": "配置 subagents.{enabled,maxDepth}（enabled 必填、未知键与越界值报错、整段替换合并）；默认关闭以保持默认工具集恰好 4 原语；无模型端点或 --no-tools 时只提示不注册 task",
+      "status": "stable",
+      "adr": ["ADR-009", "ADR-014", "ADR-017"],
+      "tests": ["packages/runtime/test/m8a-acceptance.test.ts"]
+    },
+    {
+      "id": "subagent.fork-context-import",
+      "claim": "子代理 kind=fork 按「导入即记录」实现：子会话先落 subagent/context-imported（载荷 = 派发那一刻父会话的投影，逐条记录在案，派发后再改父日志不回溯），投影展开幂等且等于「父历史 + prompt」；缺父会话访问权（sessionLog）时快速失败且不产生子会话，绝不静默降级成 fresh",
+      "status": "stable",
+      "adr": ["ADR-003", "ADR-018"],
+      "tests": ["packages/runtime/test/m8b-acceptance.test.ts"]
+    },
+    {
+      "id": "subagent.background-result-delivery",
+      "claim": "子代理 background=true（与 kind 正交）：task 只等建好子会话即返回 status=running 句柄；子代理结束后把 subagent/result 落父会话（复用父句柄 ⇒ seq 单调、JSONL 与派生索引一致，resume 重放可证）；父侧投影只送达「晚于最后一条 assistant/message」的结果（以 user 角色插入 <subagent-result …>，每条只送达一次、不堆积、幂等确定）；退出前 drain() 等待未完成者收尾，父句柄不可写时静默丢弃且绝不抛未处理异常",
+      "status": "stable",
+      "adr": ["ADR-003", "ADR-018"],
+      "tests": ["packages/runtime/test/m8b-acceptance.test.ts"]
+    },
+    {
+      "id": "portable.exchange-format-v1",
+      "claim": "会话交换文档 aster-session-exchange 自带 formatVersion（EXCHANGE_FORMAT_VERSION，与 SESSION_FORMAT_VERSION 解耦，补上 zcodeSessionFileSchema 完全没有版本字段的缺口）；Aster 往返语义无损（除 sessionId 外事件序列逐字段深等、投影逐条深等、created_at 亦保留）；更高版本 / v0 / 错 format / 坏 JSON / 篡改会进模型历史的载荷一律快速失败且原因可读",
+      "status": "stable",
+      "adr": ["ADR-003", "ADR-019"],
+      "tests": ["packages/runtime/test/m9-acceptance.test.ts"]
+    },
+    {
+      "id": "portable.vendor-adapters",
+      "claim": "厂商适配器为 best-effort 且未与真实 Claude Code / ZCode 二进制对测（只按逆向证据形状实现 + 仓内 fixture 回归）：Claude Code 原生 JSONL 导入按已观察形状清洗（丢 tool_result / IDE 噪音 / synthetic 占位 / sidechain / isMeta，连续 assistant 记录聚合成一轮）、导出只写证据里被读取的字段（不臆造 uuid/parentUuid）；ZCode 会话文件按 zcodeSessionFileSchema 读写且 mode 只在 plan/build 时采纳、不造 fileChanges/turnCheckpoints；工具轨迹/审批/模式切换等有损项显式且 CLI 必打印",
+      "status": "stable",
+      "adr": ["ADR-019"],
+      "tests": ["packages/runtime/test/m9-acceptance.test.ts"]
+    },
+    {
+      "id": "cli.session-export-import",
+      "claim": "aster --export <sessionId|latest> [--format aster|claude-code|zcode] --out <file> 与 aster --import <file> [--format …]：两者都不进 REPL、打印结果并退出；导入＝按事件重建新会话（走 persist 的单一写入路径）并打印新 sessionId 供 --resume；--export 缺 --out 快速失败；--format 取值域严格校验",
+      "status": "stable",
+      "adr": ["ADR-019"],
+      "tests": ["packages/runtime/test/m9-acceptance.test.ts"]
+    },
+    {
+      "id": "memory.exchange-format-v1",
+      "claim": "记忆交换文档 aster-memory-exchange 自带 formatVersion（MEMORY_EXCHANGE_FORMAT_VERSION，与 SESSION_FORMAT_VERSION / EXCHANGE_FORMAT_VERSION 各自独立演进，补上外部记忆层导出形状普遍无版本字段的缺口）；records 复用 MemoryRecord 不另立形状、scope 三键必填（ADR-010 的隔离前提）、provenance 只带 hash 元数据；Aster 往返逐字段深等（缺席与显式 null 是两种事实）；更高版本 / v0 / 错 format / 坏 JSON / 坏记录（含逐条路径）一律快速失败且原因可读；解析即规范化（未声明键剥掉 ⇒ 外部塞进来的身份键进不了下游）",
+      "status": "stable",
+      "adr": ["ADR-010", "ADR-030"],
+      "tests": ["packages/runtime/test/m14-acceptance.test.ts"]
+    },
+    {
+      "id": "cli.memory-export-import",
+      "claim": "aster --export-memory --out <file> [--memory-session <id>]：经 MCP 外挂**只读**读取配置的记忆层（getSessionMemories，按作用域，缺省作用域 = 最近更新的已记录会话），导出为 aster-memory-exchange 文档（形状不符的记录丢弃、未声明键剥掉 ⇒ 导出永远产出合法文档；适配器报错如实抛出）；aster --import-memory <file> [--out <file>]：校验并**规范化重写**（未声明键剥掉、产出方换成本仓、锚当前版本 = 迁移落点）；两者都不进 REPL、都必须打印「未写入任何记忆层：write path 按 ADR-016 显式推迟」；未配置记忆层 / 缺 --out 快速失败且原因可读",
+      "status": "stable",
+      "adr": ["ADR-016", "ADR-030"],
+      "tests": ["packages/runtime/test/m14-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.diff-renderer",
+      "claim": "行级差分重绘（ADR-020）：两帧相同则一个字节都不写；只重绘 firstChanged..lastChanged 区段（未变化行的文本不会被重画）；新增行向下续写、删除行清尾并把光标收回末行；宽度变化走全量重绘；每一帧都被同步输出 ESC[?2026h…ESC[?2026l 包裹，避免撕裂",
+      "status": "stable",
+      "adr": ["ADR-020"],
+      "tests": ["packages/runtime/test/m10-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.display-width",
+      "claim": "按终端显示列（而非字符串长度）计算：ANSI 不占列、东亚全角与 emoji 占 2 列、组合字符占 0 列；截断不会把一个宽字符切一半；硬换行按列宽切分且每行自闭合（中文/emoji 不会错位）",
+      "status": "stable",
+      "adr": ["ADR-020"],
+      "tests": ["packages/runtime/test/m10-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.frontend-shell",
+      "claim": "TUI 是 runSessionRepl 的前端壳（输入适配器＝按行投递的 Readable、输出适配器＝Output），命令/记忆缝/审批/SIGINT/session_end 一处实现两处外观；alt screen 进入与离开都写在 finally 并额外注册 exit 兜底、raw mode 成对开关、收尾前把最后一帧画完；非 TTY 明确提示并回落朴素 REPL；Ctrl+C 合成 SIGINT 以复用既有语义；流式渲染合帧（窗口 16ms，可复现：tui/screen.ts 的 MIN_RENDER_INTERVAL_MS）而输入回显立即 flush；深色极简语义配色且 NO_COLOR / --no-color 全关",
+      "status": "stable",
+      "adr": ["ADR-020"],
+      "tests": ["packages/runtime/test/m10-acceptance.test.ts"]
+    },
+    {
+      "id": "serve.event-feed-backpressure",
+      "claim": "事件扇出为单全局订阅 + 每连接有界队列（容量 4096，取自 OpenCode 已观察取值）：队列满只断**该**连接并以 subscriber_overflow 错误帧收尾（retryable=true，可重连后整段回放），其余连接完全不受影响；publish 绝不等待消费者（无人在读也能同步连发）；一条事件序列化失败是格式级 bug，以**同一个**错误收尾**全部**订阅者而非只影响一个",
+      "status": "stable",
+      "adr": ["ADR-021"],
+      "tests": ["packages/runtime/test/m11a-acceptance.test.ts"]
+    },
+    {
+      "id": "serve.sse-readonly-endpoints",
+      "claim": "零依赖 node:http 的三条只读路由：GET /api/event 先下发 hello 帧（protocolVersion + resume=replay-only，明示不做断点续传）再逐条转发已记录事件（会话所追加的每条事实都经同一出口：/mode、回合事件、session/end；session/start 由建会话时写入、早于该出口故不进流）；GET /api/sessions 直接扫 JSONL（没有派生索引也能工作）；GET /api/sessions/:id 回放 meta + events + deriveMessages 投影，且**调用前后事实源逐字节相同**（服务端不新增写入路径）；404 / 405 均回可读错误帧",
+      "status": "stable",
+      "adr": ["ADR-021"],
+      "tests": ["packages/runtime/test/m11a-acceptance.test.ts"]
+    },
+    {
+      "id": "serve.localhost-only-default",
+      "claim": "SSE 服务端默认只绑 127.0.0.1（未鉴权，绝不默认暴露到网络）；对外暴露必须显式 --host，且 CLI 会打印未鉴权警告；--port 严格校验（0-65535 整数，0 表示由系统分配）；端口/连接在 CLI 退出时收尾（不留监听中的端口与在途连接）",
+      "status": "stable",
+      "adr": ["ADR-021"],
+      "tests": ["packages/runtime/test/m11a-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.structured-event-driven",
+      "claim": "TUI 会话视图由**结构化事件**驱动（ADR-023）：runTuiSession 把 onEvent 接进新 tui/transcript.ts 的行模型，按 describeEvent 直接映射成屏幕行，同时给 runSessionRepl 传 trace:false —— 已有事件的文本轨迹（+ user/message#N / → tool_call / ← tool_result / ~ memory: injected / /mode 的 mode: A -> B）不再重复打印；状态条 mode 来自 mode/changed 事件、会话 id 来自 onSessionReady，**不再回读横幅与提示行**（旧的两条正则删除，且修掉状态条 mode 滞后到下一次按键才刷新的缺陷）；format.ts 退回「只配色、不决定语义」（删掉 5 条会话事实前缀规则）；回车不再回显（user/message 是事实，由事件渲染，避免同一句出现两遍）；describeEvent/describeFrame 的 DescribeOptions（assistantContent / turnEnd）是**前端差异**（TUI 不吃 assistant 正文与 turn/end，--attach 两者都渲染）；turn/start 是记账事件，显式不产生可见行（未知类型仍回退 [event]）",
+      "status": "stable",
+      "adr": ["ADR-023"],
+      "tests": ["packages/runtime/test/m10b-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.multiline-editor",
+      "claim": "多行编辑器（ADR-025，新 tui/editor.ts 纯几何）：输入区按草稿行数占 1..8 行（窗口跟随光标、超过则上滚），首行 `› ` 前缀、续行同宽缩进；换行用 Ctrl+J / Alt+Enter，以及终端若已开启 CSI-u / modifyOtherKeys 时发来的 Shift+Enter（我们不主动发 modifyOtherKeys / kitty 协议，故 Shift+Enter 不假装到处可用），Enter 仍是提交整份草稿；括号粘贴 ?2004h 让 ESC[200~…ESC[201~ 整段作为一个 paste 事件（跨分片也安全）⇒ 粘贴多行不误发；多行草稿以 NEWLINE_ESCAPE=U+0000 编码后交给 readline，再由 REPL 解码回换行 ⇒ 只落一条 user/message（且 describeEvent 按多行渲染，保住一行=一个屏幕行）；↑/↓ 先在草稿内按字符偏移移动、到边界才翻历史，Home/End 是行首/行尾，Ctrl+U 清空整份草稿；点击按行列落在字符边界上（宽字符内部归到左边界）；不做软换行（超宽行按列截断，显式声明）",
+      "status": "stable",
+      "adr": ["ADR-025"],
+      "tests": ["packages/runtime/test/m10b3-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.caret-row-render",
+      "claim": "光标可停在非末行（ADR-025）：compose 仍恰好 rows 行（视图 = rows - 状态头 - 输入行数），caretPosition 与 compose 共用同一套窗口算法（maxInputRows）故画在哪与光标停在哪永远一致；renderFrame 新增 caretRow / previousCaretRow —— 先把光标从上一帧落点归位到末行（差分前提）再画，画完上移到光标行；单行输入时行为与 M10 逐字节相同（m10 回归钉住）；并修掉一个真实缺陷：帧文本不含光标位置，行内左右移动 / Home / End 会让差分为 none ⇒ 一个字节都不写、光标看不见动 —— 新增 renderCaretMove，帧不变而光标变了就只发一段光标定位序列（createScreen 在 none 分支补发）",
+      "status": "stable",
+      "adr": ["ADR-025"],
+      "tests": ["packages/runtime/test/m10b3-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.tab-completion",
+      "claim": "Tab 补全为纯函数（ADR-024，新 tui/completion.ts）：命令（/mo → /mode ，带参数的命令补完名后补一个空格）／命令参数（/mode p → plan，候选引用 AGENT_MODES）／路径（只补最后一个看起来像路径的词；大小写不敏感前缀匹配，目录补分隔符，列举键去掉尾分隔符且由调用方注入）；三条纪律：补不动就一动不动（无匹配 / 列举失败 / 无 listDir 一律原样返回、绝不抛）、不打扰正常输入（普通中文/英文词 Tab 无反应）、多候选只补公共前缀并把候选列出来（不替用户猜也不静默改文本）；命令表 REPL_COMMANDS 与命令实现同处 repl.ts（防漂移），由 TUI 注入",
+      "status": "stable",
+      "adr": ["ADR-024"],
+      "tests": ["packages/runtime/test/m10b2-acceptance.test.ts"]
+    },
+    {
+      "id": "tui.mouse-interaction",
+      "claim": "TUI 鼠标只上报点击与滚轮，不破坏原生选中（ADR-024）：启用 ?1000h + ?1006h 而刻意不启用 ?1002/?1003（拖拽跟踪会让终端不再做原生选中复制）；滚轮改 scrollOffset（步长 3 行），左键点在输入行按列定位插入点（index = 列 - 1 - PROMPT_WIDTH 并按字符数 clamp），点其它区域不处理；SGR 鼠标序列（ESC[<b;x;yM|m）整条解析，未完成前缀留在缓冲等下一片、绝不当垃圾字符吞掉；进入 alt screen 时开启、restore() 里先关再离开（成对还原）",
+      "status": "stable",
+      "adr": ["ADR-024"],
+      "tests": ["packages/runtime/test/m10b2-acceptance.test.ts"]
+    },
+    {
+      "id": "serve.attach-mirror",
+      "claim": "--attach <url> 只读镜像客户端（ADR-022）：连 GET <url>/api/event（SSE）把远端会话镜像到本地终端，客户端不做任何写入；帧→行由 tui/events.ts 的结构化映射给出（按 SessionEvent.type 直接映射，未知事件类型回退 [event] <type>，绝不静默丢弃）；hello 帧显示协议版本与 resume=replay-only；断线（含 subscriber_overflow）一律提示重连并整段回放 GET <url>/api/sessions/<id>；TTY 用全屏差分渲染（进出 alt screen 严格还原），非 TTY 退化为逐行打印；SSE 客户端为纯解码（跨分片 / CRLF / 多行 data 容错，坏 JSON 在客户端本地合成为可读 bad_frame 错误帧）",
+      "status": "stable",
+      "adr": ["ADR-022"],
+      "tests": ["packages/runtime/test/m11b-acceptance.test.ts"]
+    },
+    {
+      "id": "serve.remote-prompt-write",
+      "claim": "POST /api/sessions/:id/prompt 远端写路径（ADR-022）：只经 persist 的单一写入路径（store.resume + handle.append，seq 连续且可 resume 重放，不新增写入者）；落 user/message 后用与 REPL 共用的 cli/session-loop.ts 跑一个回合（模式 / cwd 取自会话自身，不由客户端指定）；服务端没有审批通道，ask 一律 fail-closed deny（越界写被拒且文件未生成，判定经 trace 出口落 permission/decision）；结构性围栏：未注入 driver 一律 501（CLI 只在回环绑定时注入），本进程正在驱动的会话一律 409 session_live（一个会话一个写入者），请求体边界校验（invalid_json / invalid_prompt / payload_too_large），同一会话的并发 prompt 串行化",
+      "status": "stable",
+      "adr": ["ADR-022"],
+      "tests": [
+        "packages/runtime/test/m11b-acceptance.test.ts",
+        "packages/runtime/test/m11b-session-loop.test.ts"
+      ]
+    },
+    {
+      "id": "tui.rich-text",
+      "claim": "流式文本通道的极简 markdown（ADR-026，新 tui/rich-text.ts 纯函数）：标题（#{1,6} + 空格 → 加粗 + accent）、无序列表（- / * / + → 「• 」）、有序列表（1. → 保留序号）、围栏代码（等宽框：开 `┌─ <lang|code>`、正文行前置 `│ `、闭 `└─`；围栏状态由行模型持有并可回填）、行内代码（成对反引号 → tool 色）；只作用于**文本通道的已收全行**（未收全的半行按原样显示），**未命中任何构造的行回落 formatLine**（横幅 / 命令输出照旧上色；事件通道 describeEvent 一字未改）；只影响呈现、不产生事实，围栏状态不入 JSONL；显式不做：表格 / 引用块 / 嵌套列表 / 软换行",
+      "status": "stable",
+      "adr": ["ADR-026"],
+      "tests": [
+        "packages/runtime/test/m10b4-acceptance.test.ts",
+        "packages/runtime/test/m10b4b-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "tui.tool-result-fold",
+      "claim": "工具结果折叠（ADR-026，**视图状态**而非事实）：折叠态一行 `← tool_result: <tool> <ok|err> · <耗时> · N 行 · 折叠`（N = 被隐藏的输出行数，由 toolResultHiddenLines 单一给出 ⇒ **没有可展开的内容就不加标记**），展开态追加逐行 `│ …`（载荷为字符串按行、否则 JSON 缩进）；`DescribeOptions.collapse` 缺省 false ⇒ **保持一行摘要的既有行为**（`--attach` 不吃折叠）；交互：**左键点该行**切换这一条（屏幕行 → 转录行用 `screen.transcriptIndexAt`，与 `compose` 共用同一套窗口算法；转录行 → 事件 seq 用 `transcript.eventSeqAt`）、**Ctrl+O** 全部展开 / 收起（不用裸字母键，输入框优先）；折叠状态只存在 `transcript` 内存里、**不入 JSONL**（测试断言 JSONL 里没有 expanded / fenced 字段）",
+      "status": "stable",
+      "adr": ["ADR-026"],
+      "tests": [
+        "packages/runtime/test/m10b4-acceptance.test.ts",
+        "packages/runtime/test/m10b4b-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "tui.turn-indicator",
+      "claim": "回合内指示（ADR-026，新 tui/spinner.ts）：**忙碌态是结构化判据**（`turn/start` 之后未见 `turn/end` / `session/end`，不嗅探任何文本）；**耗时是本机时钟测量**、状态条明写 `(local)`（不是事件里的字段）；spinner 帧由纯函数 `spinnerGlyph(elapsedMs)` 按 `frames[floor(elapsed/120) % n]` 选取（确定函数，不引随机 / 不读时钟）；节拍**只在忙碌期间存在**（`turn/end` 即停 ⇒ **空闲不空转**，测试断言收尾后 200ms 内不再写字节）；只显示在状态条（紧跟模式，窄终端下 cwd / 模型名先被截也不会把它截掉），**不新增屏幕区域**；token 用量**未落事件故不显示、绝不估算**（不引 chars/4）",
+      "status": "stable",
+      "adr": ["ADR-026"],
+      "tests": [
+        "packages/runtime/test/m10b4-acceptance.test.ts",
+        "packages/runtime/test/m10b4b-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "tui.resize-redraw",
+      "claim": "resize 实测（ADR-026）：sink 的 `resize` 事件触发 syncState + 立即 flush；列宽变化走 `planDiff` 的 **full 分支**（清屏 + 回原点整帧重绘），状态条与输入行都按新尺寸重画（假 tty 可断言：Δ 输出含 `ESC[2J` + `ESC[H`）",
+      "status": "stable",
+      "adr": ["ADR-026"],
+      "tests": [
+        "packages/runtime/test/m10b4-acceptance.test.ts",
+        "packages/runtime/test/m10b4b-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "tui.ime-caret-placement",
+      "claim": "中文 IME 候选框定位的**前提**（ADR-026，写清「我们做什么 / 不做什么」）：**硬件光标保持可见**（进入时发 `?25h`，绝不隐藏），光标**列按显示列算**（前缀 2 列 + 东亚全角 2 列），且 `caretPosition` 与 `compose` **共用同一套窗口算法** ⇒ 候选框跟着正确的行列；显式**不做** preedit / 内联 IME 渲染（那需要读 OS 输入法状态，超出范围）",
+      "status": "stable",
+      "adr": ["ADR-026"],
+      "tests": [
+        "packages/runtime/test/m10b4-acceptance.test.ts",
+        "packages/runtime/test/m10b4b-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "tui.approval-interaction",
+      "claim": "审批流在 TUI 里的完整交互（ADR-026）：提问（`renderApprovalPrompt` 的**多行**文本）走文本通道**按多行**渲染；提问期间**输入行照常可用**（同一条 stdin，`Enter` 推一行即答案）；判定语义与 M6 **完全一致**（y / a / n、`always` 沉淀为会话内规则、解析失败 fail-closed），判定经 trace 出口落 `permission/decision`；假 tty 实测：build 模式下越界写 → 现场提问 → 作答 `a` → 放行且文件真的写出",
+      "status": "stable",
+      "adr": ["ADR-026"],
+      "tests": [
+        "packages/runtime/test/m10b4-acceptance.test.ts",
+        "packages/runtime/test/m10b4b-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "memory.l1-quality-gate",
+      "claim": "L1 记忆质量判官（ADR-028，M12b；**离线、无 LLM、零外部依赖，随 verify 必跑**）：新 memory/quality.ts **纯函数**四条可证伪断言——① 抽取完备性（抽取集 **⊇** golden，归一化 = 折叠空白 + 大小写不敏感 + 去掉两个 CJK 字符之间的空白）；② 检索 **top-k 命中**；③ **Memory Boundary**（**未被提及**的 query **必须返回空**，编造即 `fabricated`）；④ **更新原子性**（新事实生效 **且** 旧记忆失效）。判官**只做词法比对**（不做语义等价——那是 L2 的职责，ADR 里显式声明）；golden 集 **vendored 进仓**（test/fixtures/memory-l1/，**自造、不含真实用户数据**）且 **sha256 pin**（数据漂移当场变红）；反例测试钉住判官**真的会因缺项 / 编造 / 矛盾而变红**；**L2（采样 LLM 判官）/ L3（全量）与自动抽取显式未做**（需真实端点）",
+      "status": "stable",
+      "adr": ["ADR-028"],
+      "tests": ["packages/runtime/test/m12b-acceptance.test.ts"]
+    },
+    {
+      "id": "sandbox.best-effort",
+      "claim": "best-effort 沙箱（ADR-027，M12a；**experimental，默认 off，且不是隔离**；ADR-031 修订：平台范围收窄——Windows 用户可选 `windows-job` 的内核围栏，其余平台仍是本 best-effort）：新 sandbox 模块——① 超时/中止时杀**整棵进程树**（Windows `taskkill /PID /T /F`，类 Unix 优先进程组），**再无条件补一刀 `child.kill()`** 双保险；② 沙箱开启时子进程**环境收敛到白名单**（密钥类变量不外传）+ 显式 `ASTER_SANDBOX=best-effort` + **cwd 越界可读拒绝**（exitCode 126，**不执行**）；③ 数据根权限**只读体检**（无继承项 (I) 且无 Everyone / BUILTIN\\Users / Authenticated Users 才算已收紧）并给出**可复制执行的收紧命令**——**实测证明动 ACL 会把调用者锁在门外（EPERM），故我们显式不动手**（有测试钉住「ACL 一个字节都没改」）；**默认 off ⇒ 与 M3/M6 行为逐字节相同**（有回归）；CLI `--sandbox off|best-effort`（未知取值快速失败）。**不做**：受限令牌 / macOS seatbelt / Linux bwrap / 网络隔离 / 「审批 × 沙箱正交」完整形态 ⇒ 故 `status` 只能是 `experimental`，**不得**写进 README 的已验证能力清单",
+      "status": "experimental",
+      "adr": ["ADR-027"],
+      "tests": ["packages/runtime/test/m12a-acceptance.test.ts"]
+    },
+    {
+      "id": "sandbox.windows-job",
+      "claim": "windows-job 沙箱（ADR-031，**Windows-only**）：用 Job Object 拿**内核强制**（不是 best-effort）的围栏——① `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`：作业句柄一关（含包装进程被杀 / 超时 / 中止）⇒ 内核击杀整棵树，孙·曾孙进程**不可能**变孤儿（真进程实测：中止后 ping 归零）；② `JOB_OBJECT_LIMIT_ACTIVE_PROCESS`：超限进程**入不了作业**（实测内核拒绝）；③ `JOB_OBJECT_UILIMIT_*`（掩码 0x3f：剪贴板读写 + 外窗句柄 + 全局原子 + 系统参数 + 显示设置；**刻意不含** DESKTOP / EXITWINDOWS）。载体 = **内盒 PowerShell 5.1 + Add-Type 的 P/Invoke**（**零新依赖**；编译产物按源码 sha 指纹缓存到数据根，本机实测缓存命中 ~13ms / 现编 ~140ms）；命令文本经 base64 环境变量 + `-EncodedCommand` 交给内层 ⇒ **一字不改**、零 argv 转义风险；**拿不到围栏就拒绝执行**（可读失败 + exitCode 126，内层命令**不跑**）；非 Windows 传该值**抛错**（绝不静默退回 off / best-effort）。⚠️ **它不是文件 / 网络隔离**（实测证据：非管理员下 `SetInformationJobObject(SecurityLimitInformation)` 返回 `NOT_SUPPORTED`、AppContainer 需提权且要写 C 盘、Windows Sandbox 在 Home 版不存在）——`label` 与文档都必须同时写清「内核强制」与「不是文件 / 网络隔离」",
+      "status": "stable",
+      "adr": ["ADR-031"],
+      "tests": ["packages/runtime/test/m15-acceptance.test.ts"]
+    },
+    {
+      "id": "shell.utf8-output",
+      "claim": "子进程输出**统一 UTF-8**（M16）：pwsh provider 在每条命令前注入前言 `[Console]::OutputEncoding = UTF8`（连带把控制台输出代码页设为 65001 ⇒ **原生命令**（git/npm/python/cmd）的输出也是 UTF-8）+ `$OutputEncoding = UTF8`；命令经 `-EncodedCommand`（UTF-16LE base64）传入 ⇒ 中文 stdout/stderr 不再按 OS OEM 代码页（本机 936/GBK）写字节、我们按 UTF-8 解码不再乱码；ASCII 输出与退出码语义**不变**（有回归）；`windows-job` 包装路径与直接 spawn 路径**共用同一份脚本文本**（前言只写一处）",
+      "status": "stable",
+      "adr": ["ADR-032"],
+      "tests": ["packages/runtime/test/m16-acceptance.test.ts"]
+    },
+    {
+      "id": "memory.write-path",
+      "claim": "记忆写入路径（M17a，ADR-033；**experimental，默认关闭**）：`memory.write.{enabled,addTool,invalidateTool?,maxCandidates?,minLength?,maxLength?}`，`enabled` 缺省 false（不配置时 `afterTurn` 不存在 ⇒ 行为逐字节不变）；抽取器 `memory/extract.ts` **纯函数**、**只从本轮用户消息**抽**显式标记**后的一句（记住/记一下/以后都/从现在起/我的偏好是/remember that/from now on…，大小写不敏感），**不摘要/不归纳/不推断/不做代词消解**；四条确定性闸门（长度 4–200 / 密钥样式 / 注入样式 / 每轮上限 3 + 轮内归一化去重）；去重走**跨会话检索**（`MEMORY_ANY_SESSION=\"*\"`，写入仍用真实 session id），归一化完全相等才算重复，**去重查询失败就不写**；**每个候选都落 `memory/written`**（added / skipped_duplicate / rejected / failed + content/sourceSeq/memoryId?/reason?），不参与投影；失败 fail-open 不中断回合；MCP 适配器 `addTool` 缺省时 `add` 仍显式拒绝，服务端 isError 或无可解析记录 ⇒ 如实失败（不编 id 假装成功）。⚠️ `addTool` / `session:\"*\"` 是**我们对记忆服务器提的契约**，本机只有夹具 ⇒ **未与真实 mem0 / Graphiti 对测**",
+      "status": "experimental",
+      "adr": ["ADR-033"],
+      "tests": ["packages/runtime/test/m17a-acceptance.test.ts"]
+    },
+    {
+      "id": "memory.bitemporal-supersede",
+      "claim": "bitemporal 显式取代（M17b，ADR-034；**experimental**）：只在用户**把旧事实也说清楚**时失效它——认 `不要再 X，改成 Y` / `以后用 Y 代替 X` / `never use X, use Y` 三种句式，产出 `{text:Y, supersedesQuery:X}`；只说\"改成 Y\"时**不猜**目标并如实记录\"未能失效\"；`invalidateTool` 可选（没配 ⇒ 仍写入+去重，但事件明说旧事实可能还能检索到，**不声称**已失效）；顺序 = add 新 → invalidate 旧（**用跨会话作用域**：旧事实可能是别的会话写的）→ **重检索验证**，结论写进事件 `verification: \"ok\"` / `\"old_still_visible\"`；验证跑不了就留空并记原因，**绝不谎报成功**（ADR-028 judgeUpdate 的运行时形态）；已知 `add` 与 `invalidate` 是两次 RPC、**非原子**，并存状态会以 `old_still_visible` 可观测。⚠️ 不做语义冲突判定；失效工具是契约扩展，**未与真实记忆层对测**",
+      "status": "experimental",
+      "adr": ["ADR-034"],
+      "tests": ["packages/runtime/test/m17b-acceptance.test.ts"]
+    },
+    {
+      "id": "desktop.read-only-window",
+      "claim": "桌面版窗口（M13a，ADR-029；**experimental**）：新 `@aster/desktop` 包（第 20 个内核模块）——Electron main 只做三件事：① **「绝不碰 C 盘」把关**（`app.setPath` 把 userData/cache/sessionData/logs 改道到 `<home>\\desktop`，再用纯函数 `auditDesktopPaths` 校验；**任何一项越界即 exit 2 拒绝启动**，绝不静默落到 C 盘）；② 托起窗口（安全基线写死：`contextIsolation:true` / `nodeIntegration:false` / `sandbox:true`，renderer 只经 CJS `preload.cjs` 的 `contextBridge` 窄接口拿数据，页面只加载**同进程 loopback** 托管的本地资源、CSP `default-src 'none'` + `connect-src 'none'` ⇒ **连一次网络请求都发不出去**，renderer 只用 createElement/textContent 组装 DOM）；③ IPC 转发给**纯 Node 的 `host.ts`**（列会话 + 读一条会话的**已记录事件**并映射成卡片）。**M13a 只读**：GUI 不产生任何写入（有测试钉住读路径后 JSONL **逐字节不变**）；事件→卡片映射**只在 agent 侧一处**（不复制终端行模型，未知类型回退 `[event] <type>` 不丢事实）。可自动断言：`--self-check` 在**真窗口 + 真 renderer** 里断言「列表渲染了 / 卡片渲染了 / CSP 在 / 数据根不在 C 盘」并据此退出码。**未做**：打包（M13c，**M13b 已交付 ⇒ 见下一条 `desktop.interactive-session`**）；真机验收通过前一律 `experimental`",
+      "status": "experimental",
+      "adr": ["ADR-029"],
+      "tests": ["packages/desktop/test/m13a-acceptance.test.ts"]
+    },
+    {
+      "id": "desktop.interactive-session",
+      "claim": "桌面版**可交互**会话（M13b，ADR-029 增补；**experimental**）：会话在 Electron **main 进程内**跑 `runSessionRepl`（与 CLI/TUI **同一份实现**），写入**仍只经 persist 单一写入路径**（有测试钉住实时会话真的落了 `user/message` 且以 `session/end` 收尾）。三件事全部**复用既有语义**：① **发 prompt**（renderer 输入框 → IPC → 该会话的输入流；多行仍编码成**一条** `user/message`，`trace:false` ⇒ 已有事件的文本轨迹不重复打印）；② **审批通道**（结构化 IPC → 审批卡显示 `renderApprovalPrompt` 的**同一段文本**，`y`=once / `a`=always（**会话内**规则）/ `n`=reject，判定照旧落 `permission/decision`；实测 build 下越界写：作答 `a` 放行且**文件真的写出**、同键**不再提问**；作答 `n` 判定 deny 且**文件不生成**；无待决审批时作答返回 false）；③ **模式切换**走既有 `/mode` 命令路径 ⇒ `mode/changed` 事件（卡片带**结构化 `mode` 字段**，renderer **不嗅探文本**）。**「窗口关闭 ≠ 中断回合」**：关窗只给输入流 EOF（**等当前回合跑完**再落 `session/end{exit}`，有测试钉住**没有** error 回合），中断当前回合是**显式按钮**（合成 `process.emit(\"SIGINT\")`，与 TUI 同法）；关窗/中断时若正卡在审批则按既有语义判 `reject`（绝不悬挂）。装配面抽出 `cli/bootstrap.ts` 与 CLI **共用**（`@aster/runtime` 根入口**不新增** tools/shell/context/sandbox 导出，只经 `cli` 命名空间）；`RunReplOptions` 只多一个**可选** `approvalChannel`（缺省行为**逐字节不变**）。可自动断言：`--self-check` 在**真窗口 + 真 renderer** 里**真的发一条 prompt** 并断言卡片增加（冒烟 `smoke-m13b.mjs` 全绿：rows=2 / cards=1 / user=1 / home 在 D 盘 / 实时会话落 JSONL 且以 `session/end` 收尾）。**未做**：桌面 UI 打磨（**独立批次**，需真机逐轮定稿）；真机验收通过前一律 `experimental`",
+      "status": "experimental",
+      "adr": ["ADR-029"],
+      "tests": ["packages/desktop/test/m13b-acceptance.test.ts"]
+    },
+    {
+      "id": "desktop.portable",
+      "claim": "桌面便携形态（M13c，ADR-029 增补；**experimental**）：**手动组装一个自洽的 Electron App 目录**，**不引 electron-builder**——① 新 `tools/build-desktop-app.mjs` 用 esbuild 把 Electron main（含 `@aster/runtime` / schema / protocol / zod）打成**单文件 ESM** 并把 `renderer/`、`preload.cjs` 摆到**同一目录**（`packages/desktop/dist/app/`）。硬理由：本仓库是 npm workspaces（`node_modules/@aster/runtime` 是**符号链接**）⇒ 便携目录里解析不到；打单文件后该目录**自洽、不含任何 node_modules**；② **开发形态与便携形态共用同一套目录布局** ⇒ main 的路径推导**不分叉**，唯一分叉是「默认数据根/工作区基准」按 `app.isPackaged` 取**便携根**（`<便携根>/resources/app/` 往上两级）或**仓库根**；③ 新 `tools/build-desktop-portable.mjs` 把 `node_modules/electron/dist/` 整棵树 + `dist/app/`（拷进 `resources/app/`）摆成 `<仓库外>/dist-desktop/aster-desktop/`，exe 改名 `aster-desktop.exe`（Electron 按 **exe 同级的 `resources/app`** 找入口，与文件名无关）。**不引 electron-builder 的三条理由**：不新增带二进制的大 devDependency（供应链纪律 `05 §1` 不变）；electron-builder 的 NSIS/winCodeSign 走 **GitHub**（本机默认源下不来，Electron 当初就靠 `ELECTRON_MIRROR` 镜像）；自解压 exe 有**杀软误报**前车之鉴（`07 §5`）。**代价（显式）**：**不是单文件 exe**，而是「**解压即跑**」的目录（这正是 portable 的定义，也契合「零系统改动 / 不改 PATH / 不 `setx`」）；体积以 Electron 运行时为主（本机实测 exe **247 MB**，未压缩）。**「绝不碰 C 盘」在打包形态下依然可断言**：默认数据根 = **便携根**（`<便携根>/.aster`）⇒ App 在 D 盘数据就在 D 盘；冒烟 `smoke-m13c.mjs` **刻意不设** `ASTER_HOME`，一次跑通同时证明「解压即跑」与「默认数据根在 App 所在盘」，并断言自检产生的会话**真的落进**该数据根、便携目录里**没有 node_modules**。**未做**：桌面 UI 打磨（独立批次）、安装包（只做 portable）",
+      "status": "experimental",
+      "adr": ["ADR-029"],
+      "tests": ["packages/desktop/test/m13b-acceptance.test.ts", "packages/desktop/test/entry-guard.test.ts"]
+    },
+    {
+      "id": "desktop.session-resume",
+      "claim": "桌面版**续跑已记录会话**（M13d-1，ADR-029 增补；**experimental**）：会话列表每条带「恢复」按钮——`resume(sessionId)` **先把当前会话收掉（EOF 收尾，**不**中断）并等它收尾**（避免两个句柄同时往同一条事实源写），再把该 id 交给 `runSessionRepl` 的 **`resume` 语义**（与 CLI `--resume <sessionId>` **同一份实现**）接着跑 ⇒ 新 prompt 落进**同一条 JSONL**（同一 sessionId、**seq 紧接其后**，有测试逐条断言「无空洞、无重置」）。已经就是当前会话时**不做任何事**（绝不「关掉再重开」，有测试钉住不产生多余 `session/end`）；起不来的会话（id 不存在）**快速失败并抛给界面**，且**不留在活动会话位上**（否则下次发话会往一条死流里写）。renderer 侧：点「恢复」时**先只读铺上历史、再**让它成为活动会话——顺序反过来会有「读到旧快照把刚到的事实抹掉」的竞态（**实测抓到并修掉**，这正是本批唯一的真缺陷）。可自动断言：真窗口 `--self-check` 收尾→恢复同一 id→再发一条 prompt 并断言 `resumed=true`；冒烟（开发形态 `smoke-m13b.mjs` 与便携形态 `smoke-m13c.mjs`）都断言**两条 prompt 落在同一个会话文件**里。**未做**：工具结果展开（M13d-2）、审批规则/策略可见（M13d-3）、桌面 UI 打磨",
+      "status": "experimental",
+      "adr": ["ADR-029"],
+      "tests": ["packages/desktop/test/m13d1-acceptance.test.ts"]
+    },
+    {
+      "id": "desktop.tool-result-cards",
+      "claim": "桌面版**工具结果卡片**（M13d-2，ADR-029 增补；**experimental**）：① **修掉一个真缺陷**——`tool/result` 的 `output` 是工具返回的**值本身**（对象居多），旧映射的 `String(output)` 会把它渲染成「object Object」（即桌面版**根本看不到工具结果**）；现在正文由 `payloadLines` 给出（由 `@aster/runtime` 根入口**定向**转出这一个纯函数，与 TUI 的折叠**同一套规则**：字符串按换行切、其余 `JSON.stringify(…, null, 2)`）⇒ 对象/数组走 JSON 缩进。② **折叠**（与 `tui.tool-result-fold` 对齐）：正文多行的卡片**默认折叠**（`text` 首行、`detail` 其余行、`lines` 总行数、`defaultFolded` 由 host **单一给出**），**点卡头展开 / 收起**；「能不能展开」的判据只有**一处**（host 的纯函数，前端**不自己算**），展开状态**只活在 renderer 的闭包里**（视图状态，**绝不进 JSONL**，也不为它调任何 IPC）。可自动断言：真窗口 `--self-check` 第 ④ 步回放一条含**多行工具结果**的已记录会话，断言可折叠卡真的渲染出来（冒烟在**开发形态与便携形态**都断言 `folded=true`）。⚠️ 本批还抓到并修掉**另一个真缺陷**：桌面 bundle 的入口文件**就是** `argv[1]` ⇒ CLI 的入口守卫误报为真、**CLI 的 `main()` 在 GUI 进程里跑起来**（读 stdin、开野生 REPL、往数据根写会话）——修法见 `packages/desktop/test/entry-guard.test.ts`。**未做**：桌面 UI 打磨",
+      "status": "experimental",
+      "adr": ["ADR-029"],
+      "tests": ["packages/desktop/test/m13d2-acceptance.test.ts"]
+    },
+    {
+      "id": "desktop.rules-policy-panel",
+      "claim": "桌面版**规则 / 策略面板**（M13d-3，ADR-029 增补；**experimental**）：对齐 CLI 的 `/approvals` 与 `/policy`——① **审批规则**：`RunReplOptions` 新增**可选** `onApprovalRules`，闸门建好后把**活的** `ApprovalRules` 对象交给前端**一次**（`always` 会继续写进去）⇒ 界面**随时**读到的都是**当前**规则（不是快照、不用轮询、不用重放）；面板显示 `工具@作用域`；没有权限系统时**不回调** ⇒ 既有 CLI/TUI 行为**逐字节不变**。② **策略**：生效的「模式 → 权限」表由 main 侧用 `describePermissionRule`（拆到新 `cli/present.ts`，与 `/policy` **同一份实现**）格式化成文本行 ⇒ 两端显示**同一段**文本、不漂移。③ **renderer 不自己算**：只 `window.aster.query()`（IPC `aster:query`）拿结论再做 DOM；面板开着时收到 `permission/decision` 会顺手刷新。可自动断言：真窗口 `--self-check` 第 ⑤ 步**点一下**「规则/策略」按钮、断言面板真出现行（开发形态与便携形态两份冒烟都断言 `panel>0`）；测试断言答「本次会话始终允许」后 `approvalRules()` **立刻**读到 `write@outside`，且策略表能读到 plan 的 `*[readonly]=allow`。⚠️ 顺带（400 行门禁逼出的拆分）：`formatHistory` / `describePermissionRule` / 审批类型转出 ⇒ `cli/present.ts`；DOM 探针 ⇒ `desktop/src/dom-probe.ts`。**未做**：桌面 UI 打磨（独立批次）",
+      "status": "experimental",
+      "adr": ["ADR-029"],
+      "tests": ["packages/desktop/test/m13d3-acceptance.test.ts"]
+    },
+    {
+      "id": "desktop.dual-theme-toolbar",
+      "claim": "桌面版**双主题 + 模式工具栏**（M20，ADR-038；**experimental**）：① 深 / 浅两套语义令牌（与 TUI 同源的 accent/ok/warn/err/tool），默认**跟随系统**（`prefers-color-scheme`），标题栏按钮显式切换；`data-theme` 只写在 `<html>`，偏好存 localStorage `aster.theme` —— **只是视图状态，绝不进会话文件**；② `plan` / `build` 分段按钮点击仍走既有 `aster:mode` IPC ⇒ `/mode` 命令 ⇒ `mode/changed` 事件，**选中态只由事件驱动**（不乐观更新）；③ 呈现层打磨：中文角色标签（英文 role 仍是事实）、会话列表相对时间（绝对时间在 `title`）、输入框自动增高、`turn/start`→`turn/end` 控制「中断」可用性、滚动吸底（用户上滚不抢位置）。可自动断言：真窗口 `--self-check` 第 ⑥ 步点主题按钮断言 `data-theme` 变化且偏好落盘、第 ⑦ 步点非当前模式断言 `mode/changed` 卡片出现；冒烟 `smoke-m20.mjs` 另断言主题偏好**不出现在 JSONL**。⚠️ renderer 无 vitest ⇒ 自动化证据只有真窗口自检 + 真进程冒烟，**未达到 stable 口径**；视觉本身仍待用户本机逐轮验收",
+      "status": "experimental",
+      "adr": ["ADR-038"],
+      "tests": []
+    },
+    {
+      "id": "mcp.prompts-resources",
+      "claim": "MCP **prompts / resources 只读面**（ADR-035）：零依赖客户端支持 `prompts/list` / `prompts/get` / `resources/list` / `resources/read`，桥接对象原样透传；CLI `--mcp-prompts <server>` / `--mcp-resources <server>` **不进 REPL**、打印后退出；**先检查**服务端 `initialize` 声明的 `capabilities`，未声明就明确说「不支持」并列出已声明能力（不硬调后报 JSON-RPC error）；列表解析宽容（缺 `description` / `name` / `mimeType` 不算错，形状不对只丢自己）。**刻意不做**：把 prompt / resource 自动拼进 system 或上下文（需要选择策略与注入配额，属产品决策）⇒ 模型目前**看不到**它们",
+      "status": "stable",
+      "adr": ["ADR-035"],
+      "tests": ["packages/runtime/test/m18a-acceptance.test.ts"]
+    },
+    {
+      "id": "mcp.http-transport",
+      "claim": "MCP **Streamable HTTP 传输**（ADR-035）：零新依赖（Node 22 内置 `fetch`）——`POST` JSON-RPC，响应支持 `application/json`（单条）与 `text/event-stream`（逐事件按 `id` 取目标响应）；记住 `initialize` 的 `Mcp-Session-Id` 并在后续请求复用；通知（无 `id`）同样 `POST`；超时经 `AbortSignal`；配置 `mcp.servers[]` 为 **stdio / HTTP 严格 union**（`{name,command,args?,env?}` 或 `{name,url,headers?}`，`url` 必须 `http(s)`，两边键互斥，混写 / 非法值加载期快速失败）。stdio 与 HTTP 经同一 `connectMcpServer` 分派并桥接成同一批 `mcp__<server>__<tool>`。⚠️ **边界**：HTTP 传输只与**仓内 fixture HTTP 服务**对测（该 fixture 实现 JSON + SSE 两种响应、session id 复用与通知），**未与真实远端 MCP 服务对测**；`close()` 只置 closed、不发 `DELETE` 终止会话",
+      "status": "stable",
+      "adr": ["ADR-035"],
+      "tests": ["packages/runtime/test/m18a-acceptance.test.ts"]
+    },
+    {
+      "id": "desktop.provider-settings",
+      "claim": "桌面版**模型接入设置**（M21，ADR-039；**experimental**）：标题栏 ⚙ 打开毛玻璃弹层，填 Base URL / API Key / 模型 —— ① **密钥只以密文落盘**：`<home>\\desktop\\aster-settings.json` 里是 `windows-dpapi` 密文（Electron `safeStorage`，当前 Windows 用户绑定）；**没有可用加密能力就拒绝保存**，绝不降级成明文；② **密钥不过 IPC**：`aster:settings:get` 只回 `hasKey`，密钥只在 main 进程解密，启动横幅只写 `apiKey=encrypted`；③ **先于装配注入**：三项齐全时写 `process.env`（只在本进程，不 `setx`、不动系统），桌面设置存在时优先于继承的环境变量；④ **测试连接**：真的发一次 `POST /chat/completions`（`max_tokens:1`），失败只回状态与截断后的响应体；⑤ **保存并重启**：provider 只在装配期解析 ⇒ `app.relaunch()` 生效，回合进行中会先确认；⑥ 设置文件损坏 / DPAPI 换用户一律**不抛**（`invalid` + 可读原因，回退环境变量）。回归钉住「明文不出现在文件、不出现在任何返回值」；真窗口 `--self-check` 第 ⑧ 步断言弹层三字段。⚠️ `safeStorage` 的真实加解密只在 Windows 上验证；界面视觉仍待用户本机逐轮验收",
+      "status": "experimental",
+      "adr": ["ADR-039"],
+      "tests": ["packages/desktop/test/m21-provider-settings.test.ts"]
+    },
+    {
+      "id": "desktop.markdown-search-installer",
+      "claim": "桌面版**日用三件**（M22，ADR-040；**experimental**）：① **Markdown 渲染**——助手正文支持围栏代码块（含未闭合的流式尾巴）/ 行内代码 / 粗斜体 / 标题 / 列表 / 引用 / 分隔线；**零依赖、纯 DOM 构造**（没有 `innerHTML` / `document.write` / `eval`），链接渲染成不可点击的文本（renderer 的 CSP 不允许导航）；**只有 assistant 正文**走 Markdown，用户输入 / 工具输出 / 审计行仍逐行文本。② **会话搜索 + 重命名**——搜索是**纯视图过滤**（标题 / 内容预览 / sessionId，不重新读盘）；`host.list()` 增加 `preview`（只读 JSONL 前 64KB 取第一条 `user/message`，不缓存、不写入）与 `title`；重命名落 `<数据根>\\desktop\\session-titles.json`（**桌面标题不是会话事实**，**绝不进 JSONL**，也不参与 `deriveMessages`），坏文件 / 版本不认一律退化为无标题。③ **安装器**——`tools/build-desktop-installer.mjs` 生成 `install.cmd` / `uninstall.cmd`（robocopy + PowerShell 快捷方式；**目标以 C: 开头一律 exit 2 拒绝**），`--iexpress` 用 Windows 自带 IExpress 打**单文件 `Aster-Setup.exe`**（本机实测 126,599,168 B，安装到临时目录 80 个文件、exit 0）。⚠️ `.lnk` 快捷方式必须落在桌面 / 开始菜单（Windows 唯一做法）——这是「不碰 C 盘」的**唯一书面例外**，应用数据仍全部落安装盘；安装器是**无签名**的，SmartScreen 会提示",
+      "status": "experimental",
+      "adr": ["ADR-040"],
+      "tests": [
+        "packages/desktop/test/m22-session-list.test.ts",
+        "packages/desktop/test/m22-renderer-contract.test.ts"
+      ]
+    },
+    {
+      "id": "context.compaction",
+      "claim": "**长会话上下文压缩**（M23，ADR-041；**experimental、默认关闭**）：配置文件 `context.compaction.{enabled,maxChars,keepTurns}`（`enabled` 必须显式 `true`，不配置 ⇒ 行为与 M22 逐字节相同）。① **按整回合压缩**：边界只落在 `turn/start` 之前 ⇒ 绝不切断 `assistant(toolCalls)` 与 `tool/result` 的配对（真实 API 的硬约束）；② **压缩本身是事实**：落 `context/compacted{fromSeq,toSeq,removedMessages,removedChars,keepTurns,strategy,summary}`，`deriveMessages` 按 `seq` 跳过区间并在压缩事件位置插入一段**确定性摘要**（不调用模型）⇒ 幂等、resume 后投影一致；③ **区间不重叠**（新的从上一段 `toSeq+1` 开始）；④ **触发按字符数**（缺省 120000），不是条数；⑤ **摘要用 user 角色**送达（system 只能在首条、tool 会破坏配对），文本带 `[context compacted]` 标签。回归：`compaction.test.ts` 8 例（阈值 / 回合边界 / tool 配对 / 不重叠 / 投影幂等 / 默认零压缩）；真进程 `smoke-m23.mjs` 12/12。⚠️ 只做确定性截断（无语义摘要）；不压缩工具调用密集的单回合；压缩后早期细节**不可恢复**（需用户重新提供）",
+      "status": "experimental",
+      "adr": ["ADR-041"],
+      "tests": ["packages/runtime/test/compaction.test.ts"]
+    },
+    {
+      "id": "acp.minimal-channel",
+      "claim": "ACP **agent 侧最小通道**（ADR-036；**experimental**）：stdin/stdout 按行分隔 JSON-RPC 2.0，方法 `initialize` / `session/new` / `session/prompt` / `session/cancel`（通知），服务端只发 `session/update`（`agent_message_chunk` / `tool_call` / `tool_call_update`）；`initialize` 如实声明 `loadSession:false`、`promptCapabilities.{image,audio,embeddedContext}=false`；**stdout 只有协议**（诊断走 stderr），非 JSON 行忽略，未知方法 `-32601`，参数错 `-32602`，同会话并发 `-32000 busy`，host 错误 `-32603`；更新**全部来自已记录事件**（整块 `assistant/message` + 工具状态，**不做 token 级流式**，不另开文本通道）；无审批通道 ⇒ `ask` fail-closed deny；`session/cancel` 只 abort 该会话；EOF 逐会话落 `session/end{exit}` 并释放资源。**未与真实 ACP 客户端（Zed）对测** ⇒ 不进 README 已验证清单；不做 fs / terminal / `session/load` / 客户端 `mcpServers`",
+      "status": "experimental",
+      "adr": ["ADR-036"],
+      "tests": ["packages/runtime/test/m18b-acceptance.test.ts"]
+    },
+    {
+      "id": "llm.keyless-replay",
+      "claim": "keyless 录制回放（ADR-037，**experimental**）：`--record` 把已解析的 LlmProvider 包一层录制装饰器（loop 一行不改、不新增写入路径），把每次 LLM 往返写成**版本化 JSONL cassette**（首行 header，之后每行一条：请求快照 + 流式事件 + complete/error）；`--replay` 只读 cassette，**不需要 API key、不发任何网络请求**，按 `sha256(canonicalJson({model,messages,tools,temperature}))` **严格匹配**并逐条回放（text-delta 分片 / usage / done 的 content·toolCalls·stopReason 全部保真）；未命中 / 队列耗尽一律 fail-closed 报 `cassette mismatch`（含 key 前 12 位、消息数、最后一条 role+预览、工具名、剩余数），绝不伪造模型输出；cassette 不含 signal / 任何密钥，加载时重算 requestKey 检出篡改；`--replay` 与 `--record` / `--stub` / `--demo-*` 互斥，`--record` 拒绝覆盖已存在文件。⚠️ **边界**：回放要求与录制相同的 cwd / mode / 工具配置（它们是请求哈希的一部分）；录制源目前只在**本地 OpenAI-compatible fixture** 上验证过，**未录制真实厂商会话** ⇒ 不进 README「已验证能力」清单",
+      "status": "experimental",
+      "adr": ["ADR-037"],
+      "tests": [
+        "packages/runtime/test/cassette.test.ts",
+        "packages/runtime/test/m19-acceptance.test.ts"
+      ]
+    }
+  ],
+  "removed": [],
+  "roadmap": [
+    "v0.2: 真沙箱（审批 × 沙箱正交 + 失败升级重试）——**M12a 交付 best-effort（experimental：进程树击杀 + 环境收敛 + 数据根体检），M15 追加 windows-job（ADR-031，Windows-only：Job Object 的 KILL_ON_JOB_CLOSE 整树击杀 + 进程数上限 + UI 限制，内核强制、已实测）**；**仍不是文件/网络隔离**（本机实测不可达：非管理员 token filtering NOT_SUPPORTED / AppContainer 需提权且写 C 盘 / Windows Sandbox 在 Home 版不存在），**Linux·macOS 的真沙箱计划已正式撤销（平台范围收窄为 Windows-only）**",
+    "v0.3: MCP 剩余面（prompts / resources / HTTP 传输——Stdio 工具加载已交付）、长期记忆经 MCP 外挂（**检索注入已交付**；**L1 质量门禁已交付**；**规则版写入路径已交付（experimental、默认关闭，ADR-033/034：显式标记抽取 + 四道确定性闸门 + memory/written 审计 + 跨会话检索 + 显式取代与写后验证）**；**语义版抽取 / L2 采样 / L3 全量仍未做**）",
+    "v0.4: 显式版本化会话交换格式（**主张 4 的会话侧已交付**，ADR-019：ASTER 文档 + Claude Code / ZCode 适配器）；（**主张 4 的记忆侧已交付**，ADR-030：`aster-memory-exchange` 文档 + `--export-memory` / `--import-memory`；**只搬运、不写记忆层**——写入走 ADR-033 的独立路径）+ **记忆质量 L2/L3 采样判官与语义版抽取仍待做**",
+    "v0.5: 差分渲染 TUI（**机制面已交付**，ADR-020；**完整版未交付**：M10b-1..4 已交付（结构化驱动 / 补全 / 鼠标 / 多行编辑 / 富文本 / 折叠 / 回合内指示 / resize・IME・审批实测），**M10b-5 配色打磨轮次显式推迟**到用户本地核验时逐轮定稿）",
+    "v1.0: client/server + SSE（**两端已交付**：ADR-021 只读事件流 + ADR-022 只读镜像与远端写路径）、HaluMem 式记忆质量门禁（**L1 已交付**，ADR-028；**L2 采样 / L3 全量需真实端点，未做**）",
+    "DESKTOP: 桌面 GUI（ADR-029，**experimental**）——**M13a 已交付**（窗口 + 只读回放 + 「绝不碰 C 盘」把关 + 真窗口自检）；**M13b 已交付**（main 进程内跑 runSessionRepl：发 prompt / 审批 UI（y·a·n，always 为会话内规则）/ 模式切换 / SIGINT 按钮 / 关窗≠中断回合 + `cli/bootstrap.ts` 与 CLI 共用装配）；**M13c 已交付**（便携形态 = **手动组装自洽 App 目录**、不引 electron-builder：单文件 ESM bundle + `resources/app` + exe 改名，`dist-desktop\\aster-desktop\\aster-desktop.exe` **解压即跑**、默认数据根=便携根）；**M13d 对齐 CLI/TUI 的功能缺口**（**M13d-1 已交付**：续跑已记录会话 = 列表「恢复」按钮 + `resume` 同一份语义，新 prompt 落同一条 JSONL、seq 紧接其后；**M13d-2 已交付**：工具结果**按载荷本身**渲染（修掉「object Object」真缺陷）+ 多行正文**折叠/展开**（与 TUI 的折叠同源，视图状态不入 JSONL），并顺带修掉**另一个真缺陷**（桌面 bundle 的入口文件＝`argv[1]` ⇒ CLI 入口守卫误报、CLI 的 main() 在 GUI 进程里跑起来））；**M13d-3 已交付**：规则 / 策略面板（对齐 `/approvals` 与 `/policy`——活的审批规则对象交给前端一次、策略文本与 `/policy` 同一 formatter、renderer 只 query 不自己算；真窗口自检第 ⑤ 步点按钮断言面板出行））；**待做**：**桌面 UI 打磨（独立批次，需真机逐轮定稿）** + 安装包（只做 portable）；真机验收通过前一律 `experimental`，不进 README 已验证清单"
+  ]
+}

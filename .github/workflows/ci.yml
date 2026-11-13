@@ -1,0 +1,31 @@
+# Aster CI（**Phase 2 才启用**：Phase 1 未装 git、未建仓，本文件为开源阶段准备的资产）
+#
+# 与 05-工程规范 §3 对齐：类型检查 / 静态检查 / 单测 / 架构门禁 / 能力声明门禁 / 依赖审计。
+# 平台矩阵含 windows-latest —— ADR-009「首发支持 Windows」在此被真实断言（含 pwsh 后端契约测试）。
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.19"
+          cache: npm
+      # 供应链硬化（05 §1）：禁止生命周期脚本
+      - run: npm ci --ignore-scripts
+      # 一条命令跑全部门禁（与本地 npm run verify 完全相同）
+      - run: npm run verify
+      # 依赖审计（prod 依赖）
+      - run: npm audit --omit=dev

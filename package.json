@@ -1,0 +1,49 @@
+{
+  "name": "aster",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Aster - an auditable, Windows-only local agent harness optimized for practical functionality (v1.0)",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "workspaces": [
+    "packages/schema",
+    "packages/protocol",
+    "packages/runtime",
+    "packages/desktop"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "architecture:check": "node tools/architecture-check.mjs",
+    "capabilities:check": "node tools/check-capabilities.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run architecture:check && npm run capabilities:check",
+    "cli": "tsx packages/runtime/src/cli/main.ts",
+    "precli": "npm run typecheck",
+    "bundle": "node tools/build-bundle.mjs",
+    "desktop-build": "tsc -b tsconfig.json",
+    "desktop-app": "tsc -b tsconfig.json && node tools/build-desktop-app.mjs",
+    "desktop": "tsc -b tsconfig.json && node tools/build-desktop-app.mjs && node node_modules/electron/cli.js packages/desktop/dist/app/main.mjs",
+    "desktop-selfcheck": "tsc -b tsconfig.json && node tools/build-desktop-app.mjs && node node_modules/electron/cli.js packages/desktop/dist/app/main.mjs --self-check",
+    "desktop-portable": "tsc -b tsconfig.json && node tools/build-desktop-app.mjs && node tools/build-desktop-portable.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.2",
+    "@types/node": "22.15.30",
+    "electron": "44.8.0",
+    "esbuild": "0.25.12",
+    "tsx": "4.20.3",
+    "typescript": "5.8.3",
+    "vitest": "3.2.4"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}

@@ -1,0 +1,18 @@
+# 依赖与构建产物
+node_modules/
+dist/
+*.tsbuildinfo
+# esbuild 单文件 bundle 构建产物（bin/aster.cmd 启动器属源码，须纳入版本控制，故不忽略）
+bin/aster.mjs
+
+# 本地数据与临时目录（ASTER_HOME / 开发缓存）
+.aster/
+.aster-*/
+.dev/
+backups/
+
+# 日志与编辑器
+*.log
+.DS_Store
+.idea/
+.vscode/

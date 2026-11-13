@@ -1,0 +1,73 @@
+{
+  "version": "l1-1",
+  "note": "自造小型 fixture（**不含任何真实用户数据**）；只借 HaluMem 的指标思想，不含其数据集/代码/prompt（许可 CC BY-NC-ND 4.0，只借思想）。golden 集按 **L1 的词法比对规则**书写（归一化后必须能在抽取集里原样找到）——语义等价的判定属 L2，本层不做。",
+  "extraction": [
+    {
+      "case": "记住称呼与所在地（中文；归一化会吃掉中文字之间多余的空格）",
+      "extracted": [
+        "用户希望大家称呼他为「小林」",
+        "称呼： 小林",
+        "居住地：杭州",
+        "偏好深色主题"
+      ],
+      "golden": ["称呼：小林", "居住地：杭州"]
+    },
+    {
+      "case": "工具/回复偏好（英文；大小写与空白折叠都不应影响判分）",
+      "extracted": ["  user   likes  short replies ", "偏好 fast 编辑速度"],
+      "golden": ["USER LIKES SHORT REPLIES", "偏好   fast   编辑速度"]
+    }
+  ],
+  "retrieval": [
+    {
+      "case": "问所在地 -> top-3 必须含 m-loc",
+      "query": "我现在住哪里",
+      "k": 3,
+      "records": [
+        { "id": "m-loc", "content": "居住地：杭州", "score": 0.93 },
+        { "id": "m-name", "content": "称呼：小林", "score": 0.41 },
+        { "id": "m-theme", "content": "偏好深色主题", "score": 0.22 }
+      ],
+      "goldenIds": ["m-loc"]
+    },
+    {
+      "case": "问称呼 -> top-2 必须含 m-name",
+      "query": "怎么称呼我",
+      "k": 2,
+      "records": [
+        { "id": "m-name", "content": "称呼：小林", "score": 0.88 },
+        { "id": "m-theme", "content": "偏好深色主题", "score": 0.31 }
+      ],
+      "goldenIds": ["m-name"]
+    }
+  ],
+  "boundary": [
+    {
+      "case": "对话里没提过宠物 -> 必须返回空",
+      "query": "我的宠物叫什么",
+      "records": []
+    },
+    {
+      "case": "对话里没提过车 -> 必须返回空",
+      "query": "我开什么车",
+      "records": []
+    }
+  ],
+  "update": [
+    {
+      "case": "居住地变更：新事实生效 + 旧记忆失效（两条矛盾不得同时可检索）",
+      "oldRecord": {
+        "id": "m-loc-old",
+        "content": "居住地：北京",
+        "validAt": "2026-01-01T00:00:00.000Z",
+        "invalidAt": "2026-09-01T00:00:00.000Z"
+      },
+      "newRecord": {
+        "id": "m-loc-new",
+        "content": "居住地：杭州",
+        "validAt": "2026-09-01T00:00:00.000Z",
+        "invalidAt": null
+      }
+    }
+  ]
+}

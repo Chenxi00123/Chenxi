@@ -1,0 +1,23 @@
+{
+  "$comment": "架构治理策略（05-工程规范 §2，参 zcode 的 architecture-policy 之形，自建内容）。由 tools/architecture-check.mjs 读取执行。注：Phase 1 用 JSON 而非 YAML，以避免为门禁引入 YAML 解析依赖。",
+  "global": {
+    "maxFileLines": 400,
+    "maxTestFileLines": 600,
+    "forbidCycles": true,
+    "forbidDeepImports": true
+  },
+  "modules": [
+    { "id": "schema", "dir": "packages/schema", "requires": [] },
+    { "id": "protocol", "dir": "packages/protocol", "requires": ["schema"] },
+    { "id": "runtime", "dir": "packages/runtime", "requires": ["schema", "protocol"] },
+    { "id": "desktop", "dir": "packages/desktop", "requires": ["schema", "runtime"] }
+  ],
+  "forbiddenEdges": [
+    { "from": "schema", "to": "protocol" },
+    { "from": "schema", "to": "runtime" },
+    { "from": "schema", "to": "desktop" },
+    { "from": "protocol", "to": "runtime" },
+    { "from": "protocol", "to": "desktop" },
+    { "from": "runtime", "to": "desktop" }
+  ]
+}
