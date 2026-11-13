@@ -1,7 +1,7 @@
 /**
  * 事件扇出内核（ADR-021）：**单全局订阅 + 每连接有界队列**。
  *
- * 继承自 OpenCode 的背压形态（证据：`packages/server/src/event-feed.ts:8,64-68`，
+ * 参考 OpenCode 的背压形态（公开源码：`packages/server/src/event-feed.ts:8,64-68`，
  * 容量 `4096`、队列满即**只断该订阅者**）。三条不变量：
  *  1. **`publish` 绝不等待消费者**——背压只发生在每连接的队列上，绝不发生在发布者；
  *     否则一个慢客户端会把整个 harness 卡住。

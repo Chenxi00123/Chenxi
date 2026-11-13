@@ -2,7 +2,7 @@
 /**
  * 测试夹具：**零依赖** stdio MCP 服务端（JSON-RPC 2.0，按行分隔）。
  *
- * 结构照抄 spike `08` 的 `spike-stdio-server.mjs`，但**不引入 `@modelcontextprotocol/sdk`**
+ * 结构参考 spike `08` 的 `spike-stdio-server.mjs`，但**不引入 `@modelcontextprotocol/sdk`**
  * （ADR-015 已定案：不引 SDK），改为手写最小 JSON-RPC 分发。提供两个工具：
  *  - `echo`：带 `readOnlyHint: true` 注解；
  *  - `add`：**不带任何注解**（用于验证「缺失按保守值」）。

@@ -1,7 +1,7 @@
 /**
  * ZCode 会话文件适配器（ADR-019，**best-effort、有损**）。
  *
- * 形状来源 = 逆向证据（`07-证据索引` §5 的 zcode 快照）：
+ * 形状来源 = 公开源码快照（`07-证据索引` §5 记录的 zcode 公开仓库）：
  *  - `packages/shared/src/validation.ts:1746` `zcodeSessionFileSchema = { meta, messages,
  *    fileChanges?, turnCheckpoints? }`（**没有任何版本字段**——这正是主张 4 要补的缺口）；
  *  - `packages/shared/src/zcode-task-types-core.ts:1090` `ZCodePersistedMessage = { id?, role:

@@ -61,6 +61,11 @@ cpSync(appPayload, path.join(outRoot, "resources", "app"), { recursive: true });
 
 // ④ 许可证随分发：Electron 的 LICENSE / LICENSES.chromium.html 由 ① 整树带出；
 //    这里补**本项目** Apache-2.0 与第三方声明（否则收件人只会看到 Electron 的 MIT 文本）。
+//    Electron 自带的 LICENSE 与本项目同名 —— 先改名保留（MIT 要求保留其版权与许可原文），再放我们的。
+const electronLicense = path.join(outRoot, "LICENSE");
+if (existsSync(electronLicense)) {
+	renameSync(electronLicense, path.join(outRoot, "LICENSES.electron.txt"));
+}
 copyFileSync(path.join(repoRoot, "LICENSE"), path.join(outRoot, "LICENSE"));
 copyFileSync(path.join(repoRoot, "THIRD_PARTY_NOTICES.md"), path.join(outRoot, "THIRD_PARTY_NOTICES.md"));
 

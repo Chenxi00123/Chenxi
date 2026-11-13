@@ -1,7 +1,7 @@
 /**
  * Claude Code 原生会话 JSONL 适配器（ADR-019，**best-effort、有损**）。
  *
- * 形状来源 = 逆向证据（`07-证据索引` §5 的 zcode 快照）：
+ * 形状来源 = 公开源码快照（`07-证据索引` §5 记录的 zcode 公开仓库）：
  *  - `packages/services/src/session/claude-native/claudeNativeSessionImportParser.ts`
  *  - `.../jsonLineRecord.ts`
  * 每行一条记录：`{ type: "user"|"assistant"|"system"|…, message: { role?, content:

@@ -73,8 +73,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## 3. Chromium（Electron 内嵌）
 
-Electron 运行时内含 Chromium。其完整许可文本随 Electron 发行版提供，便携目录 md 与安装包中均包含
+Electron 运行时内含 Chromium。其完整许可文本随 Electron 发行版提供，便携目录与安装包中均包含
 `LICENSES.chromium.html`（由 `node_modules/electron/dist` 原样复制）。分发时**不要删除该文件**。
+
+Electron 自身的 MIT 许可原文在便携根被保留为 `LICENSES.electron.txt`（避免与本项目的 `LICENSE` 同名覆盖）；
+其文本同时抄录于本文件第 2 节。
 
 ---
 
