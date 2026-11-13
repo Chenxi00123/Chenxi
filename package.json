@@ -5,6 +5,10 @@
   "type": "module",
   "description": "Aster - an auditable, Windows-only local agent harness optimized for practical functionality (v1.0)",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chenxi00123/Aster.git"
+  },
   "engines": {
     "node": ">=22.19"
   },

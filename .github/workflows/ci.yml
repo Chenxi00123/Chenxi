@@ -1,7 +1,9 @@
-# Aster CI（**Phase 2 才启用**：Phase 1 未装 git、未建仓，本文件为开源阶段准备的资产）
+# Aster CI（Phase 2：2026-11-13 首次推送启用，首轮两腿均为红 → 修复后第三轮全绿）
 #
 # 与 05-工程规范 §3 对齐：类型检查 / 静态检查 / 单测 / 架构门禁 / 能力声明门禁 / 依赖审计。
 # 平台矩阵含 windows-latest —— ADR-009「首发支持 Windows」在此被真实断言（含 pwsh 后端契约测试）。
+# ubuntu-latest 是补充信号：Windows-only 用例（盘符路径 / `cmd /c` / `taskkill /T` / 宿主 ACL）已显式 skipIf，
+# 其余共享逻辑在 Linux 上照常跑。换行由 `.gitattributes` 统一为 LF（否则 Windows 的 autocrlf 会让 biome 失败）。
 name: ci
 
 on:
