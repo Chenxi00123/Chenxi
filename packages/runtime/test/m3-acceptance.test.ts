@@ -272,52 +272,57 @@ describe("M3 判据 #8：只读并发 / 写类串行", () => {
 });
 
 describe("M3 判据 #11：Windows 可开箱（bash 工具走 pwsh + 可读替代提示）", () => {
-	it("Windows 选择 pwsh 后端；Unix 惯用法给提示而非硬失败", async () => {
-		expect(selectShellProvider({ platform: "win32" }).id).toBe("pwsh");
+	// Windows-only：`selectShellProvider({platform:"win32"})` 的后端可用性仍取决于**宿主**是否装有 PowerShell，
+	// 在 Linux runner 上断言"必定选中 pwsh"没有意义（见 CI 首次运行的失败记录）。
+	it.skipIf(process.platform !== "win32")(
+		"Windows 选择 pwsh 后端；Unix 惯用法给提示而非硬失败",
+		async () => {
+			expect(selectShellProvider({ platform: "win32" }).id).toBe("pwsh");
 
-		const { ctx, registry, shell } = realRuntime();
-		expect(shell.id).toBe("pwsh");
+			const { ctx, registry, shell } = realRuntime();
+			expect(shell.id).toBe("pwsh");
 
-		// `ls` 是 Unix 惯用法：命令照常执行，但结果里带可读替代提示
-		const lsResult = await executeTool({
-			ctx,
-			registry,
-			call: { callId: callId("c_ls"), toolName: "bash", input: { command: "ls" } },
-			context: {
-				sessionId: "ses_m3_shell",
-				callId: callId("c_ls"),
-				mode: "plan",
-				cwd: REPO_ROOT,
-			},
-		});
-		expect(lsResult.ok).toBe(true);
-		if (lsResult.ok) {
-			const output = lsResult.value as { providerId: string; hints?: string[] };
-			expect(output.providerId).toBe("pwsh");
-			expect(output.hints?.join(" ")).toContain("Get-ChildItem");
-		}
+			// `ls` 是 Unix 惯用法：命令照常执行，但结果里带可读替代提示
+			const lsResult = await executeTool({
+				ctx,
+				registry,
+				call: { callId: callId("c_ls"), toolName: "bash", input: { command: "ls" } },
+				context: {
+					sessionId: "ses_m3_shell",
+					callId: callId("c_ls"),
+					mode: "plan",
+					cwd: REPO_ROOT,
+				},
+			});
+			expect(lsResult.ok).toBe(true);
+			if (lsResult.ok) {
+				const output = lsResult.value as { providerId: string; hints?: string[] };
+				expect(output.providerId).toBe("pwsh");
+				expect(output.hints?.join(" ")).toContain("Get-ChildItem");
+			}
 
-		// 真实只读命令：在仓库内列出 package.json
-		const okResult = await executeTool({
-			ctx,
-			registry,
-			call: {
-				callId: callId("c_ok"),
-				toolName: "bash",
-				input: { command: "Get-ChildItem -Name package.json" },
-			},
-			context: {
-				sessionId: "ses_m3_shell",
-				callId: callId("c_ok"),
-				mode: "plan",
-				cwd: REPO_ROOT,
-			},
-		});
-		expect(okResult.ok).toBe(true);
-		if (okResult.ok) {
-			const output = okResult.value as { stdout: string; exitCode: number | null };
-			expect(output.exitCode).toBe(0);
-			expect(output.stdout).toContain("package.json");
-		}
-	});
+			// 真实只读命令：在仓库内列出 package.json
+			const okResult = await executeTool({
+				ctx,
+				registry,
+				call: {
+					callId: callId("c_ok"),
+					toolName: "bash",
+					input: { command: "Get-ChildItem -Name package.json" },
+				},
+				context: {
+					sessionId: "ses_m3_shell",
+					callId: callId("c_ok"),
+					mode: "plan",
+					cwd: REPO_ROOT,
+				},
+			});
+			expect(okResult.ok).toBe(true);
+			if (okResult.ok) {
+				const output = okResult.value as { stdout: string; exitCode: number | null };
+				expect(output.exitCode).toBe(0);
+				expect(output.stdout).toContain("package.json");
+			}
+		},
+	);
 });

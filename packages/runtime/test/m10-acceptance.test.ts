@@ -318,6 +318,8 @@ describe("M10 应用层：假 tty 驱动真实 REPL（alt screen 还原 + 差分
 		const home = newTemp("aster-m10-home-");
 		const cwd = newTemp("aster-m10-cwd-");
 		const stdout = new FakeStdout();
+		// 这条用例要断言"静态内容不重画"：屏幕必须**装得下**首屏 + 新回复，否则发生滚动就是整屏重画（合理行为）。
+		stdout.rows = 30;
 		const stdin = new FakeStdin();
 		const lines: string[] = [];
 
@@ -350,7 +352,11 @@ describe("M10 应用层：假 tty 驱动真实 REPL（alt screen 还原 + 差分
 		// 差分生效：回车那次渲染之后的片段里**不应**再出现状态条（未变化的部分没被重画）
 		const delta = stdout.chunks.slice(beforeSubmit).join("");
 		expect(delta).toContain("STUB-REPLY");
-		expect(delta).not.toContain("aster ·"); // 状态条在这批增量里没有被重画
+		// 差分的意图是「**静态**内容不重画」。选一条真正不动的锚点：
+		//  - 状态条含回合内指示器，忙碌时本来就会随节拍重绘（CI 上已实证）；
+		//  - 会话块与输入行在**下对齐**布局里会随新增行上移，也会被重画；
+		// 只有状态条与正文之间的**分隔线**既不含时间信息、也不随行数变化 ⇒ 它出现才说明退化成整屏重画。
+		expect(delta).not.toContain("─".repeat(24));
 
 		// Ctrl+D -> EOF -> readline 关闭 -> REPL 收尾（落 session/end）
 		stdin.type("\u0004");

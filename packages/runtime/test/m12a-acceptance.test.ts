@@ -124,57 +124,68 @@ describe("M12a best-effort：环境收敛 + cwd 越界可读拒绝", () => {
 		}
 	});
 
-	it("`cwd` 越出工作区根 -> **可读拒绝**（不是抛异常）；根内则是正常准备", () => {
-		const sandbox = createBestEffortSandbox();
-		const refused = sandbox.prepare({
-			command: "echo hi",
-			cwd: "D:\\outside\\dir",
-			workspaceRoot: "D:\\workspace",
-		});
-		expect(refused.refusal).toContain("sandbox refused");
-		expect(refused.refusal).toContain("Do not retry");
-		const ok = sandbox.prepare({
-			command: "echo hi",
-			cwd: "D:\\workspace\\sub",
-			workspaceRoot: "D:\\workspace",
-		});
-		expect(ok.refusal).toBeUndefined();
-	});
+	// 用例用 Windows 盘符路径（`D:\workspace`）表达"在根内 / 在根外"；Linux 上这些不是绝对路径，语义不同。
+	it.skipIf(process.platform !== "win32")(
+		"`cwd` 越出工作区根 -> **可读拒绝**（不是抛异常）；根内则是正常准备",
+		() => {
+			const sandbox = createBestEffortSandbox();
+			const refused = sandbox.prepare({
+				command: "echo hi",
+				cwd: "D:\\outside\\dir",
+				workspaceRoot: "D:\\workspace",
+			});
+			expect(refused.refusal).toContain("sandbox refused");
+			expect(refused.refusal).toContain("Do not retry");
+			const ok = sandbox.prepare({
+				command: "echo hi",
+				cwd: "D:\\workspace\\sub",
+				workspaceRoot: "D:\\workspace",
+			});
+			expect(ok.refusal).toBeUndefined();
+		},
+	);
 });
 
 describe("M12a 进程树击杀（真进程）：超时/中止不留孤儿", () => {
-	it("父进程 + 孙子进程一起消失（`taskkill /T` / 进程组）", async () => {
-		// 父：起一个孙子并打印两个 pid，然后自己也长睡
-		const script = [
-			"const { spawn } = require('node:child_process');",
-			"const grand = spawn(process.execPath, ['-e', 'setInterval(()=>{},1000)'], { stdio: 'ignore' });",
-			"console.log(process.pid + ' ' + grand.pid);",
-			"setInterval(() => {}, 1000);",
-		].join(" ");
-		const parent = spawn(process.execPath, ["-e", script], { stdio: ["ignore", "pipe", "ignore"] });
-
-		const pids = await new Promise<{ parent: number; grand: number }>((resolve, reject) => {
-			let buffer = "";
-			const timer = setTimeout(() => reject(new Error("no pids in time")), 8000);
-			parent.stdout.on("data", (chunk: Buffer) => {
-				buffer += chunk.toString();
-				const match = /(\d+)\s+(\d+)/.exec(buffer);
-				if (match !== null) {
-					clearTimeout(timer);
-					resolve({ parent: Number(match[1]), grand: Number(match[2]) });
-				}
+	// 进程树击杀的 Windows 实现走 `taskkill /T`；Linux 分支未做验收（1.0 只承诺 Windows），故只在 win32 上跑。
+	it.skipIf(process.platform !== "win32")(
+		"父进程 + 孙子进程一起消失（`taskkill /T` / 进程组）",
+		async () => {
+			// 父：起一个孙子并打印两个 pid，然后自己也长睡
+			const script = [
+				"const { spawn } = require('node:child_process');",
+				"const grand = spawn(process.execPath, ['-e', 'setInterval(()=>{},1000)'], { stdio: 'ignore' });",
+				"console.log(process.pid + ' ' + grand.pid);",
+				"setInterval(() => {}, 1000);",
+			].join(" ");
+			const parent = spawn(process.execPath, ["-e", script], {
+				stdio: ["ignore", "pipe", "ignore"],
 			});
-			parent.on("error", reject);
-		});
 
-		expect(alive(pids.parent)).toBe(true);
-		expect(alive(pids.grand)).toBe(true);
-		expect(killProcessTree(pids.parent)).toBe(true);
-		// 孙悟空也要走：这正是 `child.kill()` 做不到的部分
-		await waitFor(() => !alive(pids.parent) && !alive(pids.grand));
-		expect(alive(pids.parent)).toBe(false);
-		expect(alive(pids.grand)).toBe(false);
-	}, 20000);
+			const pids = await new Promise<{ parent: number; grand: number }>((resolve, reject) => {
+				let buffer = "";
+				const timer = setTimeout(() => reject(new Error("no pids in time")), 8000);
+				parent.stdout.on("data", (chunk: Buffer) => {
+					buffer += chunk.toString();
+					const match = /(\d+)\s+(\d+)/.exec(buffer);
+					if (match !== null) {
+						clearTimeout(timer);
+						resolve({ parent: Number(match[1]), grand: Number(match[2]) });
+					}
+				});
+				parent.on("error", reject);
+			});
+
+			expect(alive(pids.parent)).toBe(true);
+			expect(alive(pids.grand)).toBe(true);
+			expect(killProcessTree(pids.parent)).toBe(true);
+			// 孙悟空也要走：这正是 `child.kill()` 做不到的部分
+			await waitFor(() => !alive(pids.parent) && !alive(pids.grand));
+			expect(alive(pids.parent)).toBe(false);
+			expect(alive(pids.grand)).toBe(false);
+		},
+		20000,
+	);
 
 	it("非法 pid 直接返回 false（不抛）", () => {
 		expect(killProcessTree(undefined)).toBe(false);

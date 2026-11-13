@@ -43,7 +43,8 @@ describe("M16 输出编码（真进程）", () => {
 		expect(result.stdout.trim()).toBe(payload);
 	});
 
-	it("**原生命令**的输出也是 UTF-8（控制台代码页确实被改了）", async () => {
+	// `cmd /c` 只在 Windows 存在；Linux runner 上这条没有对应物（cmdlet 路径仍照常验证）
+	it.skipIf(!isWindows)("**原生命令**的输出也是 UTF-8（控制台代码页确实被改了）", async () => {
 		const home = newTemp("aster-m16-native-");
 		const provider = createPwshProvider({});
 		const result = await provider.run({ command: "cmd /c echo 中文-原生命令", cwd: home });

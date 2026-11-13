@@ -1,0 +1,11 @@
+# 换行符纪律（2026-11-13 首次上 CI 的教训）
+#
+# Git for Windows 默认 core.autocrlf=true，会让检出的工作区变成 CRLF；
+# `biome check` 的格式化规则要求 LF，于是 **Windows runner 在 lint 阶段直接失败**。
+# 这里把仓库内的文本文件统一钉成 LF，工作区不再随机器漂移。
+* text=auto eol=lf
+
+# Windows 脚本必须 CRLF（cmd.exe 对 LF 的兼容性不可靠）
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf

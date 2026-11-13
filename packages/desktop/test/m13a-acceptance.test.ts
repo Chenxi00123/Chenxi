@@ -60,7 +60,9 @@ function sessionFile(home: string): string {
 	return join(dir, file);
 }
 
-describe("M13a 「绝不碰 C 盘」守卫（纯函数）", () => {
+// 桌面版是 Windows-only：这里断言的是盘符 / `\desktop` 的 Windows 路径语义，
+// 在 Linux runner 上 `node:path` 会把 `D:\...` 当相对路径解析（CI 首次运行已实证），故整组只在 win32 上跑。
+describe.skipIf(process.platform !== "win32")("M13a 「绝不碰 C 盘」守卫（纯函数）", () => {
 	it("路径布局：四个受管路径都在 `<home>\\desktop` 之下", () => {
 		const home = join("D:", "data", "aster", "desktop");
 		const paths = desktopPaths(home);
