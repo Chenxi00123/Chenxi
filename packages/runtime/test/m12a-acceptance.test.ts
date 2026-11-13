@@ -286,8 +286,11 @@ describe("M12a 数据根权限体检（**只读**：我们只检测 + 给命令�
 		expect(typeof audit.reason).toBe("string");
 		expect(audit.reason.length).toBeGreaterThan(0);
 		if (process.platform === "win32") {
-			// 新建的临时目录从父目录继承权限 ⇒ 本机应当被判为"未收紧"，并给出可复制的收紧命令
-			expect(audit.tight).toBe(false);
+			// 结论取决于**宿主 ACL**：本机新建临时目录会继承父目录（⇒ 未收紧），但 GitHub runner 的临时目录
+			// 可能本来就是"已收紧"的（CI 首次运行已实证）。这里钉的是**结论与理由的一致性**与**只读**，
+			// 不是某台机器的初始 ACL 状态。
+			expect(typeof audit.tight).toBe("boolean");
+			if (audit.tight) expect(audit.reason).toContain("未发现继承项");
 			expect(audit.hint).toContain("icacls");
 			expect(audit.hint).toContain("/inheritance:r");
 		} else {
