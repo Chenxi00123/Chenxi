@@ -1,4 +1,4 @@
-# Aster
+# Chenxi
 
 > 一个 **Windows-only、可审计、功能实用、持续优化** 的本地 agent harness（不追求"最小"）。
 > **v1.0.0 交付可安装的日用版**：事件溯源会话（**JSONL 事实源 + SQLite 派生索引**）+ 4 原语工具（**bash / pwsh 双 shell**）+ **默认双模式（plan / build）** + 元数据驱动权限 + **可交互审批（`y`/`a`/`n`）** + **分层本地配置** + **MCP stdio 工具加载** + **记忆注入缝（`before_turn`）** + **子代理（独立会话 `task` 工具，支持 `fork` / `background`）** + **版本化会话交换格式（`--export` / `--import`）** + **版本化记忆交换格式（`--export-memory` / `--import-memory`，ADR-030）** + **差分渲染 TUI（`--tui`）** + **client/server（`--serve` 事件流与回放 / `--attach` 只读镜像 / `POST /api/sessions/:id/prompt` 远端写）** + **环境自检（`--doctor`）** + **keyless 录制回放（--record / --replay，experimental）** + waterfall 扩展缝。
@@ -30,26 +30,26 @@ npm run verify
 
 | 环境变量 | 含义 | 示例 |
 |---|---|---|
-| `ASTER_BASE_URL` | OpenAI 兼容 endpoint | `https://api.deepseek.com/v1` |
-| `ASTER_API_KEY` | API key（**不会落盘、不会被打印**） | `sk-...` |
-| `ASTER_MODEL` | 模型 id | `deepseek-chat` |
-| `ASTER_HOME` | 数据目录（会话 JSONL 与索引），默认 `~/.aster` | `d:\aster-home` |
+| `CHENXI_BASE_URL` | OpenAI 兼容 endpoint | `https://api.deepseek.com/v1` |
+| `CHENXI_API_KEY` | API key（**不会落盘、不会被打印**） | `sk-...` |
+| `CHENXI_MODEL` | 模型 id | `deepseek-chat` |
+| `CHENXI_HOME` | 数据目录（会话 JSONL 与索引），默认 `~/.chenxi` | `d:\chenxi-home` |
 
 **不需要密钥也能跑（keyless 演示）**：
 
 ```powershell
 # 脚本化「读文件 -> 总结」的完整闭环
-npm run cli -- --home .\.aster --demo-read package.json
+npm run cli -- --home .\.chenxi --demo-read package.json
 
 # 现场复现 plan/build 的权限差异：plan 拒写，/mode build 后通过
-npm run cli -- --home .\.aster --demo-write demo-out.txt
+npm run cli -- --home .\.chenxi --demo-write demo-out.txt
 
 # 纯流式回放（桩 provider）
-npm run cli -- --home .\.aster --stub "hello from stub"
+npm run cli -- --home .\.chenxi --stub "hello from stub"
 
 # 扩展缝：加载中间件即可注入超时、或短路内置行为（**主循环一行不改**）
-npm run cli -- --home .\.aster --mode build --demo-bash "Start-Sleep -Seconds 5" --ext-timeout 400
-npm run cli -- --home .\.aster --mode build --demo-bash "Write-Output hi" --ext-short-circuit bash
+npm run cli -- --home .\.chenxi --mode build --demo-bash "Start-Sleep -Seconds 5" --ext-timeout 400
+npm run cli -- --home .\.chenxi --mode build --demo-bash "Write-Output hi" --ext-short-circuit bash
 ```
 
 > 提示：默认启动模式是 **plan**（写类工具一律 `deny`）。演示 `bash` 相关能力时请加 `--mode build`，或在会话内用 `/mode build` 切换。
@@ -57,32 +57,32 @@ npm run cli -- --home .\.aster --mode build --demo-bash "Write-Output hi" --ext-
 会话维护与**可移植**（ADR-019）：
 
 ```powershell
-npm run cli -- --home .\.aster --list
-npm run cli -- --home .\.aster --resume <sessionId>    # 也可用 --resume latest 续上最近一次
-npm run cli -- --home .\.aster --rebuild-index   # 由 JSONL 全量重建派生索引
-npm run cli -- --home .\.aster --doctor          # 环境自检（关键项全通过 exit 0，否则 exit 1）
-npm run cli -- --home .\.aster --acp             # ACP agent 侧最小通道（stdin/stdout JSON-RPC；experimental，ADR-036）
-npm run cli -- --home .\.aster --mcp-prompts <server>    # 列出该 MCP 服务端的提示词（不进 REPL）
-npm run cli -- --home .\.aster --mcp-resources <server>  # 列出该 MCP 服务端的资源（不进 REPL）
+npm run cli -- --home .\.chenxi --list
+npm run cli -- --home .\.chenxi --resume <sessionId>    # 也可用 --resume latest 续上最近一次
+npm run cli -- --home .\.chenxi --rebuild-index   # 由 JSONL 全量重建派生索引
+npm run cli -- --home .\.chenxi --doctor          # 环境自检（关键项全通过 exit 0，否则 exit 1）
+npm run cli -- --home .\.chenxi --acp             # ACP agent 侧最小通道（stdin/stdout JSON-RPC；experimental，ADR-036）
+npm run cli -- --home .\.chenxi --mcp-prompts <server>    # 列出该 MCP 服务端的提示词（不进 REPL）
+npm run cli -- --home .\.chenxi --mcp-resources <server>  # 列出该 MCP 服务端的资源（不进 REPL）
 
-npm run cli -- --home .\.aster --export latest --out session.aster.json   # 版本化交换文档（无损）
-npm run cli -- --home .\.aster --export <id> --format claude-code --out s.jsonl
-npm run cli -- --home .\.aster --import session.aster.json                # 导入＝新建会话，打印新 sessionId
-npm run cli -- --home .\.aster --import s.jsonl --format claude-code
+npm run cli -- --home .\.chenxi --export latest --out session.chenxi.json   # 版本化交换文档（无损）
+npm run cli -- --home .\.chenxi --export <id> --format claude-code --out s.jsonl
+npm run cli -- --home .\.chenxi --import session.chenxi.json                # 导入＝新建会话，打印新 sessionId
+npm run cli -- --home .\.chenxi --import s.jsonl --format claude-code
 ```
 
-`--format` 取 `aster`（缺省）/ `claude-code` / `zcode`；`--export` 必须给 `--out`，两者都**不进 REPL**。
+`--format` 取 `chenxi`（缺省）/ `claude-code` / `zcode`；`--export` 必须给 `--out`，两者都**不进 REPL**。
 
 **记忆**交换（ADR-030，兑现主张 4 的**记忆侧**）：
 
 ```powershell
 # 把配置的记忆层（经 MCP 外挂，只读）导出为版本化文档；缺省作用域 = 最近更新的已记录会话
-npm run cli -- --home .\.aster --export-memory --out memory.aster.json
-npm run cli -- --home .\.aster --export-memory --out memory.aster.json --memory-session <sessionId>
+npm run cli -- --home .\.chenxi --export-memory --out memory.chenxi.json
+npm run cli -- --home .\.chenxi --export-memory --out memory.chenxi.json --memory-session <sessionId>
 
 # 校验一份记忆交换文档，并可选地规范化重写成 canonical 形式（未声明键剥掉）
-npm run cli -- --home .\.aster --import-memory memory.aster.json
-npm run cli -- --home .\.aster --import-memory received.json --out normalized.json
+npm run cli -- --home .\.chenxi --import-memory memory.chenxi.json
+npm run cli -- --home .\.chenxi --import-memory received.json --out normalized.json
 ```
 
 `--export-memory` 必须给 `--out`，未配置 `memory.{server,searchTool}` 时**快速失败**并打印已查过的配置文件路径。
@@ -93,12 +93,12 @@ npm run cli -- --home .\.aster --import-memory received.json --out normalized.js
 ### 差分渲染 TUI（可选，ADR-020）
 
 ```powershell
-npm run cli -- --home .\.aster --tui            # 全屏差分渲染前端（深色极简配色）
-npm run cli -- --home .\.aster --tui --no-color # 关闭上色（等价于设置 NO_COLOR=1）
+npm run cli -- --home .\.chenxi --tui            # 全屏差分渲染前端（深色极简配色）
+npm run cli -- --home .\.chenxi --tui --no-color # 关闭上色（等价于设置 NO_COLOR=1）
 ```
 
 `--tui` 只在 **stdout 与 stdin 都是 TTY** 时生效；否则打印一行提示并**回落**朴素 REPL（不假装能画）。
-界面：状态条（`aster` · 模式 · **回合内指示（仅回合进行中）** · cwd · 模型 · 会话 id）／细分隔线／**下对齐**的会话视图／输入行。
+界面：状态条（`chenxi` · 模式 · **回合内指示（仅回合进行中）** · cwd · 模型 · 会话 id）／细分隔线／**下对齐**的会话视图／输入行。
 
 > ⚠️ **本版本交付 TUI 的"机制面 + 结构化驱动 + 基础交互 + 多行编辑 + 富文本 / 回合内指示"**：用户 2026-10-15 首次真机验收判定「**只是雏形，距离完整版还差得远**」。
 > 已交付 = 差分重绘 / 同步输出 / 合帧 / 全角列宽 / alt screen 还原 / 深色极简配色 / **会话事实改由结构化事件驱动（ADR-023，M10b-1）** / **Tab 补全 + 鼠标（ADR-024，M10b-2）** / **多行编辑器 + 括号粘贴（ADR-025，M10b-3）** / **富文本正文 + 工具结果折叠 + 回合内指示（ADR-026，M10b-4）** / **resize・IME 前提・审批交互的实测项**。
@@ -119,9 +119,9 @@ npm run cli -- --home .\.aster --tui --no-color # 关闭上色（等价于设置
 
 ```powershell
 # 录制一次真实会话（需要可用的模型端点）
-npm run cli -- --home .\.aster --record .\.aster\cassettes\demo.jsonl
+npm run cli -- --home .\.chenxi --record .\.chenxi\cassettes\demo.jsonl
 # 完全离线回放：不需要 API key、不访问网络
-npm run cli -- --home .\.aster --replay .\.aster\cassettes\demo.jsonl
+npm run cli -- --home .\.chenxi --replay .\.chenxi\cassettes\demo.jsonl
 ```
 
 cassette = **版本化 JSONL**（首行 header，之后每条 LLM 往返一行：请求快照 + 流式事件 + complete/error）。
@@ -133,8 +133,8 @@ cassette = **版本化 JSONL**（首行 header，之后每条 LLM 往返一行�
 ### 桌面版（**experimental**，ADR-029，M13a 只读窗口 → M13b 可交互会话）
 
 ```powershell
-.\bin\aster-desktop.cmd            # 打开 Aster 桌面窗口（数据根 = 仓库内 .aster；零 PATH 改动）
-.\bin\aster-desktop.cmd --self-check   # 端到端自检：在真窗口里真的发一条 prompt 并断言「列表/卡片/CSP/数据根不在 C 盘」后退出
+.\bin\chenxi-desktop.cmd            # 打开 Chenxi 桌面窗口（数据根 = 仓库内 .chenxi；零 PATH 改动）
+.\bin\chenxi-desktop.cmd --self-check   # 端到端自检：在真窗口里真的发一条 prompt 并断言「列表/卡片/CSP/数据根不在 C 盘」后退出
 ```
 
 > **先装 Electron 二进制**（仓库按供应链纪律设了 `ignore-scripts=true`，所以这一步是**显式**的；
@@ -153,35 +153,36 @@ cassette = **版本化 JSONL**（首行 header，之后每条 LLM 往返一行�
 判定照旧落 `permission/decision`）；④ **模式切换**（`plan`/`build`，走既有 `/mode` 路径 ⇒ `mode/changed` 事件）；⑤ **中断当前回合**按钮（合成 SIGINT）；
 ⑥ **工具结果卡片**（M13d-2）：工具返回的**对象/数组**按 JSON 缩进、字符串按行显示（不再出现 `[object Object]`），**多行的默认折叠**、**点卡头展开 / 收起**（折叠只是视图状态，**不写进会话文件**）；
 ⑦ **规则 / 策略**（M13d-3）：点「规则/策略」按钮看**本会话已沉淀的 `always` 规则**与**生效的「模式 → 权限」**表（等价于 CLI 的 `/approvals` 与 `/policy`，文本用的是同一个 formatter）。
-⑧ **深 / 浅双主题 + 工具栏**（M20）：默认跟随系统（`prefers-color-scheme`），标题栏右侧按钮可显式切换并记住偏好（存 localStorage `aster.theme`，**只是视图状态、不进会话文件**）；
+⑧ **深 / 浅双主题 + 工具栏**（M20）：默认跟随系统（`prefers-color-scheme`），标题栏右侧按钮可显式切换并记住偏好（存 localStorage `chenxi.theme`，**只是视图状态、不进会话文件**）；
 `plan`/`build` 模式做成分段按钮（点击仍走既有 `/mode` 路径，选中态**只由事件**驱动）；另做了相对时间、输入框自动增高、回合内「中断」按钮可用性、**滚动吸底**（往上翻历史时不被新事件拽回底部）。
 ⑨ **模型接入设置 + 毛玻璃**（M21）：标题栏 ⚙ 打开设置弹层，填 **Base URL / API Key / 模型**；**密钥只用 Windows DPAPI 加密落盘**
-（`<数据根>\desktop\aster-settings.json`，只有当前 Windows 用户能解），**界面永远拿不到密钥**（`settings:get` 只回 `hasKey`）；
+（`<数据根>\desktop\chenxi-settings.json`，只有当前 Windows 用户能解），**界面永远拿不到密钥**（`settings:get` 只回 `hasKey`）；
 「测试连接」会真的发一次最小 `POST /chat/completions`；「保存并重启」后生效（provider 只在装配期解析）。面板 / 顶栏 / 输入区 / 工具卡
 都做了**毛玻璃**（半透明 + `backdrop-filter` + 背景光晕，深/浅两套），弹层带遮罩模糊与入场动画。
 **「窗口关闭 ≠ 中断回合」**：关窗只给会话输入流 EOF，**等当前回合跑完**再落 `session/end`；要中止回合请按**中断**按钮。
 ⑩ **日用三件**（M22）：**Markdown**（助手正文的代码块 / 行内代码 / 标题 / 列表 / 引用，零依赖纯 DOM，链接不可点击）；
 **会话搜索**（标题 / 内容预览 / id，纯视图过滤）与**重命名**（落 `<数据根>\desktop\session-titles.json`，
 **桌面标题不是会话事实、绝不进 JSONL**）；**安装器**——`install.cmd` / `uninstall.cmd`（目标以 `C:` 开头一律拒绝）
-与 `--iexpress` 打出的单文件 `Aster-Setup.exe`（本机实测 126 MB、安装后 80 个文件）。
+与 `--iexpress` 打出的单文件 `Chenxi-Setup.exe`（本机实测 126 MB、安装后 80 个文件）。
+许可证随产物分发：便携根与安装包内都带 `LICENSE` 与 `THIRD_PARTY_NOTICES.md`（后者含 zod / Electron 的完整声明）。
 
-**便携形态（M13c）**：`npm run desktop-portable` 会在**仓库外**摆出 `..\dist-desktop\aster-desktop\`——
-**双击**里面的 `aster-desktop.exe` 即可运行（**零安装、不改 PATH、不 `setx`**）；默认数据根 = **便携根**（`<便携根>\.aster`），
-所以只要把这个目录放在 D 盘，数据就落在 D 盘（也可以用 `ASTER_HOME` 指到别处）。
+**便携形态（M13c）**：`npm run desktop-portable` 会在**仓库外**摆出 `..\dist-desktop\chenxi-desktop\`——
+**双击**里面的 `chenxi-desktop.exe` 即可运行（**零安装、不改 PATH、不 `setx`**）；默认数据根 = **便携根**（`<便携根>\.chenxi`），
+所以只要把这个目录放在 D 盘，数据就落在 D 盘（也可以用 `CHENXI_HOME` 指到别处）。
 
 **安装形态（M22）**：`node tools/build-desktop-installer.mjs` 会在便携根生成 `install.cmd` / `uninstall.cmd`；
-加 `--iexpress` 会再用 Windows 自带的 IExpress 打出**单文件** `..\dist-desktop\Aster-Setup.exe`（双击即装）。
-默认装到 `D:\Aster`，可用 `ASTER_INSTALL_DIR` 改；**目标以 `C:` 开头一律拒绝（exit 2）**。
-唯一例外：桌面 / 开始菜单的 `Aster.lnk` 只能写在系统位置（Windows 的做法），应用数据仍然全在安装盘。
+加 `--iexpress` 会再用 Windows 自带的 IExpress 打出**单文件** `..\dist-desktop\Chenxi-Setup.exe`（双击即装）。
+默认装到 `D:\Chenxi`，可用 `CHENXI_INSTALL_DIR` 改；**目标以 `C:` 开头一律拒绝（exit 2）**。
+唯一例外：桌面 / 开始菜单的 `Chenxi.lnk` 只能写在系统位置（Windows 的做法），应用数据仍然全在安装盘。
 安装器**没有代码签名**，首次运行会被 SmartScreen 拦一下（选"更多信息 → 仍要运行"）。
-它**不是单文件 exe**，而是"**解压即跑**"的目录（这正是 portable 的定义）；体积以 Electron 运行时为主（**实测未压缩**：`aster-desktop.exe` 约 247 MB，**整个目录约 369 MB / 79 个文件**）。
-自检：`<便携根>\aster-desktop.exe --self-check`（在真窗口里发一条 prompt、续跑同一会话、回放可折叠工具卡、点开规则面板、
+它**不是单文件 exe**，而是"**解压即跑**"的目录（这正是 portable 的定义）；体积以 Electron 运行时为主（**实测未压缩**：`chenxi-desktop.exe` 约 247 MB，**安装后约 369 MB / 80 个文件**）。
+自检：`<便携根>\chenxi-desktop.exe --self-check`（在真窗口里发一条 prompt、续跑同一会话、回放可折叠工具卡、点开规则面板、
 切换主题与模式、打开模型设置弹层并断言三字段后退出）。
 
 **它还**不能**做什么**：模型设置目前是**单端点 / 单模型**（没有多端点切换、没有从 `/models` 拉列表）；
 Markdown 不支持表格 / 嵌套列表 / 代码高亮；安装器无签名、无自动更新；
 **观感与日用能力已按 M20–M22 定稿，但仍需你本机逐轮验收后才可能转 `stable`**——因此桌面版**一律标 `experimental`**，不进本文件的「已验证能力」清单。
-（实装部分是**新 `@aster/desktop` 包 = 第 20 个内核模块**；架构门禁已把它纳入依赖方向：`desktop → runtime/schema`，且**禁止反向**。）
+（实装部分是**新 `@chenxi/desktop` 包 = 第 20 个内核模块**；架构门禁已把它纳入依赖方向：`desktop → runtime/schema`，且**禁止反向**。）
 **边界（写死，ADR-029）**：GUI **不替代** `--tui`，也**不替代** `--serve`（同一份事件、三种外观）；renderer **拿不到 Node**（`sandbox:true` + `contextIsolation:true`），
 只能经 `preload.cjs` 的窄接口取数据；页面由**同进程 loopback** 托管且 CSP 为 `default-src 'none'` + `connect-src 'none'`（**连一次网络请求都发不出去**）；
 **「绝不碰 C 盘」是硬闸**：启动时把 Electron 的 `userData`/`cache`/`sessionData`/`logs` 全改道到 `<数据根>\desktop` 并**校验**，任何一项越界就 **exit 2 拒绝启动**（M21 起在 `app.whenReady` **之前**落实——Chromium 启动时就会读 `userData` 下的 `Local State`，晚了会让 `safeStorage` 拿到另一把钥匙）。
@@ -189,7 +190,7 @@ Markdown 不支持表格 / 嵌套列表 / 代码高亮；安装器无签名、�
 ### ACP 通道（**experimental**，ADR-036）
 
 ```powershell
-npm run cli -- --home .\.aster --acp    # stdin/stdout 按行分隔的 JSON-RPC 2.0，供编辑器 / 脚本驱动
+npm run cli -- --home .\.chenxi --acp    # stdin/stdout 按行分隔的 JSON-RPC 2.0，供编辑器 / 脚本驱动
 ```
 
 支持 `initialize` / `session/new` / `session/prompt` / `session/cancel`（通知），服务端只发 `session/update`
@@ -207,7 +208,7 @@ npm run cli -- --home .\.aster --acp    # stdin/stdout 按行分隔的 JSON-RPC 
 
 ```powershell
 # 一边跑会话、一边让别的终端/程序看（只读：事件流 + 回放）
-npm run cli -- --home .\.aster --serve --port 8787
+npm run cli -- --home .\.chenxi --serve --port 8787
 # 另一个终端（curl 就是客户端）：
 curl -N http://127.0.0.1:8787/api/event          # SSE：hello 帧 + 逐条事件
 curl    http://127.0.0.1:8787/api/sessions      # 会话列表（直接扫 JSONL）
@@ -232,16 +233,16 @@ curl -X POST http://127.0.0.1:8787/api/sessions/<id>/prompt `
 ### 安装为本地启动器（**零系统改动、不改 PATH**）
 
 ```powershell
-# 打成单文件 ESM bundle（产物 bin\aster.mjs，已在 .gitignore 中忽略）
+# 打成单文件 ESM bundle（产物 bin\chenxi.mjs，已在 .gitignore 中忽略）
 npm run bundle
 
-# bin\aster.cmd 为纯 cmd 启动器（已入库）：默认数据目录 = <仓库>\.aster，
-# 若已设置环境变量 ASTER_HOME 则以其为准。
-.\bin\aster.cmd --doctor
-.\bin\aster.cmd --resume latest
+# bin\chenxi.cmd 为纯 cmd 启动器（已入库）：默认数据目录 = <仓库>\.chenxi，
+# 若已设置环境变量 CHENXI_HOME 则以其为准。
+.\bin\chenxi.cmd --doctor
+.\bin\chenxi.cmd --resume latest
 ```
 
-> 若 PowerShell 执行策略受限，可直接调用 `node .\bin\aster.mjs <args>`，效果相同。
+> 若 PowerShell 执行策略受限，可直接调用 `node .\bin\chenxi.mjs <args>`，效果相同。
 
 ### 本地配置（可选，ADR-014）
 
@@ -250,9 +251,9 @@ npm run bundle
 | 位置 | 用途 |
 |---|---|
 | `<home>/config.json` | 用户级 |
-| `<cwd>/aster.config.json` | 项目级（覆盖用户级同名键） |
+| `<cwd>/chenxi.config.json` | 项目级（覆盖用户级同名键） |
 
-`--config <file>`（CLI）或 `ASTER_CONFIG=<file>` 可显式指定**唯一**配置文件，并**跳过**自动发现。v1 字段面（**严格**：未知键直接报错并指出键名）：
+`--config <file>`（CLI）或 `CHENXI_CONFIG=<file>` 可显式指定**唯一**配置文件，并**跳过**自动发现。v1 字段面（**严格**：未知键直接报错并指出键名）：
 
 ```json
 {
@@ -297,7 +298,7 @@ npm run bundle
 
 **prompts / resources 只读查看**：`--mcp-prompts <server>` / `--mcp-resources <server>` 打印服务端声明的提示词 / 资源后退出（**不进 REPL**）。两者都**先检查** `initialize` 返回的 `capabilities`——没声明就明确说"不支持"并列出已声明能力。**刻意不做**：把 prompt / resource 自动拼进 system 或上下文（需要选择策略与注入配额，属产品决策）⇒ 模型目前**看不到**它们。
 
-`memory` 声明长期记忆**经 MCP 外挂**（ADR-010/016）：每回合开始前用 `searchTool` **跨会话**检索（`session: "*"`）相关记忆，结果**先落 `memory/injected` 事件**、再由投影挂到该回合用户消息前缀上（`<memory source="…">…</memory>`）；**只注入最新一次**，不堆积。检索失败只提示、不中断对话。作用域三键为 `user`（`ASTER_USER` / `USER` / `USERNAME`，缺省 `local`）、`agent`（`aster`）、`session`（当前会话 id）。⚠️ `--no-tools` 会连 MCP 桥接一起关掉 ⇒ 记忆（检索与写入）随之不可用。
+`memory` 声明长期记忆**经 MCP 外挂**（ADR-010/016）：每回合开始前用 `searchTool` **跨会话**检索（`session: "*"`）相关记忆，结果**先落 `memory/injected` 事件**、再由投影挂到该回合用户消息前缀上（`<memory source="…">…</memory>`）；**只注入最新一次**，不堆积。检索失败只提示、不中断对话。作用域三键为 `user`（`CHENXI_USER` / `USER` / `USERNAME`，缺省 `local`）、`agent`（`chenxi`）、`session`（当前会话 id）。⚠️ `--no-tools` 会连 MCP 桥接一起关掉 ⇒ 记忆（检索与写入）随之不可用。
 
 **记忆写入（experimental，默认关闭，ADR-033/034）**：`memory.write.enabled: true` + `addTool` 后，每回合结束按**规则抽取**用户**显式标记**后的一句话（`记住…` / `以后都…` / `remember that…`），过**四道确定性闸门**（长度 / 密钥样式 / 注入样式 / 每轮 3 条 + 归一化去重）再写入；**每个候选都落 `memory/written` 事件**（added / skipped_duplicate / rejected / failed + 原因）。
 **它很不"聪明"**：不摘要、不归纳、不推断、不做代词消解 —— 价值是"**不会写坏**"，不是"写得多"。显式取代（`不要再 vim，改成 neovim`）会先写新事实、再失效旧记录（需配 `invalidateTool`）、**重检索验证**并如实记 `verification`（`ok` / `old_still_visible`；验证跑不了就留空）——**绝不谎报成功**。`addTool` / `invalidateTool` / `session:"*"` 都是**我们对记忆服务器提的契约**，本机只有夹具 ⇒ **未与真实 mem0 / Graphiti 对测**，故**不进**「已验证能力」清单。
@@ -331,10 +332,10 @@ npm run bundle
 - cli.tool-approval-interactive: `ask` 请求现场征询用户：`y`=仅此次放行 / `a`=本会话内始终放行（沉淀为同工具同作用域的审批规则）/ `n`=拒绝；无法识别一律 fail-closed 拒绝
 - cli.resume-latest: `--resume latest` 直接续上最近更新的会话（同一 sessionId，且退出前历史在恢复后可见）
 - cli.sigint-graceful-abort: `Ctrl+C` 一次中止当前回合（落 `turn/end{error}`）或把当前审批判为拒绝；二次退出并落 `session/end{interrupted}`
-- cli.doctor-self-check: `--doctor` 自检 Node 版本 / shell provider / `node:sqlite` / `ASTER_HOME` 可写 / 端点变量 set-unset / UTF-8 / 会话与索引状态；关键项全通过 exit 0，否则 exit 1；**绝不打印密钥值**
+- cli.doctor-self-check: `--doctor` 自检 Node 版本 / shell provider / `node:sqlite` / `CHENXI_HOME` 可写 / 端点变量 set-unset / UTF-8 / 会话与索引状态；关键项全通过 exit 0，否则 exit 1；**绝不打印密钥值**
 - tools.read-output-cap: `read` 输出按 UTF-8 字节上限（65536）截断并置 `truncated` 与 `truncatedReason`（`window`/`bytes`）
-- config.layered-json-file: 本地配置为分层 JSON（`<home>/config.json` -> `<cwd>/aster.config.json`，**逐键合并**且近者胜）；`--config`（CLI）或 `ASTER_CONFIG` 可显式指定并**跳过**自动发现；未知键 / 非法值 / 非法 JSON 一律快速失败且错误可读（含键名或键路径）；读取时**容忍首个 UTF-8 BOM**（Windows 记事本 / PowerShell 会写）
-- config.precedence-cli-env-file-default: 配置优先级 **CLI 参数 > 环境变量 > 配置文件 > 内置默认**：`--mode` > `ASTER_MODE` > 配置 `mode` > 内置 `plan`；配置 `model` 仅在 `ASTER_MODEL` 未设置时兜底，**绝不覆盖**
+- config.layered-json-file: 本地配置为分层 JSON（`<home>/config.json` -> `<cwd>/chenxi.config.json`，**逐键合并**且近者胜）；`--config`（CLI）或 `CHENXI_CONFIG` 可显式指定并**跳过**自动发现；未知键 / 非法值 / 非法 JSON 一律快速失败且错误可读（含键名或键路径）；读取时**容忍首个 UTF-8 BOM**（Windows 记事本 / PowerShell 会写）
+- config.precedence-cli-env-file-default: 配置优先级 **CLI 参数 > 环境变量 > 配置文件 > 内置默认**：`--mode` > `CHENXI_MODE` > 配置 `mode` > 内置 `plan`；配置 `model` 仅在 `CHENXI_MODEL` 未设置时兜底，**绝不覆盖**
 - config.mode-permission-override: 配置文件可按模式**整段替换**「模式 -> 权限」规则（未提供的模式回退内置默认），且覆盖必须**显式写出**规则；`guard` 仍只能否决，`plan` 的安全默认不被隐式破坏；`/policy` 与 `--doctor` 让生效规则与配置来源**可见**
 - mcp.stdio-client: **自写零依赖** MCP stdio 客户端（JSON-RPC 2.0 按行分隔）：`initialize` / `tools/list` / `tools/call` / `close`；请求 id 单调递增，超时与子进程退出都会清理待决请求，`close` 幂等，**不引入 `@modelcontextprotocol/sdk`**
 - mcp.tool-bridge: MCP 工具以 `mcp__<server>__<tool>` **命名空间**注册（重名即注册失败）；`input` 原样透传服务端 JSON Schema（按已声明子集校验），`output` 声明并强制校验 `CallToolResult` **内容信封**（调和 ADR-005）
@@ -350,11 +351,11 @@ npm run bundle
 - config.subagents-optin: 配置 `subagents.{enabled,maxDepth}`（`enabled` 必填、未知键与越界值报错、整段替换合并）；**默认关闭**以保持默认工具集恰好 4 原语；无模型端点或 `--no-tools` 时**只提示不注册**
 - subagent.fork-context-import: 子代理 `kind=fork` 按「**导入即记录**」实现：子会话先落 `subagent/context-imported`（载荷 = **派发那一刻**父会话的投影，逐条记录在案，派发后再改父日志**不回溯**），投影展开**幂等**且等于「父历史 + prompt」；缺父会话访问权（`sessionLog`）时**快速失败**且**不产生**子会话，绝不静默降级成 `fresh`
 - subagent.background-result-delivery: 子代理 `background=true`（与 `kind` **正交**）：`task` 只等建好子会话即返回 `status=running` 句柄；子代理结束后把 `subagent/result` 落**父会话**（复用父句柄 ⇒ seq 单调、JSONL 与派生索引一致，`resume` 重放可证）；父侧投影**只送达「晚于最后一条 `assistant/message`」**的结果（以 user 角色插入 `<subagent-result …>`，**每条只送达一次**、不堆积、幂等确定）；退出前 `drain()` 等待未完成者收尾，父句柄不可写时**静默丢弃**且绝不抛未处理异常
-- portable.exchange-format-v1: 会话交换文档 `aster-session-exchange` 自带 `formatVersion`（`EXCHANGE_FORMAT_VERSION`，与 `SESSION_FORMAT_VERSION` **解耦**，补上 `zcodeSessionFileSchema` **完全没有版本字段**的缺口）；**Aster 往返语义无损**（除 `sessionId` 外事件序列逐字段深等、投影逐条深等、`created_at` 亦保留）；更高版本 / v0 / 错 `format` / 坏 JSON / 篡改会进模型历史的载荷一律**快速失败**且原因可读
-- portable.vendor-adapters: 厂商适配器为 **best-effort** 且**未与真实 Claude Code / ZCode 二进制对测**（只按逆向证据形状实现 + 仓内 fixture 回归）：Claude Code 原生 JSONL 导入按已观察形状清洗（丢 `tool_result` / IDE 噪音 / `synthetic` 占位 / `sidechain` / `isMeta`，连续 assistant 记录**聚合成一轮**）、导出**只写证据里被读取的字段**（不臆造 `uuid`/`parentUuid`）；ZCode 会话文件按 `zcodeSessionFileSchema` 读写且 `mode` 只在 `plan`/`build` 时采纳、不造 `fileChanges`/`turnCheckpoints`；工具轨迹/审批/模式切换等**有损项显式**且 CLI 必打印
-- cli.session-export-import: `aster --export <sessionId|latest> [--format aster|claude-code|zcode] --out <file>` 与 `aster --import <file> [--format …]`：两者都**不进 REPL**、打印结果并退出；导入＝按事件**重建**新会话（走 `persist` 的单一写入路径）并打印新 `sessionId` 供 `--resume`；`--export` 缺 `--out` 快速失败；`--format` 取值域严格校验
-- memory.exchange-format-v1: 记忆交换文档 `aster-memory-exchange` 自带 `formatVersion`（`MEMORY_EXCHANGE_FORMAT_VERSION`，与 `SESSION_FORMAT_VERSION` / `EXCHANGE_FORMAT_VERSION` **各自独立演进**，补上外部记忆层导出形状普遍**无版本字段**的缺口）；`records` **复用** `MemoryRecord`（不另立形状）、`scope` 三键**必填**（ADR-010 的隔离前提）、`provenance` 只带 hash 元数据；Aster 往返**逐字段深等**（**缺席与显式 `null` 是两种事实**）；更高版本 / v0 / 错 `format` / 坏 JSON / 坏记录（含**逐条路径**）一律**快速失败**且原因可读；解析即**规范化**（未声明键剥掉 ⇒ 外部塞进来的身份键**进不了**下游）
-- cli.memory-export-import: `aster --export-memory --out <file> [--memory-session <id>]`：经 MCP 外挂**只读**读取配置的记忆层（`getSessionMemories`，缺省作用域 = 最近更新的已记录会话）导出为 `aster-memory-exchange` 文档（形状不符的记录**丢弃**、未声明键**剥掉** ⇒ 导出**永远产出合法文档**；适配器报错**如实抛出**）；`aster --import-memory <file> [--out <file>]`：校验并**规范化重写**（= 主张 4 的「迁移」落点）；两者都**不进 REPL**、都必须打印「**未写入任何记忆层**：write path 按 ADR-016 显式推迟」；未配置记忆层 / 缺 `--out` 快速失败且原因可读
+- portable.exchange-format-v1: 会话交换文档 `chenxi-session-exchange` 自带 `formatVersion`（`EXCHANGE_FORMAT_VERSION`，与 `SESSION_FORMAT_VERSION` **解耦**，补上 `zcodeSessionFileSchema` **完全没有版本字段**的缺口）；**Chenxi 往返语义无损**（除 `sessionId` 外事件序列逐字段深等、投影逐条深等、`created_at` 亦保留）；更高版本 / v0 / 错 `format` / 坏 JSON / 篡改会进模型历史的载荷一律**快速失败**且原因可读
+- portable.vendor-adapters: 厂商适配器为 **best-effort** 且**未与真实 Claude Code / ZCode 二进制对测**（只按公开源码与文档里可观察到的形状实现 + 仓内 fixture 回归）：Claude Code 原生 JSONL 导入按已观察形状清洗（丢 `tool_result` / IDE 噪音 / `synthetic` 占位 / `sidechain` / `isMeta`，连续 assistant 记录**聚合成一轮**）、导出**只写证据里被读取的字段**（不臆造 `uuid`/`parentUuid`）；ZCode 会话文件按 `zcodeSessionFileSchema` 读写且 `mode` 只在 `plan`/`build` 时采纳、不造 `fileChanges`/`turnCheckpoints`；工具轨迹/审批/模式切换等**有损项显式**且 CLI 必打印
+- cli.session-export-import: `chenxi --export <sessionId|latest> [--format chenxi|claude-code|zcode] --out <file>` 与 `chenxi --import <file> [--format …]`：两者都**不进 REPL**、打印结果并退出；导入＝按事件**重建**新会话（走 `persist` 的单一写入路径）并打印新 `sessionId` 供 `--resume`；`--export` 缺 `--out` 快速失败；`--format` 取值域严格校验
+- memory.exchange-format-v1: 记忆交换文档 `chenxi-memory-exchange` 自带 `formatVersion`（`MEMORY_EXCHANGE_FORMAT_VERSION`，与 `SESSION_FORMAT_VERSION` / `EXCHANGE_FORMAT_VERSION` **各自独立演进**，补上外部记忆层导出形状普遍**无版本字段**的缺口）；`records` **复用** `MemoryRecord`（不另立形状）、`scope` 三键**必填**（ADR-010 的隔离前提）、`provenance` 只带 hash 元数据；Chenxi 往返**逐字段深等**（**缺席与显式 `null` 是两种事实**）；更高版本 / v0 / 错 `format` / 坏 JSON / 坏记录（含**逐条路径**）一律**快速失败**且原因可读；解析即**规范化**（未声明键剥掉 ⇒ 外部塞进来的身份键**进不了**下游）
+- cli.memory-export-import: `chenxi --export-memory --out <file> [--memory-session <id>]`：经 MCP 外挂**只读**读取配置的记忆层（`getSessionMemories`，缺省作用域 = 最近更新的已记录会话）导出为 `chenxi-memory-exchange` 文档（形状不符的记录**丢弃**、未声明键**剥掉** ⇒ 导出**永远产出合法文档**；适配器报错**如实抛出**）；`chenxi --import-memory <file> [--out <file>]`：校验并**规范化重写**（= 主张 4 的「迁移」落点）；两者都**不进 REPL**、都必须打印「**未写入任何记忆层**：write path 按 ADR-016 显式推迟」；未配置记忆层 / 缺 `--out` 快速失败且原因可读
 - sandbox.windows-job: **Windows-only** 的**内核强制**围栏（ADR-031）：Job Object 的 `KILL_ON_JOB_CLOSE`（作业句柄一关 ⇒ 内核击杀**整棵树**，含包装进程被杀 / 超时 / 中止，孙·曾孙**不可能**变孤儿）+ `ACTIVE_PROCESS` 上限（超限进程**入不了作业**）+ `UILIMIT_*`（剪贴板读写 / 外窗句柄 / 全局原子 / 系统参数 / 显示设置；**刻意不含** DESKTOP / EXITWINDOWS）；载体是**内盒 PowerShell 5.1 + `Add-Type` P/Invoke**（**零新依赖**，编译产物按源码 sha 指纹缓存到数据根）；命令文本经 base64 环境变量 + `-EncodedCommand` 交给内层 ⇒ **一字不改**；**拿不到围栏就拒绝执行**（exitCode 126，内层不跑）；非 Windows 传该值**报错**（不静默退回）。⚠️ **它不是文件 / 网络隔离**——`label` 与文档同时写清「内核强制」与「不是文件 / 网络隔离」
 - shell.utf8-output: 子进程输出**统一 UTF-8**（ADR-032）：每条命令前注入 `[Console]::OutputEncoding = UTF8`（连带把控制台输出代码页设为 **65001** ⇒ **原生命令**（git / npm / python / cmd）的输出也变 UTF-8）+ `$OutputEncoding = UTF8`，命令经 `-EncodedCommand`（UTF-16LE base64）传入 ⇒ 中文 stdout / stderr **不再按 OS OEM 代码页（本机 936）写字节**（此前 Node 按 UTF-8 解码即 `����`）；ASCII 输出与**退出码语义不变**（有回归）；`windows-job` 包装路径与直接 spawn 路径**共用同一份脚本文本**（前言只写一处）
 - mcp.prompts-resources: MCP **prompts / resources 只读面**（ADR-035）：零依赖客户端支持 `prompts/list` / `prompts/get` / `resources/list` / `resources/read`，桥接对象原样透传；CLI `--mcp-prompts <server>` / `--mcp-resources <server>` **不进 REPL**、打印后退出；**先检查** `initialize` 返回的 `capabilities`，未声明就明确说"不支持"并列出已声明能力（不硬调后报 JSON-RPC error）；列表解析宽容（缺 `description` / `name` / `mimeType` 不算错，形状不对只丢自己）。**刻意不做**：把 prompt / resource 自动拼进 system 或上下文 ⇒ 模型目前**看不到**它们
@@ -387,24 +388,24 @@ npm run bundle
 - **v0.3** — MCP（**Stdio 工具加载已交付**；**prompts / resources 只读查看已交付**；**Streamable HTTP 传输已交付**——ADR-035，HTTP 侧只与仓内 fixture 对测）、长期记忆经 MCP 外挂（**检索注入已交付**；**L1 质量门禁已交付**；**规则版写入路径已交付（experimental、默认关闭，ADR-033/034）**；**语义版抽取 / L2 采样 / L3 全量仍未做**）
 - **keyless 录制回放** — **M19 已交付（experimental，ADR-037）**：--record / --replay + 版本化 JSONL cassette + 严格请求哈希匹配 + fail-closed 不匹配；剩余：录制真实厂商会话的样本、把 cassette 固化为 CI 离线回归。
 - **ACP** — agent 侧最小通道 **已交付（`experimental`，ADR-036）**：`--acp` + `initialize` / `session/new` / `session/prompt` / `session/cancel`，更新只来自已记录事件；**未与真实 ACP 客户端（Zed）对测** ⇒ 不进「已验证能力」清单；剩余：token 级流式、`session/request_permission`、fs / terminal、`session/load`
-- **v0.4** — 显式版本化的会话交换格式（**主张 4 的会话侧已交付**：ADR-019）+ **记忆交换格式已交付**（ADR-030，`aster-memory-exchange` + `--export-memory` / `--import-memory`；**只搬运、不写记忆层**）；剩余：厂商侧记忆适配器（**未与真实 mem0 / Graphiti 对测**）
+- **v0.4** — 显式版本化的会话交换格式（**主张 4 的会话侧已交付**：ADR-019）+ **记忆交换格式已交付**（ADR-030，`chenxi-memory-exchange` + `--export-memory` / `--import-memory`；**只搬运、不写记忆层**）；剩余：厂商侧记忆适配器（**未与真实 mem0 / Graphiti 对测**）
 - **v0.5** — 差分渲染 TUI：**机制面已交付**（ADR-020）+ **结构化驱动已交付**（ADR-023，M10b-1）+ **基础交互已交付**（Tab 补全 / 鼠标，ADR-024，M10b-2）+ **多行编辑器已交付**（ADR-025，M10b-3）+ **富文本 / 折叠 / 回合内指示 / resize・IME 前提・审批实测已交付**（ADR-026，M10b-4）；**完整版仍未收口**（用户 2026-10-15 首次实测判定「只是雏形」，该判定**未被本批推翻**）——剩余项 **M10b-5 配色打磨轮次：用户 2026-10-16 决定「先要完整版、之后再本地核验」，故**显式推迟**（不标完成）**
 - **v1.0** — client/server + SSE（**两端已交付**：ADR-021 只读事件流与回放、ADR-022 `--attach` 只读镜像 + 远端写路径）、HaluMem 式记忆质量门禁（**L1 已交付**，ADR-028；**L2 采样 / L3 全量需真实端点，未做**）
 
 **`best-effort` 沙箱（`experimental`，ADR-027）——怎么开、以及它**不是**什么**：
 
 ```powershell
-.\bin\aster.cmd --sandbox best-effort        # 默认是 off；未知取值会直接报错，不会静默退回
+.\bin\chenxi.cmd --sandbox best-effort        # 默认是 off；未知取值会直接报错，不会静默退回
 ```
 
-开启后：① 工具被**超时/中止**时杀**整棵进程树**（Windows `taskkill /T /F`），再补一刀 `child.kill()`；② 子进程环境**收敛到白名单**（**密钥类变量不外传**）、显式打标 `ASTER_SANDBOX=best-effort`，`cwd` 越出工作区即**可读拒绝**（不执行）；
+开启后：① 工具被**超时/中止**时杀**整棵进程树**（Windows `taskkill /T /F`），再补一刀 `child.kill()`；② 子进程环境**收敛到白名单**（**密钥类变量不外传**）、显式打标 `CHENXI_SANDBOX=best-effort`，`cwd` 越出工作区即**可读拒绝**（不执行）；
 ③ 启动横幅打印**数据根权限体检**结论，未收紧时附一条**可复制执行**的 `icacls` 命令（**我们不动手改 ACL**——实测 `icacls /inheritance:r` 会把调用者自己锁在门外，故显式交给用户执行）。
 **它**不是**隔离**：不限制工具能写哪里（那仍由 `plan`/`build` 的 `allow/deny/ask` 管）、不做受限令牌/seatbelt/bwrap、不做网络隔离 ⇒ 因此**不进「已验证能力」清单**，一律标 `experimental`。
 
 **`windows-job` 沙箱（ADR-031，**Windows-only**）——用 Job Object 拿**内核强制**的围栏**：
 
 ```powershell
-.\bin\aster.cmd --sandbox windows-job     # 默认仍是 off；非 Windows 传这个值会**直接报错**（不静默退回）
+.\bin\chenxi.cmd --sandbox windows-job     # 默认仍是 off；非 Windows 传这个值会**直接报错**（不静默退回）
 ```
 
 开启后（**这些性质已由真进程测试钉住**）：① 作业句柄一关（含**包装进程被杀 / 超时 / 中止**）⇒ **内核击杀整棵树**，孙·曾孙进程**不可能**变孤儿（实测：中止后 `ping` 归零）；② **进程数上限**（默认 64，含内层 pwsh 自己）——超限进程**入不了作业**；③ **UI 限制**（剪贴板读写 / 外窗句柄 / 全局原子 / 系统参数 / 显示设置；**刻意不含** DESKTOP / EXITWINDOWS）；④ **拿不到围栏就拒绝执行**（`exitCode 126`，内层命令**不跑**，绝不"没围栏也跑"）。
@@ -418,7 +419,7 @@ npm run bundle
 ## 5. 架构（3 包 / 20 模块 / 6 不变量 / 3 缝）
 
 ```
-@aster/schema   ──▶  @aster/protocol  ──▶  @aster/runtime  ──▶  @aster/desktop
+@chenxi/schema   ──▶  @chenxi/protocol  ──▶  @chenxi/runtime  ──▶  @chenxi/desktop
 （纯类型/契约）        （线协议形状）         （19 个内核模块 + CLI + 扩展缝）   （Electron 桌面壳，experimental）
 ```
 
@@ -436,9 +437,18 @@ npm run bundle
 4. **许可红线**：本项目**只借鉴设计，不复制代码**。被参考项目中 `mem0` / `Graphiti` / `Letta` / `Codex` / `Gemini CLI` / `Goose` / `zcode` 为 Apache-2.0，`dsh` / `OpenCode` / `Pi` / `supermemory` / `TencentDB-Agent-Memory` 为 MIT，`HaluMem` 为 **CC BY-NC-ND 4.0（禁商用禁演绎）**，`honcho` / `basic-memory` 为 **AGPL-3.0**——**后两者的代码一行都未进入本项目**。
 5. **协作**：提交需 DCO 签核（`Signed-off-by`）与 **AI 贡献披露**，见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
 
-## 7. 许可
+## 7. 许可与合规
 
-计划采用 **Apache-2.0**（ADR-012）。`LICENSE` / `NOTICE` 将在开源阶段（Phase 2）随仓库一起落地；当前仓库为**本地开发态**，尚未对外发布。
+本项目以 **Apache-2.0** 发布，全文见 [`LICENSE`](./LICENSE)。构建产物里内联 / 随附的第三方代码
+（zod、Electron、Chromium）的版权与许可声明见 [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md)；
+**分发 `bin/chenxi.mjs`、桌面便携目录或 `Chenxi-Setup.exe` 时必须随附该文件**（构建脚本已自动处理）。
+
+**非官方声明**：Chenxi 是独立项目，与 Anthropic（Claude / Claude Code）、字节跳动（ZCode）、OpenAI 等
+**没有任何关联、合作或背书关系**。文档与 CLI 中出现的第三方产品名，仅用于说明可导入 / 导出的文件格式；
+相关商标归各自所有者。
+
+**代码来源**：本项目只参考公开源码与公开文档的**设计思路**，不复制第三方代码；会话 / 记忆交换适配器
+是按文件格式独立实现的（`--format claude-code` / `zcode` 仅表示格式兼容，不代表官方支持）。
 
 ## 8. 开发命令
 

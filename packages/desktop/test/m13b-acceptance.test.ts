@@ -13,8 +13,8 @@
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { cli } from "@aster/runtime";
-import type { SessionEvent } from "@aster/schema";
+import { cli } from "@chenxi/runtime";
+import type { SessionEvent } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import type { EventCard } from "../src/host.js";
 import {
@@ -72,7 +72,7 @@ function collector() {
 
 describe("M13b 发 prompt（会话在 main 进程内跑 runSessionRepl）", () => {
 	it("sendPrompt 真的落 user/message；且 trace:false ⇒ 已有事件的文本轨迹不再重复打印", async () => {
-		const home = newTemp("aster-m13b-prompt-");
+		const home = newTemp("chenxi-m13b-prompt-");
 		const runtime = await bootstrap({ home, stub: "hi from stub", noTools: true });
 		const seen = collector();
 		const session = createLiveSession({
@@ -111,9 +111,9 @@ describe("M13b 发 prompt（会话在 main 进程内跑 runSessionRepl）", () =
 describe("M13b 审批通道（IPC 弹审批 UI；语义与 M6 完全一致）", () => {
 	/** build 模式下写**工作区之外**的路径 ⇒ 触发 `ask`（走审批通道）。 */
 	function approveSetup() {
-		const home = newTemp("aster-m13b-approve-home-");
-		const cwd = newTemp("aster-m13b-approve-cwd-");
-		const outside = join(newTemp("aster-m13b-approve-out-"), "out.txt");
+		const home = newTemp("chenxi-m13b-approve-home-");
+		const cwd = newTemp("chenxi-m13b-approve-cwd-");
+		const outside = join(newTemp("chenxi-m13b-approve-out-"), "out.txt");
 		return { home, cwd, outside };
 	}
 
@@ -207,7 +207,7 @@ describe("M13b 审批通道（IPC 弹审批 UI；语义与 M6 完全一致）", 
 	});
 
 	it("无待决审批时 answerApproval 返回 false（不抛、不臆断）", async () => {
-		const home = newTemp("aster-m13b-noapproval-");
+		const home = newTemp("chenxi-m13b-noapproval-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const session = createLiveSession({
 			runtime,
@@ -228,7 +228,7 @@ describe("M13b 审批通道（IPC 弹审批 UI；语义与 M6 完全一致）", 
 
 describe("M13b 模式切换 / 关窗语义", () => {
 	it("setMode 走既有 `/mode` 命令路径 ⇒ 落 mode/changed 事件（卡片带结构化 mode 字段）", async () => {
-		const home = newTemp("aster-m13b-mode-");
+		const home = newTemp("chenxi-m13b-mode-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const seen = collector();
 		const session = createLiveSession({
@@ -260,7 +260,7 @@ describe("M13b 模式切换 / 关窗语义", () => {
 	});
 
 	it("close() = EOF 收尾：**不中断回合**，等它跑完再落 session/end{exit}", async () => {
-		const home = newTemp("aster-m13b-close-");
+		const home = newTemp("chenxi-m13b-close-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const session = createLiveSession({
 			runtime,
@@ -292,7 +292,7 @@ describe("M13b 模式切换 / 关窗语义", () => {
 
 describe("M13b 当前会话管理（无活动会话时发话即开一条新会话）", () => {
 	it("自动开新会话；reset() 摘掉当前会话后，下次发话开的是**另一条**（不串台）", async () => {
-		const home = newTemp("aster-m13b-sessions-");
+		const home = newTemp("chenxi-m13b-sessions-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const seen = collector();
 		const sessions = createDesktopSessions({
@@ -337,7 +337,7 @@ describe("M13b 契约与纪律（源码级断言，防漂移）", () => {
 	const sessionSource = readFileSync(join(PKG, "src", "session.ts"), "utf8");
 
 	it("IPC 频道名 main ↔ preload **一致**（preload 是 CJS，故只能用源码比对钉住）", () => {
-		const channels = [...mainSource.matchAll(/"(aster:[a-z:]+)"/g)].map((match) => match[1]);
+		const channels = [...mainSource.matchAll(/"(chenxi:[a-z:]+)"/g)].map((match) => match[1]);
 		expect(channels.length).toBeGreaterThanOrEqual(8);
 		for (const channel of new Set(channels)) expect(preloadSource).toContain(channel);
 		// 交互面（只增不改）

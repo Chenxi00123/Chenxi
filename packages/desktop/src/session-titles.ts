@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-export const TITLES_FORMAT = "aster-desktop-session-titles";
+export const TITLES_FORMAT = "chenxi-desktop-session-titles";
 export const TITLES_VERSION = 1;
 export const TITLES_FILENAME = "session-titles.json";
 

@@ -31,7 +31,7 @@ import type {
 	StopReason,
 	SubagentKind,
 	SubagentResultPayload,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { ContextBuilder } from "../context/index.js";
 import { createContext } from "../events/index.js";
 import type { LlmProvider } from "../llm/types.js";

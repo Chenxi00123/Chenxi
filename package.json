@@ -1,13 +1,13 @@
 {
-  "name": "aster",
+  "name": "chenxi",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Aster - an auditable, Windows-only local agent harness optimized for practical functionality (v1.0)",
+  "description": "Chenxi - an auditable, Windows-only local agent harness optimized for practical functionality (v1.0)",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Chenxi00123/Aster.git"
+    "url": "git+https://github.com/Chenxi00123/Chenxi.git"
   },
   "engines": {
     "node": ">=22.19"

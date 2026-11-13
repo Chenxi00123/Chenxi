@@ -4,8 +4,8 @@
  * 优先级：
  *   1. `--replay <cassette>` —— **最高**：只回放，不读端点 / 不需要密钥 / 不发网络请求；
  *   2. `--stub` / `--demo-*` —— keyless 演示，回放固定脚本，不访问网络、不需密钥；
- *   3. `ASTER_BASE_URL` / `ASTER_API_KEY` / `ASTER_MODEL` —— 真实 openai-compatible 端点
- *      （其中 `ASTER_MODEL` 可由配置文件 `model` **兜底**，ADR-014）；
+ *   3. `CHENXI_BASE_URL` / `CHENXI_API_KEY` / `CHENXI_MODEL` —— 真实 openai-compatible 端点
+ *      （其中 `CHENXI_MODEL` 可由配置文件 `model` **兜底**，ADR-014）；
  *   4. 都不可用 —— 「仅记录」模式（不伪造 assistant 内容）。
  *
  * M19（ADR-037）：`--record` 把**已解析出来的** provider 包一层录制装饰器（stub / demo / 真实端点都可），
@@ -15,7 +15,7 @@
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve as resolvePath } from "node:path";
-import type { ToolCallId } from "@aster/schema";
+import type { ToolCallId } from "@chenxi/schema";
 import type { LoadedConfig } from "../config/index.js";
 import { withModelFallback } from "../config/index.js";
 import {
@@ -113,7 +113,7 @@ function withRecording(inner: ResolvedProvider, pathArg: string): ResolvedProvid
 	const { provider, model } = inner;
 	if (provider === undefined || model === undefined) {
 		throw new Error(
-			"--record requires a model endpoint: set ASTER_BASE_URL / ASTER_API_KEY / ASTER_MODEL, " +
+			"--record requires a model endpoint: set CHENXI_BASE_URL / CHENXI_API_KEY / CHENXI_MODEL, " +
 				"or use --stub / --demo-read / --demo-write / --demo-bash",
 		);
 	}
@@ -167,7 +167,7 @@ function resolveInnerProvider(options: CliOptions, loaded: LoadedConfig): Resolv
 				{
 					callId: "demo_write_call" as ToolCallId,
 					toolName: "write",
-					input: { path: options.demoWrite, content: "written by aster demo\n" },
+					input: { path: options.demoWrite, content: "written by chenxi demo\n" },
 				},
 			],
 			stopReason: "tool_call" as const,

@@ -7,13 +7,13 @@
  *   - prompt 声明（`toJsonSchema()` 投射给模型）
  * 因此「声明」与「判定」不会漂移（dsh 的「操作边界即判定边界」）。
  */
-import type { JsonSchema, SchemaIssue, SchemaParseResult, ValueSchema } from "@aster/schema";
+import type { JsonSchema, SchemaIssue, SchemaParseResult, ValueSchema } from "@chenxi/schema";
 import { z } from "zod";
 
-/** 把 zod schema 包装为 Aster 的 ValueSchema 契约。 */
+/** 把 zod schema 包装为 Chenxi 的 ValueSchema 契约。 */
 export function valueSchema<T>(schema: z.ZodType<T>): ValueSchema<T> {
 	return {
-		kind: "aster/value-schema",
+		kind: "chenxi/value-schema",
 		parse(input: unknown): SchemaParseResult<T> {
 			const result = schema.safeParse(input);
 			if (result.success) {
@@ -36,7 +36,7 @@ export function isValueSchema(value: unknown): value is ValueSchema<unknown> {
 	if (typeof value !== "object" || value === null) return false;
 	const candidate = value as { kind?: unknown; parse?: unknown; toJsonSchema?: unknown };
 	return (
-		candidate.kind === "aster/value-schema" &&
+		candidate.kind === "chenxi/value-schema" &&
 		typeof candidate.parse === "function" &&
 		typeof candidate.toJsonSchema === "function"
 	);

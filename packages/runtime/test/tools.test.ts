@@ -7,7 +7,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ToolCallContext, ToolError, ToolExecutionResult } from "@aster/schema";
+import type { ToolCallContext, ToolError, ToolExecutionResult } from "@chenxi/schema";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { createContext } from "../src/events/index.js";
@@ -28,7 +28,7 @@ import { makeTempDir } from "./helpers/tmp.js";
 
 /** 造一个临时工作目录作为 cwd。 */
 function tempCwd(): string {
-	return makeTempDir("aster-tools-");
+	return makeTempDir("chenxi-tools-");
 }
 
 /** 构造 ToolCallContext（callId 为 branded 类型，需断言）。 */

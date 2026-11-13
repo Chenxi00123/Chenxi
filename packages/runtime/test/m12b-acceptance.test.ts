@@ -7,7 +7,7 @@
  *    更新原子性（新事实生效 + 旧记忆失效）；
  *  - **反例（关键）**：**故意篡改**输入必须让判官变红——缺一条 golden、top-k 挤掉目标、给边界 query 塞记录（= 编造）、
  *    旧记忆没失效 / 新事实被标失效；**判官不是"永远 ok 的摆设"**；
- *  - **离线纪律**：判官源码**零外部依赖**（只允许一处 `import type` 自 `@aster/schema`，无 `node:` / `fetch(` / 网络）。
+ *  - **离线纪律**：判官源码**零外部依赖**（只允许一处 `import type` 自 `@chenxi/schema`，无 `node:` / `fetch(` / 网络）。
  *
  * 说明（如实标注）：本批只做 **L1**；**L2（采样 LLM 判官）/ L3（全量）** 需要真实模型端点 ⇒ 本机无法实测，**显式未做**。
  */
@@ -15,7 +15,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { MemoryRecord } from "@aster/schema";
+import type { MemoryRecord } from "@chenxi/schema";
 import { describe, expect, it } from "vitest";
 import {
 	judgeBoundary,
@@ -168,10 +168,10 @@ describe("M12b 反例：判官必须**真的会因为坏事变红**", () => {
 });
 
 describe("M12b 离线纪律：判官源码零外部依赖、无网络、无 LLM", () => {
-	it("只允许一处 `import type` 自 `@aster/schema`；不得出现 node: / fetch / http", () => {
+	it("只允许一处 `import type` 自 `@chenxi/schema`；不得出现 node: / fetch / http", () => {
 		const source = readFileSync(join(HERE, "..", "src", "memory", "quality.ts"), "utf8");
 		const imports = [...source.matchAll(/^import .*$/gm)].map((match) => match[0]);
-		expect(imports).toEqual(['import type { MemoryRecord } from "@aster/schema";']);
+		expect(imports).toEqual(['import type { MemoryRecord } from "@chenxi/schema";']);
 		expect(source).not.toContain("node:");
 		expect(source).not.toContain("fetch(");
 		expect(source).not.toContain("http");

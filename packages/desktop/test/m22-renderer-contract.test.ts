@@ -4,7 +4,7 @@
  * renderer 没有 vitest 环境（不引 jsdom），所以这里不做 DOM 单测，而是钉住三条**不可退让**的性质：
  *  ① Markdown 渲染**绝不拼 HTML 字符串**（没有 innerHTML / document.write / eval）；
  *  ② 只有 **assistant** 正文走 Markdown（用户输入 / 工具输出 / 审计行保持逐行文本）；
- *  ③ 搜索与改名都是**视图层**：`aster:sessions:rename` 只落桌面标题文件，**不碰 JSONL**。
+ *  ③ 搜索与改名都是**视图层**：`chenxi:sessions:rename` 只落桌面标题文件，**不碰 JSONL**。
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -57,13 +57,13 @@ describe("搜索 / 改名：视图层，不写事实", () => {
 	it("renderer 的搜索只过滤本地列表（不重新读盘）", () => {
 		const app = renderer("app.js");
 		expect(app).toContain("state.sessions.filter");
-		expect(app).not.toMatch(/search[\s\S]{0,200}window\.aster\.(list|read)\(/);
+		expect(app).not.toMatch(/search[\s\S]{0,200}window\.chenxi\.(list|read)\(/);
 	});
 
 	it("改名走独立 IPC，且只落桌面标题文件", () => {
 		const main = readFileSync(join(PKG, "src", "main.ts"), "utf8");
 		const titles = readFileSync(join(PKG, "src", "session-titles.ts"), "utf8");
-		expect(main).toContain('rename: "aster:sessions:rename"');
+		expect(main).toContain('rename: "chenxi:sessions:rename"');
 		expect(main).toContain("saveTitle(dataHome");
 		// 标题模块**不得**出现任何会话日志写入（JSONL 是唯一事实源的写入面）
 		expect(titles).not.toMatch(/appendFile/);

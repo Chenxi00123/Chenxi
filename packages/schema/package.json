@@ -1,9 +1,9 @@
 {
-  "name": "@aster/schema",
+  "name": "@chenxi/schema",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Aster schema: pure contracts (session events, tool definition, memory interface). No runtime dependencies.",
+  "description": "Chenxi schema: pure contracts (session events, tool definition, memory interface). No runtime dependencies.",
   "license": "Apache-2.0",
   "engines": { "node": ">=22.19" },
   "main": "./dist/index.js",

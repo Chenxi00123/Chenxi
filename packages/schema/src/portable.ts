@@ -4,27 +4,27 @@
  * **纯类型/常量**（本包零依赖）：版本化与迁移的**实现**在 `runtime/portable`。
  *
  * 设计要点：
- *  - **一个 canonical 文档**是唯一的对外契约（`aster-session-exchange`），厂商适配器只是它的投影；
+ *  - **一个 canonical 文档**是唯一的对外契约（`chenxi-session-exchange`），厂商适配器只是它的投影；
  *  - 文档**自带 `formatVersion`** —— 这正是本主张补的缺口：ZCode 自己的会话文件
  *    （`zcodeSessionFileSchema = { meta, messages, fileChanges?, turnCheckpoints? }`）**没有版本字段**；
- *  - `events` 逐条保存我们的会话事件（含 `session/start`），因此 Aster ↔ Aster 往返**语义无损**。
+ *  - `events` 逐条保存我们的会话事件（含 `session/start`），因此 Chenxi ↔ Chenxi 往返**语义无损**。
  */
 import type { SessionEvent } from "./events.js";
 import type { AgentMode } from "./mode.js";
 import type { ExchangeFormatVersion } from "./version.js";
 
 /** 文档格式标识（放在文档里第一眼就能认出这是谁写的）。 */
-export const EXCHANGE_FORMAT = "aster-session-exchange";
+export const EXCHANGE_FORMAT = "chenxi-session-exchange";
 
 export type ExchangeFormat = typeof EXCHANGE_FORMAT;
 
-/** CLI `--format` 的取值域：`aster` = canonical 文档；其余为厂商适配器（best-effort、有损）。 */
-export const PORTABLE_FORMATS = ["aster", "claude-code", "zcode"] as const;
+/** CLI `--format` 的取值域：`chenxi` = canonical 文档；其余为厂商适配器（best-effort、有损）。 */
+export const PORTABLE_FORMATS = ["chenxi", "claude-code", "zcode"] as const;
 
 export type PortableFormat = (typeof PORTABLE_FORMATS)[number];
 
 export interface ExchangeProducer {
-	/** 产出方名字（缺省 `aster`）。 */
+	/** 产出方名字（缺省 `chenxi`）。 */
 	readonly name: string;
 	/** 产出方版本（来自 `package.json`）。 */
 	readonly version: string;

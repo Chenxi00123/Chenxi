@@ -6,7 +6,7 @@
  * 解析**严格**：缺字段、错 format、版本不符、坏 JSON、requestKey 篡改一律 `CassetteError`，
  * 信息带**行号 / 字段**。
  */
-import type { ModelMessage, StopReason, ToolCallRef, ToolDescriptor } from "@aster/schema";
+import type { ModelMessage, StopReason, ToolCallRef, ToolDescriptor } from "@chenxi/schema";
 import {
 	CASSETTE_FORMAT,
 	CASSETTE_FORMAT_VERSION,

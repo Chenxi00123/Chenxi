@@ -20,7 +20,7 @@ import type {
 	ToolCallContext,
 	ToolCallId,
 	ToolCallRef,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runDoctor } from "../src/cli/doctor.js";
 import { parseArgs } from "../src/cli/main.js";
@@ -119,8 +119,8 @@ function writeRequest(path: string, cwd: string): PermissionRequest {
 
 describe("M6 审批流：once / always / reject（含会话内规则沉淀）", () => {
 	it("y=仅本次放行；a=沉淀为同工具同作用域规则（后续不再提问）；n=拒绝", async () => {
-		const cwd = newTemp("aster-m6-approve-");
-		const outside = join(newTemp("aster-m6-elsewhere-"), "outside.txt");
+		const cwd = newTemp("chenxi-m6-approve-");
+		const outside = join(newTemp("chenxi-m6-elsewhere-"), "outside.txt");
 		const inside = join(cwd, "inside.txt");
 
 		const questions: string[] = [];
@@ -163,9 +163,9 @@ describe("M6 审批流：once / always / reject（含会话内规则沉淀）", 
 
 describe("M6 CLI 集成：审批答案取自同一 stdin 的下一行", () => {
 	it("build 下越权写 -> 现场提问 -> `a` 作答放行；下一回合同键不再提问", async () => {
-		const home = newTemp("aster-m6-home-");
-		const cwd = newTemp("aster-m6-cwd-");
-		const elsewhere = newTemp("aster-m6-outside-");
+		const home = newTemp("chenxi-m6-home-");
+		const cwd = newTemp("chenxi-m6-cwd-");
+		const elsewhere = newTemp("chenxi-m6-outside-");
 		const outside = join(elsewhere, "out.txt");
 
 		const provider = createStubProvider([
@@ -221,7 +221,7 @@ describe("M6 CLI 集成：审批答案取自同一 stdin 的下一行", () => {
 
 describe("M6 --resume latest", () => {
 	it("续上最近更新的会话：同一 sessionId，且历史可见", async () => {
-		const home = newTemp("aster-m6-resume-");
+		const home = newTemp("chenxi-m6-resume-");
 		const first = await runSessionRepl({
 			home,
 			provider: createStubProvider([{ content: "hi", stopReason: "end_turn" }]),
@@ -249,8 +249,8 @@ describe("M6 --resume latest", () => {
 
 describe("M6 SIGINT 优雅中断", () => {
 	it("一次中止当前回合（turn/end 为 error）；二次退出并落 session/end{interrupted}", async () => {
-		const home = newTemp("aster-m6-sigint-");
-		const cwd = newTemp("aster-m6-sigint-cwd-");
+		const home = newTemp("chenxi-m6-sigint-");
+		const cwd = newTemp("chenxi-m6-sigint-cwd-");
 
 		let markStarted: () => void = () => {};
 		const started = new Promise<void>((resolve) => {
@@ -312,15 +312,15 @@ describe("M6 SIGINT 优雅中断", () => {
 
 describe("M6 --doctor 环境自检", () => {
 	it("关键项全通过 -> 退出码 0；且端点只报 set/unset，绝不打印密钥值", async () => {
-		const home = newTemp("aster-m6-doctor-");
+		const home = newTemp("chenxi-m6-doctor-");
 		const collected = collector();
 		const code = await runDoctor({
 			home,
 			output: collected.output,
 			env: {
-				ASTER_BASE_URL: "https://example.invalid/v1",
-				ASTER_API_KEY: "sk-super-secret-value",
-				ASTER_MODEL: "some-model",
+				CHENXI_BASE_URL: "https://example.invalid/v1",
+				CHENXI_API_KEY: "sk-super-secret-value",
+				CHENXI_MODEL: "some-model",
 			},
 			nodeVersion: "22.23.2",
 			platform: "win32",
@@ -329,7 +329,7 @@ describe("M6 --doctor 环境自检", () => {
 		expect(code).toBe(0);
 		expect(collected.text()).toContain("node:sqlite");
 		expect(collected.text()).toContain("home-writable");
-		expect(collected.text()).toContain("ASTER_API_KEY=set");
+		expect(collected.text()).toContain("CHENXI_API_KEY=set");
 		expect(collected.text()).not.toContain("sk-super-secret-value");
 		expect(collected.text()).toContain("OK: all critical checks passed.");
 	});
@@ -337,7 +337,7 @@ describe("M6 --doctor 环境自检", () => {
 	it("Node 版本过低 -> 退出码 1", async () => {
 		const collected = collector();
 		const code = await runDoctor({
-			home: newTemp("aster-m6-doctor-old-"),
+			home: newTemp("chenxi-m6-doctor-old-"),
 			output: collected.output,
 			env: {},
 			nodeVersion: "20.10.0",
@@ -360,7 +360,7 @@ describe("M6 read 输出上限", () => {
 		const ctx = createContext();
 		const registry = createToolRegistry(ctx);
 		registry.register(createReadTool());
-		const cwd = newTemp("aster-m6-read-bytes-");
+		const cwd = newTemp("chenxi-m6-read-bytes-");
 		writeFileSync(join(cwd, "big.txt"), "x".repeat(200_000), "utf8");
 
 		const result = await executeTool({
@@ -381,7 +381,7 @@ describe("M6 read 输出上限", () => {
 		const ctx = createContext();
 		const registry = createToolRegistry(ctx);
 		registry.register(createReadTool());
-		const cwd = newTemp("aster-m6-read-window-");
+		const cwd = newTemp("chenxi-m6-read-window-");
 		writeFileSync(
 			join(cwd, "lines.txt"),
 			Array.from({ length: 10 }, (_, i) => `line ${i}`).join("\n"),

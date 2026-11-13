@@ -13,7 +13,7 @@ import type {
 	ToolCallId,
 	ToolError,
 	ToolResultPayload,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { createContext } from "../src/events/index.js";
@@ -42,7 +42,7 @@ function sleep(ms: number): Promise<void> {
 
 /** 造一个临时工作目录作为 cwd（保证只在 D 盘）。 */
 function tempCwd(): string {
-	return makeTempDir("aster-ext-");
+	return makeTempDir("chenxi-ext-");
 }
 
 /** 自造上下文 + 注册表。 */

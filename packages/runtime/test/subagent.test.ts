@@ -13,7 +13,7 @@ import type {
 	ToolCallContext,
 	ToolCallId,
 	ToolCallRef,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { createContext } from "../src/events/index.js";
 import { createStubProvider, type StubScript } from "../src/llm/index.js";
@@ -79,8 +79,8 @@ function userMessageContent(events: readonly SessionEvent[]): string | undefined
 
 describe("M8a subagent runner: fresh 派发 = 独立会话", () => {
 	it("建独立子会话、继承父会话 id、落 prompt、返回 summary/steps/stopReason", async () => {
-		const home = newTemp("aster-m8a-home-");
-		const cwd = newTemp("aster-m8a-cwd-");
+		const home = newTemp("chenxi-m8a-home-");
+		const cwd = newTemp("chenxi-m8a-cwd-");
 		const parentSessionId = "ses_m8a_parent" as SessionId;
 		const provider = createStubProvider({ content: "subagent says hi", stopReason: "end_turn" });
 
@@ -123,8 +123,8 @@ describe("M8a subagent runner: fresh 派发 = 独立会话", () => {
 
 describe("M8a 结构性防递归：靠 task 工具是否存在", () => {
 	it("maxDepth=1：子会话**不**注册 task；子代理调用 task 得到错误结果", async () => {
-		const home = newTemp("aster-m8a-d1-");
-		const cwd = newTemp("aster-m8a-d1-cwd-");
+		const home = newTemp("chenxi-m8a-d1-");
+		const cwd = newTemp("chenxi-m8a-d1-cwd-");
 		const provider = createStubProvider([
 			toolCallStep(taskCall("call_task_1", "inner")),
 			{ content: "no task tool here", stopReason: "end_turn" },
@@ -160,8 +160,8 @@ describe("M8a 结构性防递归：靠 task 工具是否存在", () => {
 	});
 
 	it("maxDepth=2：子会话注册 task，调用**成功**并真的再派发一层（子子会话出现）", async () => {
-		const home = newTemp("aster-m8a-d2-");
-		const cwd = newTemp("aster-m8a-d2-cwd-");
+		const home = newTemp("chenxi-m8a-d2-");
+		const cwd = newTemp("chenxi-m8a-d2-cwd-");
 		const provider = createStubProvider([
 			toolCallStep(taskCall("call_task_1", "inner work")),
 			{ content: "grandchild says", stopReason: "end_turn" },
@@ -209,8 +209,8 @@ describe("M8a 结构性防递归：靠 task 工具是否存在", () => {
 
 describe("M8a 模式继承（当次调用）", () => {
 	it("dispatch 的 `mode` 覆盖 runner 缺省模式，并写进子会话 session/start", async () => {
-		const home = newTemp("aster-m8a-mode-");
-		const cwd = newTemp("aster-m8a-mode-cwd-");
+		const home = newTemp("chenxi-m8a-mode-");
+		const cwd = newTemp("chenxi-m8a-mode-cwd-");
 		const provider = createStubProvider({ content: "ok", stopReason: "end_turn" });
 
 		const runner = createSubagentRunner({
@@ -232,8 +232,8 @@ describe("M8a 模式继承（当次调用）", () => {
 
 describe("M8a `task` 工具接线（execute 两参）", () => {
 	it("走完整工具流水线时，父会话 id 取**当次调用**的 context.sessionId", async () => {
-		const home = newTemp("aster-m8a-tool-");
-		const cwd = newTemp("aster-m8a-tool-cwd-");
+		const home = newTemp("chenxi-m8a-tool-");
+		const cwd = newTemp("chenxi-m8a-tool-cwd-");
 		const provider = createStubProvider({ content: "done", stopReason: "end_turn" });
 		const runner = createSubagentRunner({
 			home,

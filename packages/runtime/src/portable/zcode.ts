@@ -14,7 +14,7 @@
  *  - **导出端不造数**：不写 `fileChanges` / `turnCheckpoints`（我们无对应事实），
  *    也**不加版本字段**（那会破坏它的 schema 校验）；版本化只发生在**我们自己的**交换文档里。
  */
-import type { AgentMode } from "@aster/schema";
+import type { AgentMode } from "@chenxi/schema";
 import { z } from "zod";
 import { epochMsToIso, isoToEpochMs, type PortableTurn } from "./turns.js";
 
@@ -105,7 +105,7 @@ export function importZCodeSession(text: string): ZCodeImport {
 /** 由第一条用户消息派生标题（单行、截断）；没有用户消息则用中性兜底。 */
 function deriveTitle(turns: readonly PortableTurn[]): string {
 	const first = turns.find((turn) => turn.role === "user" && turn.content.trim() !== "");
-	if (first === undefined) return "Aster session";
+	if (first === undefined) return "Chenxi session";
 	const single = first.content.replace(/\s+/g, " ").trim();
 	return single.length > 60 ? `${single.slice(0, 59)}…` : single;
 }
@@ -124,7 +124,7 @@ export function exportZCodeSession(params: {
 	readonly updatedAt: string;
 	readonly turns: readonly PortableTurn[];
 }): string {
-	const taskId = `aster-${params.sessionId}`;
+	const taskId = `chenxi-${params.sessionId}`;
 	const firstTurnMs = isoToEpochMs(params.turns.find((turn) => turn.at !== undefined)?.at);
 	const createdAt = isoToEpochMs(params.createdAt) ?? firstTurnMs ?? Date.now();
 	const updatedAt = isoToEpochMs(params.updatedAt) ?? createdAt;

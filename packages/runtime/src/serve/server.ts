@@ -24,8 +24,8 @@ import {
 	PROTOCOL_VERSION,
 	type PromptResultFrame,
 	type StreamFrame,
-} from "@aster/protocol";
-import type { SessionEvent, SessionId } from "@aster/schema";
+} from "@chenxi/protocol";
+import type { SessionEvent, SessionId } from "@chenxi/schema";
 import { deriveMessages } from "../session/index.js";
 import type { PromptDriver } from "./driver.js";
 import { type EventFeed, SubscriberOverflowError } from "./feed.js";

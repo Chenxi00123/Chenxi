@@ -10,7 +10,7 @@ import type {
 	PermissionDecisionPayload,
 	PermissionRequest,
 	PermissionVerdict,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { BeforeToolCallBlock, BeforeToolCallHook } from "../tools/execute.js";
 import type { PermissionSystem } from "./types.js";
 

@@ -20,7 +20,7 @@ import type {
 	PermissionDecisionPayload,
 	ToolCallId,
 	ToolCallRef,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { configFileSchema, loadConfig } from "../src/config/index.js";
 import type { Context } from "../src/events/index.js";
@@ -137,7 +137,7 @@ describe("M7b ADR-005 调和：桥接后的 MCP 工具能通过注册期校验",
 	it("注册成功即可证明 input/output 都是合法 ValueSchema（否则注册期就抛错）", async () => {
 		const { registry, bridged } = await makeBridgedRegistry();
 
-		expect(bridged.serverInfo.name).toBe("aster-mcp-fixture");
+		expect(bridged.serverInfo.name).toBe("chenxi-mcp-fixture");
 		expect(bridged.toolNames).toEqual(["mcp__fixture__echo", "mcp__fixture__add"]);
 		expect(registry.size()).toBe(2);
 
@@ -164,7 +164,7 @@ describe("M7b ADR-005 调和：桥接后的 MCP 工具能通过注册期校验",
 describe("M7b 权限组合：MCP 工具按元数据参与判定", () => {
 	it("plan：服务端声明只读的 echo 被允许；未声明的 add（保守判为写）被拒", async () => {
 		const { ctx, registry } = await makeBridgedRegistry();
-		const cwd = newTemp("aster-m7b-cwd-");
+		const cwd = newTemp("chenxi-m7b-cwd-");
 
 		const echoRun = await runTurnWithPermissions({
 			mode: "plan",
@@ -195,7 +195,7 @@ describe("M7b 权限组合：MCP 工具按元数据参与判定", () => {
 
 	it("build：host 作用域 -> ask；答 `a` 后**真的执行** MCP 调用，且规则沉淀到本会话", async () => {
 		const { ctx, registry } = await makeBridgedRegistry();
-		const cwd = newTemp("aster-m7b-cwd-");
+		const cwd = newTemp("chenxi-m7b-cwd-");
 		const questions: string[] = [];
 		const ask = async (question: string) => {
 			questions.push(question);
@@ -229,7 +229,7 @@ describe("M7b 权限组合：MCP 工具按元数据参与判定", () => {
 
 	it("build 下答 `n` -> 拒绝，且 MCP 未被真正调用", async () => {
 		const { ctx, registry } = await makeBridgedRegistry();
-		const cwd = newTemp("aster-m7b-cwd-");
+		const cwd = newTemp("chenxi-m7b-cwd-");
 
 		const run = await runTurnWithPermissions({
 			mode: "build",
@@ -264,9 +264,9 @@ describe("M7b ADR-014/015 配置面：mcp.servers", () => {
 				.success,
 		).toBe(false);
 
-		const cwd = newTemp("aster-m7b-dup-");
+		const cwd = newTemp("chenxi-m7b-dup-");
 		writeFileSync(
-			join(cwd, "aster.config.json"),
+			join(cwd, "chenxi.config.json"),
 			JSON.stringify({
 				mcp: {
 					servers: [
@@ -286,15 +286,15 @@ describe("M7b ADR-014/015 配置面：mcp.servers", () => {
 	});
 
 	it("`mcp` 整段替换：项目级覆盖用户级（不是把 servers 合并）", () => {
-		const home = newTemp("aster-m7b-home-");
-		const cwd = newTemp("aster-m7b-cwd-");
+		const home = newTemp("chenxi-m7b-home-");
+		const cwd = newTemp("chenxi-m7b-cwd-");
 		writeFileSync(
 			join(home, "config.json"),
 			JSON.stringify({ mcp: { servers: [{ name: "user", command: "u" }] } }),
 			"utf8",
 		);
 		writeFileSync(
-			join(cwd, "aster.config.json"),
+			join(cwd, "chenxi.config.json"),
 			JSON.stringify({ mcp: { servers: [{ name: "project", command: "p" }] } }),
 			"utf8",
 		);
@@ -305,16 +305,20 @@ describe("M7b ADR-014/015 配置面：mcp.servers", () => {
 	});
 
 	it("未声明 / 空数组 -> `mcpServers` 不含键；声明缺失文件路径不触发 IO", () => {
-		const home = newTemp("aster-m7b-none-home-");
-		const cwd = newTemp("aster-m7b-none-cwd-");
+		const home = newTemp("chenxi-m7b-none-home-");
+		const cwd = newTemp("chenxi-m7b-none-cwd-");
 		expect(loadConfig({ home, cwd, env: {} }).mcpServers).toBeUndefined();
 
-		writeFileSync(join(cwd, "aster.config.json"), JSON.stringify({ mcp: { servers: [] } }), "utf8");
+		writeFileSync(
+			join(cwd, "chenxi.config.json"),
+			JSON.stringify({ mcp: { servers: [] } }),
+			"utf8",
+		);
 		expect(loadConfig({ home, cwd, env: {} }).mcpServers).toBeUndefined();
 
 		// 声明了不存在的可执行文件也**不应**在加载期报错（桥接失败发生在启动桥接时）
 		writeFileSync(
-			join(cwd, "aster.config.json"),
+			join(cwd, "chenxi.config.json"),
 			JSON.stringify({
 				mcp: { servers: [{ name: "ghost", command: "definitely-not-a-real-binary-xyz" }] },
 			}),

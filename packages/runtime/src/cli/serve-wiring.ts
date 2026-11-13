@@ -7,7 +7,7 @@
  *  - **live 会话集合**由 REPL 经 `registerLive()` 登记，driver 据此对同一会话返回 409
  *    （一个会话一个写入者，避免同一 JSONL 出现两个写入者）。
  */
-import type { SessionEvent, SessionId } from "@aster/schema";
+import type { SessionEvent, SessionId } from "@chenxi/schema";
 import type { ContextBuilder } from "../context/index.js";
 import type { LlmProvider } from "../llm/types.js";
 import type { ToolRuntime } from "../loop/index.js";

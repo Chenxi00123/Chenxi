@@ -17,7 +17,7 @@ import type {
 	PermissionDecisionPayload,
 	ToolCallId,
 	ToolCallRef,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runSessionRepl } from "../src/cli/repl.js";
 import { createContextBuilder } from "../src/context/index.js";
@@ -38,7 +38,7 @@ import { makeTempDir } from "./helpers/tmp.js";
 const temps: string[] = [];
 
 function newWorkdir(): string {
-	const dir = makeTempDir("aster-m4-");
+	const dir = makeTempDir("chenxi-m4-");
 	temps.push(dir);
 	return dir;
 }
@@ -289,7 +289,7 @@ describe("M4 ADR-013：模式对账必须**送达模型**（CLI 级）", () => {
 		expect(second?.role).toBe("system");
 		expect(second?.content).toContain("BUILD mode");
 		// 工具清单与身份段也在系统提示里（不是靠模型猜）
-		expect(first?.content).toContain("Aster");
+		expect(first?.content).toContain("Chenxi");
 		expect(first?.content).toContain("read");
 		// 模式切换事件已落盘
 		expect(collected.join("")).toContain("mode: plan -> build");
@@ -298,7 +298,7 @@ describe("M4 ADR-013：模式对账必须**送达模型**（CLI 级）", () => {
 
 describe("M4 作用域判定：isInsideRoot", () => {
 	it("同根/子路径为 inside；父目录与别处为 outside", () => {
-		const root = join(makeTempDir("aster-m4-scope-"), "work");
+		const root = join(makeTempDir("chenxi-m4-scope-"), "work");
 		mkdirSync(root, { recursive: true });
 		temps.push(root);
 		expect(isInsideRoot(root, root)).toBe(true);

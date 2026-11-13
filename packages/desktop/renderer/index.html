@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Aster 桌面版渲染页（ADR-029 / 增补 M13b：**可交互**；M20：双主题 + 工具栏）。
+  Chenxi 桌面版渲染页（ADR-029 / 增补 M13b：**可交互**；M20：双主题 + 工具栏）。
   安全基线（写死不许改）：CSP `default-src 'none'`（**连一次网络请求都发不出去**），脚本/样式只从**本地**加载；
   renderer 拿不到 Node（`sandbox: true` + `contextIsolation: true`），只能调 preload 暴露的窄接口。
 -->
@@ -11,12 +11,12 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'none'; connect-src 'none'"
     />
-    <title>Aster</title>
+    <title>Chenxi</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header>
-      <div class="brand">aster</div>
+      <div class="brand">chenxi</div>
       <div class="modes" id="mode-switch" role="group" aria-label="模式（plan 只读 / build 可写）">
         <button type="button" data-mode="plan" aria-pressed="false">plan</button>
         <button type="button" data-mode="build" aria-pressed="false">build</button>

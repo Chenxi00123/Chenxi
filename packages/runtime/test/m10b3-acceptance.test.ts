@@ -16,7 +16,7 @@
 import { EventEmitter } from "node:events";
 import { readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import type { SessionEvent } from "@aster/schema";
+import type { SessionEvent } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import {
 	applyEdit,
@@ -265,8 +265,8 @@ describe("M10b-3 帧与差分（纯函数）", () => {
 
 describe("M10b-3 应用层：假 tty 驱动真实 REPL（粘贴多行 → 一条消息）", () => {
 	it("粘贴多行不被提交；Enter 后**只落一条** user/message（含换行）并按多行渲染", async () => {
-		const home = newTemp("aster-m10b3-home-");
-		const cwd = newTemp("aster-m10b3-cwd-");
+		const home = newTemp("chenxi-m10b3-home-");
+		const cwd = newTemp("chenxi-m10b3-cwd-");
 		const stdout = new FakeStdout();
 		const stdin = new FakeStdin();
 

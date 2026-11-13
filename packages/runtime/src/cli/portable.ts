@@ -7,14 +7,14 @@
  *  - 导入**永不进 REPL**：打印新 `sessionId` 并退出，用户再自行 `--resume`。
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import type { AgentMode, PortableFormat, SessionId } from "@aster/schema";
-import { EXCHANGE_FORMAT, EXCHANGE_FORMAT_VERSION } from "@aster/schema";
+import type { AgentMode, PortableFormat, SessionId } from "@chenxi/schema";
+import { EXCHANGE_FORMAT, EXCHANGE_FORMAT_VERSION } from "@chenxi/schema";
 import type { SessionStore } from "../persist/index.js";
 import { createSessionStore } from "../persist/index.js";
 import type { PortableTurn } from "../portable/index.js";
 import {
-	ASTER_PRODUCER,
 	buildExchangeDocument,
+	CHENXI_PRODUCER,
 	exportClaudeCodeJsonl,
 	exportZCodeSession,
 	importClaudeCodeJsonl,
@@ -38,7 +38,7 @@ export interface PortableCliOptions {
 	readonly exportTarget?: string;
 	/** `--import <path>`。 */
 	readonly importPath?: string;
-	/** `--format aster|claude-code|zcode`（缺省 `aster`）。 */
+	/** `--format chenxi|claude-code|zcode`（缺省 `chenxi`）。 */
 	readonly format?: PortableFormat;
 	/** `--export` 的输出路径（必填）。 */
 	readonly out?: string;
@@ -56,10 +56,10 @@ async function runExport(
 	const sessionId =
 		target === "latest" ? resolveLatestSession(await store.list()) : (target as SessionId);
 
-	const exported = await readSessionForExport({ store, sessionId, producer: ASTER_PRODUCER });
+	const exported = await readSessionForExport({ store, sessionId, producer: CHENXI_PRODUCER });
 	const cwd = exported.meta.cwd === "" ? process.cwd() : exported.meta.cwd;
 
-	if (format === "aster") {
+	if (format === "chenxi") {
 		const document = buildExchangeDocument({
 			session: { ...exported.meta, cwd },
 			events: exported.events,
@@ -68,7 +68,7 @@ async function runExport(
 		writeFileSync(out, `${JSON.stringify(document, null, 2)}\n`, "utf8");
 		options.output.write(
 			`exported ${exported.events.length} event(s) as ${EXCHANGE_FORMAT} ` +
-				`v${EXCHANGE_FORMAT_VERSION} (lossless for Aster) -> ${out}\n`,
+				`v${EXCHANGE_FORMAT_VERSION} (lossless for Chenxi) -> ${out}\n`,
 		);
 		return;
 	}
@@ -100,7 +100,7 @@ interface ImportedSource {
 	readonly updatedAt?: string;
 }
 
-function readVendorSource(format: Exclude<PortableFormat, "aster">, text: string): ImportedSource {
+function readVendorSource(format: Exclude<PortableFormat, "chenxi">, text: string): ImportedSource {
 	if (format === "claude-code") {
 		const parsed = importClaudeCodeJsonl(text);
 		return {
@@ -131,7 +131,7 @@ async function runImport(
 	const path = options.importPath as string;
 	const text = readFileSync(path, "utf8");
 
-	if (format === "aster") {
+	if (format === "chenxi") {
 		const document = parseExchangeJson(text);
 		const result = await importExchangeDocument({
 			store,
@@ -143,7 +143,7 @@ async function runImport(
 				`(produced by ${document.producer.name} ${document.producer.version}) ` +
 				`into session ${result.sessionId}\n`,
 		);
-		options.output.write(`resume with: aster --resume ${result.sessionId}\n`);
+		options.output.write(`resume with: chenxi --resume ${result.sessionId}\n`);
 		return;
 	}
 
@@ -161,13 +161,13 @@ async function runImport(
 		`imported ${source.turns.length} turn(s) from ${format} into session ${result.sessionId}\n`,
 	);
 	options.output.write(`note: ${format} is a best-effort adapter — ${LOSSY_NOTE}\n`);
-	options.output.write(`resume with: aster --resume ${result.sessionId}\n`);
+	options.output.write(`resume with: chenxi --resume ${result.sessionId}\n`);
 }
 
 /** 执行 `--export` / `--import`（两者都**不进 REPL**：打印结果并退出）。 */
 export async function runPortableCommand(options: PortableCliOptions): Promise<void> {
 	const store = createSessionStore(options.home === undefined ? {} : { home: options.home });
-	const format = options.format ?? "aster";
+	const format = options.format ?? "chenxi";
 	try {
 		if (options.importPath !== undefined) {
 			await runImport(options, store, format);

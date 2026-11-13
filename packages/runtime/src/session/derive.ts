@@ -16,7 +16,12 @@
  *     不再重复送达（不堆积、不重复，且不需要任何额外状态）。
  * 其余事件（session/turn/permission/mode）属**审计事实**，不进模型历史。
  */
-import type { ModelMessage, SessionEvent, SubagentResultPayload, ToolCallRef } from "@aster/schema";
+import type {
+	ModelMessage,
+	SessionEvent,
+	SubagentResultPayload,
+	ToolCallRef,
+} from "@chenxi/schema";
 
 export interface DeriveOptions {
 	/** 可选的 system 首条消息（由 `context` 模块生成，v0.1 M2 接入）。 */

@@ -23,7 +23,7 @@ import {
 	type MemoryScope,
 	type MemoryWrittenPayload,
 	type SessionEvent,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import {
 	type ExtractionOptions,
 	extractMemoryCandidates,

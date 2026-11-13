@@ -1,8 +1,8 @@
 /**
  * 会话运行时装配（ADR-029 增补，M13b）——**从 `cli/main.ts` 抽出**，供**两种外壳共用**：
- *  ① `cli/main.ts`（CLI / TUI / --serve 的本地 REPL 路径）；② 桌面版 main 进程（`@aster/desktop`）。
+ *  ① `cli/main.ts`（CLI / TUI / --serve 的本地 REPL 路径）；② 桌面版 main 进程（`@chenxi/desktop`）。
  *
- * 为什么抽出来而不是把 `@aster/runtime` 根入口摊成"什么都能 import"：
+ * 为什么抽出来而不是把 `@chenxi/runtime` 根入口摊成"什么都能 import"：
  * 桌面版真正需要的是"**一份配好的会话运行时**"（provider / 工具 / 权限 / 上下文构造器 / 记忆缝 / 子代理），
  * 而不是散落各处的 `tools` / `shell` / `context` / `sandbox` 内部模块。⇒ 装配留在这里（runtime 包内），
  * 只经**已有的 `cli` 命名空间**暴露（`bootstrapSessionRuntime`）。
@@ -10,7 +10,7 @@
  * 纪律：本文件**只做装配**，不做交互（不做输入/输出通道、不建会话、不写事件）——
  * 会话的建立与唯一写入路径仍归 `runSessionRepl` / `persist`。
  */
-import type { AgentMode, SessionId } from "@aster/schema";
+import type { AgentMode, SessionId } from "@chenxi/schema";
 import { type LoadedConfig, loadConfig, resolveDefaultMode } from "../config/index.js";
 import {
 	type CompactionConfig,
@@ -188,7 +188,7 @@ function createMemorySeamFactory(
 		...(write?.invalidateTool === undefined ? {} : { invalidateTool: write.invalidateTool }),
 	});
 	const source = `mcp:${memory.server}/${memory.searchTool}`;
-	const user = process.env.ASTER_USER ?? process.env.USER ?? process.env.USERNAME ?? "local";
+	const user = process.env.CHENXI_USER ?? process.env.USER ?? process.env.USERNAME ?? "local";
 	if (write !== undefined) {
 		output.write(
 			`memory: write path ON (add=${write.addTool ?? "(missing)"}` +
@@ -197,7 +197,7 @@ function createMemorySeamFactory(
 		);
 	}
 	return (sessionId: SessionId) => {
-		const scope = { user, agent: "aster", session: sessionId };
+		const scope = { user, agent: "chenxi", session: sessionId };
 		// 写入缝用**真实** session id；检索（注入 / 去重）在 `seam.ts` 里补成 `session: "*"`（跨会话）
 		const writer =
 			write?.addTool === undefined

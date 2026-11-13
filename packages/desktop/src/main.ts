@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Electron main（ADR-029 / 增补 M13b）：**只做四件事**——① 落实「绝不碰 C 盘」并把关；
  * ② 托起窗口（本地资源 + 安全基线）；③ 装配**一次**会话运行时（与 CLI **共用 `cli/bootstrap.ts`**）；
  * ④ 把 IPC 转发给**纯 Node 的 `host.ts` / `session.ts`**。main **不写业务逻辑**。
@@ -15,8 +15,8 @@
 
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { cli } from "@aster/runtime";
-import { AGENT_MODES } from "@aster/schema";
+import { cli } from "@chenxi/runtime";
+import { AGENT_MODES } from "@chenxi/schema";
 import { app, BrowserWindow, ipcMain, nativeTheme } from "electron";
 import { createDesktopHost, toEventCards } from "./host.js";
 import { auditDesktopPaths, desktopDataRoot, desktopPaths, resolveDesktopHome } from "./paths.js";
@@ -44,7 +44,7 @@ const PRELOAD = resolve(APP_DIR, "preload.cjs");
  * 默认**数据根 / 工作区**的基准（「绝不碰 C 盘」的可断言前提）：
  *  - **便携形态**（`app.isPackaged`）→ **便携根**（`<便携根>/resources/app/` 往上两级）⇒ 数据落在 **App 所在盘**；
  *  - **开发形态** → **仓库根**（`packages/desktop/dist/app/` 往上四级）。
- * 用户可用 `ASTER_HOME` 覆盖（优先级更高）。
+ * 用户可用 `CHENXI_HOME` 覆盖（优先级更高）。
  */
 const BASE_ROOT = fileURLToPath(
 	new URL(app.isPackaged ? "../../" : "../../../../", import.meta.url),
@@ -52,41 +52,41 @@ const BASE_ROOT = fileURLToPath(
 
 /** renderer → main 的**调用**频道（受契约约束：只增不改，改动必须进 ADR）。 */
 export const CHANNELS = {
-	meta: "aster:meta",
-	list: "aster:sessions:list",
-	read: "aster:sessions:read",
-	prompt: "aster:prompt",
-	setMode: "aster:mode",
-	answerApproval: "aster:approval",
-	interrupt: "aster:interrupt",
-	newSession: "aster:new",
+	meta: "chenxi:meta",
+	list: "chenxi:sessions:list",
+	read: "chenxi:sessions:read",
+	prompt: "chenxi:prompt",
+	setMode: "chenxi:mode",
+	answerApproval: "chenxi:approval",
+	interrupt: "chenxi:interrupt",
+	newSession: "chenxi:new",
 	/** M13d-1：续跑一条已记录会话（与 CLI 的 `--resume <sessionId>` 同一份语义）。 */
-	resume: "aster:resume",
+	resume: "chenxi:resume",
 	/** M13d-3：查"生效的审批规则 + 模式→权限策略"（等价于 CLI 的 `/approvals` 与 `/policy`）。 */
-	query: "aster:query",
+	query: "chenxi:query",
 	/** M21：模型接入设置（读 / 存 / 测 / 重启）。 */
-	settingsGet: "aster:settings:get",
-	settingsSave: "aster:settings:save",
-	settingsTest: "aster:settings:test",
-	settingsRestart: "aster:settings:restart",
+	settingsGet: "chenxi:settings:get",
+	settingsSave: "chenxi:settings:save",
+	settingsTest: "chenxi:settings:test",
+	settingsRestart: "chenxi:settings:restart",
 	/** M22：会话改名（桌面标题，**不是**会话事实；不写 JSONL）。 */
-	rename: "aster:sessions:rename",
+	rename: "chenxi:sessions:rename",
 } as const;
 
 /** main → renderer 的**推送**频道（事件 / 文本 / 审批 / 会话就绪 / 装配审计）。 */
 export const PUSH = {
-	event: "aster:push:event",
-	text: "aster:push:text",
-	approval: "aster:push:approval",
-	ready: "aster:push:ready",
-	boot: "aster:boot",
+	event: "chenxi:push:event",
+	text: "chenxi:push:text",
+	approval: "chenxi:push:approval",
+	ready: "chenxi:push:ready",
+	boot: "chenxi:boot",
 } as const;
 
 const selfCheck = process.argv.includes("--self-check");
 
 /** ① 「绝不碰 C 盘」：先改道，再校验；不满足就**拒绝启动**（绝不静默落到 C 盘）。 */
 function guardPaths(): { readonly dataHome: string; readonly report: string } {
-	// 会话数据根与 CLI/TUI **同一个**（ASTER_HOME / 仓库内 `.aster`）：GUI 要能看到 CLI 跑出来的会话
+	// 会话数据根与 CLI/TUI **同一个**（CHENXI_HOME / 仓库内 `.chenxi`）：GUI 要能看到 CLI 跑出来的会话
 	const dataHome = resolveDesktopHome(process.env, BASE_ROOT);
 	// Electron 自己的内部路径（cookies / localStorage / GPU / 日志）统一落到 `<home>\desktop` 之下
 	const guardRoot = desktopDataRoot(dataHome);
@@ -97,8 +97,8 @@ function guardPaths(): { readonly dataHome: string; readonly report: string } {
 	const audit = auditDesktopPaths(guardRoot, (key) => app.getPath(key as "userData"));
 	if (!audit.ok) {
 		process.stderr.write(
-			`aster-desktop: 拒绝启动 —— ${audit.reason}\n` +
-				`（本项目红线：数据一律落在仓库所在盘；可用 ASTER_HOME 指定别处的 D 盘目录）\n`,
+			`chenxi-desktop: 拒绝启动 —— ${audit.reason}\n` +
+				`（本项目红线：数据一律落在仓库所在盘；可用 CHENXI_HOME 指定别处的 D 盘目录）\n`,
 		);
 		app.exit(2);
 	}
@@ -229,7 +229,7 @@ async function run(): Promise<void> {
 		height: 720,
 		// 窗口底色跟随系统主题（M20 双主题）：首帧就不会先闪一块和界面相反的颜色
 		backgroundColor: nativeTheme.shouldUseDarkColors ? "#0b0d11" : "#f6f7f9",
-		title: "Aster",
+		title: "Chenxi",
 		show: !selfCheck,
 		webPreferences: {
 			preload: PRELOAD,

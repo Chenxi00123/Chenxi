@@ -4,7 +4,7 @@
  * 用途：本模块测试、loop 测试，以及将来 CI 的无网络快照回放。
  * **绝不发任何网络请求、绝不接触 apiKey**。
  */
-import type { StopReason, ToolCallRef } from "@aster/schema";
+import type { StopReason, ToolCallRef } from "@chenxi/schema";
 import type { LlmProvider, LlmRequest, LlmStreamEvent, LlmUsage } from "./types.js";
 
 /** 单次 `stream()` 的回放脚本。 */

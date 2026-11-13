@@ -268,7 +268,7 @@ export async function connectMcpStdio(options: McpClientOptions): Promise<McpCli
 		const result = await request("initialize", {
 			protocolVersion: PROTOCOL_VERSION,
 			capabilities: {},
-			clientInfo: { name: "aster-mcp-client", version: "1.0.0" },
+			clientInfo: { name: "chenxi-mcp-client", version: "1.0.0" },
 		});
 		notify("notifications/initialized");
 		const record = asRecord(result);

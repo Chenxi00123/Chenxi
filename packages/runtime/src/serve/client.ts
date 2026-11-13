@@ -9,7 +9,7 @@
  * 坏 JSON 的处理是**显式**的：在**客户端本地**合成为一条可读 `error` 帧（`code: "bad_frame"`）
  * 交给镜像渲染——既不静默吞掉，也不让一帧坏数据把整条流打死。
  */
-import type { StreamFrame } from "@aster/protocol";
+import type { StreamFrame } from "@chenxi/protocol";
 
 /** SSE 增量解码器：喂进任意分片，吐出**已完整**的帧。 */
 export function createSseDecoder(): { push(chunk: string): StreamFrame[] } {

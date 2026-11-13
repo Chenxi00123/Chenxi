@@ -31,7 +31,7 @@ function stubTool(name: string, description: string): AnyToolDefinition {
 describe("默认分节", () => {
 	it("createContextBuilder 预置默认段，buildSystem 含身份/准则/工具约定关键字", () => {
 		const text = createContextBuilder().buildSystem();
-		expect(text).toContain("Aster"); // 身份
+		expect(text).toContain("Chenxi"); // 身份
 		expect(text).toContain("read-only"); // 准则：先只读探索
 		expect(text).toContain("retry"); // 准则：出错不要盲目重试
 		expect(text).toContain("fabricate"); // 准则：不要臆造内容
@@ -136,10 +136,10 @@ describe("稳定/动态分离（ADR-011）", () => {
 
 		const dynamic = builder.buildDynamic();
 		expect(dynamic).toContain("DYNAMIC_MARKER");
-		expect(dynamic).not.toContain("Aster"); // 稳定段不进入动态段
+		expect(dynamic).not.toContain("Chenxi"); // 稳定段不进入动态段
 
 		const system = builder.buildSystem();
-		expect(system).toContain("Aster");
+		expect(system).toContain("Chenxi");
 		expect(system).not.toContain("DYNAMIC_MARKER");
 
 		dispose();

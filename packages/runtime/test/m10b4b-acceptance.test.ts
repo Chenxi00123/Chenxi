@@ -17,7 +17,7 @@
 import { EventEmitter } from "node:events";
 import { readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { SessionEvent, ToolCallId, ToolCallRef } from "@aster/schema";
+import type { SessionEvent, ToolCallId, ToolCallRef } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { createContext } from "../src/events/index.js";
 import { createStubProvider } from "../src/llm/index.js";
@@ -111,8 +111,8 @@ function slowProvider(delayMs: number, text: string): LlmProvider {
 
 describe("M10b-4 应用层：假 tty 驱动真实 REPL", () => {
 	it("正文 markdown 走富文本；工具结果折叠 + `Ctrl+O` 全展开", async () => {
-		const home = newTemp("aster-m10b4b-home-");
-		const cwd = newTemp("aster-m10b4b-cwd-");
+		const home = newTemp("chenxi-m10b4b-home-");
+		const cwd = newTemp("chenxi-m10b4b-cwd-");
 		const target = join(cwd, "sample.txt");
 		writeFileSync(target, "line1\nline2\nline3\nline4\nline5\nline6\n", "utf8");
 		const stdout = new FakeStdout();
@@ -187,8 +187,8 @@ describe("M10b-4 应用层：假 tty 驱动真实 REPL", () => {
 	});
 
 	it("回合内指示：忙碌时状态条显示本地测量、`turn/end` 后消失且**空闲不空转**", async () => {
-		const home = newTemp("aster-m10b4b-spin-home-");
-		const cwd = newTemp("aster-m10b4b-spin-cwd-");
+		const home = newTemp("chenxi-m10b4b-spin-home-");
+		const cwd = newTemp("chenxi-m10b4b-spin-cwd-");
 		const stdout = new FakeStdout();
 		const stdin = new FakeStdin();
 		let clock = 1000; // 注入的本地时钟（ADR-026：耗时是**本地测量**）
@@ -224,7 +224,7 @@ describe("M10b-4 应用层：假 tty 驱动真实 REPL", () => {
 		await delay(60); // 让收尾那一帧画完
 		const settled = stdout.text.length;
 		// 状态条的最新一次重绘**不含** `(local)`（忙碌事实已清账）
-		const lastStatus = [...stdout.chunks].reverse().find((chunk) => chunk.includes("aster"));
+		const lastStatus = [...stdout.chunks].reverse().find((chunk) => chunk.includes("chenxi"));
 		expect(lastStatus).toBeDefined();
 		expect(lastStatus).not.toContain("(local)");
 		// 空闲不空转：节拍已停 ⇒ 200ms 内一个字节都不再写
@@ -236,8 +236,8 @@ describe("M10b-4 应用层：假 tty 驱动真实 REPL", () => {
 	});
 
 	it("resize：尺寸变了就全量重绘（宽度变化走 `planDiff` 的 full 分支）", async () => {
-		const home = newTemp("aster-m10b4b-resize-home-");
-		const cwd = newTemp("aster-m10b4b-resize-cwd-");
+		const home = newTemp("chenxi-m10b4b-resize-home-");
+		const cwd = newTemp("chenxi-m10b4b-resize-cwd-");
 		const stdout = new FakeStdout();
 		stdout.rows = 12;
 		const stdin = new FakeStdin();
@@ -262,15 +262,15 @@ describe("M10b-4 应用层：假 tty 驱动真实 REPL", () => {
 		const delta = stdout.text.slice(before);
 		expect(delta).toContain("\u001b[2J\u001b[H"); // 全量重绘（清屏 + 回原点）
 		expect(delta).toContain("› "); // 输入行照旧画出来
-		expect(delta).toContain("aster"); // 状态条也在这一帧里
+		expect(delta).toContain("chenxi"); // 状态条也在这一帧里
 
 		stdin.type("\u0004");
 		await session;
 	});
 
 	it("IME 定位前提：硬件光标可见 + 全角按 **2** 显示列算光标列（不做 preedit 渲染）", async () => {
-		const home = newTemp("aster-m10b4b-ime-home-");
-		const cwd = newTemp("aster-m10b4b-ime-cwd-");
+		const home = newTemp("chenxi-m10b4b-ime-home-");
+		const cwd = newTemp("chenxi-m10b4b-ime-cwd-");
 		const stdout = new FakeStdout();
 		const stdin = new FakeStdin();
 
@@ -301,9 +301,9 @@ describe("M10b-4 应用层：假 tty 驱动真实 REPL", () => {
 	});
 
 	it("审批流在 TUI 里的完整交互：提问**按多行**渲染，提问期间输入行照常作答", async () => {
-		const home = newTemp("aster-m10b4b-ask-home-");
-		const cwd = newTemp("aster-m10b4b-ask-cwd-");
-		const elsewhere = newTemp("aster-m10b4b-ask-outside-");
+		const home = newTemp("chenxi-m10b4b-ask-home-");
+		const cwd = newTemp("chenxi-m10b4b-ask-cwd-");
+		const elsewhere = newTemp("chenxi-m10b4b-ask-outside-");
 		const outside = join(elsewhere, "out.txt");
 		const stdout = new FakeStdout();
 		stdout.rows = 20; // 提问有 5 行，视口要装得下

@@ -38,7 +38,7 @@ function fakeBox(available = true): SecretBox {
 
 const homes: string[] = [];
 function makeHome(): string {
-	const home = mkdtempSync(join(tmpdir(), "aster-m21-"));
+	const home = mkdtempSync(join(tmpdir(), "chenxi-m21-"));
 	homes.push(home);
 	return home;
 }
@@ -56,10 +56,10 @@ afterEach(() => {
 });
 
 describe("设置文件位置与归一化", () => {
-	it("落在 <home>\\desktop\\aster-settings.json（与 Electron 内部路径同根、在 D 盘）", () => {
+	it("落在 <home>\\desktop\\chenxi-settings.json（与 Electron 内部路径同根、在 D 盘）", () => {
 		const home = makeHome();
 		const file = settingsPath(home);
-		expect(file.endsWith(join("desktop", "aster-settings.json"))).toBe(true);
+		expect(file.endsWith(join("desktop", "chenxi-settings.json"))).toBe(true);
 		expect(file.startsWith(home)).toBe(true);
 		expect(existsSync(file)).toBe(false);
 	});
@@ -214,7 +214,7 @@ describe("坏文件：宁可报 invalid 也不拖垮启动", () => {
 
 	it("版本不受支持", () => {
 		const home = makeHome();
-		writeRaw(home, JSON.stringify({ format: "aster-desktop-settings", formatVersion: 9 }));
+		writeRaw(home, JSON.stringify({ format: "chenxi-desktop-settings", formatVersion: 9 }));
 		const loaded = loadProviderSettings({ home, secretBox: fakeBox() });
 		expect(loaded.source).toBe("invalid");
 		expect(loaded.problem).toContain("版本");
@@ -231,9 +231,9 @@ describe("注入环境变量与对外视图", () => {
 			secretBox: box,
 		});
 		expect(providerEnvFromSettings(loadProviderSettings({ home, secretBox: box }))).toEqual({
-			ASTER_BASE_URL: "https://x.example",
-			ASTER_API_KEY: SECRET,
-			ASTER_MODEL: "m",
+			CHENXI_BASE_URL: "https://x.example",
+			CHENXI_API_KEY: SECRET,
+			CHENXI_MODEL: "m",
 		});
 
 		const noKey = loadProviderSettings({ home, secretBox: fakeBox(false) });

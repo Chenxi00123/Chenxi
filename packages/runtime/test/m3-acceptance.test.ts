@@ -18,7 +18,7 @@ import type {
 	ToolCallId,
 	ToolCallRef,
 	ToolMetadata,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { createContext } from "../src/events/index.js";
@@ -133,7 +133,7 @@ describe("M3 判据 #1：完整六段闭环（真实 read 工具读真实仓库�
 			expect(toolResult.payload.ok).toBe(true);
 			const output = toolResult.payload.output as { content?: string; path?: string };
 			expect(output.path).toBe(join(REPO_ROOT, "package.json"));
-			expect(output.content).toContain('"name": "aster"');
+			expect(output.content).toContain('"name": "chenxi"');
 		}
 
 		expect(deriveMessages(log.events).map((m) => m.role)).toEqual([

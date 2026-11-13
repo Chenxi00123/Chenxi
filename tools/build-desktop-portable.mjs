@@ -3,7 +3,7 @@
  *
  * 做法（**手动组装**，不用 electron-builder）——把一个自洽的 Electron App 摆出来：
  *   <out>/                               ← 便携根（默认落在**仓库所在盘**，即 D 盘）
- *     aster-desktop.exe                  ← 就是 Electron 运行时（改名只为双击时看得懂）
+ *     chenxi-desktop.exe                  ← 就是 Electron 运行时（改名只为双击时看得懂）
  *     *.dll / *.pak / locales/ ...       ← 原样来自 `node_modules/electron/dist/`
  *     resources/app/                     ← `tools/build-desktop-app.mjs` 的产物（自洽：无 node_modules）
  *
@@ -16,7 +16,7 @@
  *
  * 运行：node tools/build-desktop-portable.mjs（前置：`npm run desktop-app`）
  */
-import { cpSync, existsSync, mkdirSync, renameSync, rmSync, statSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, renameSync, rmSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,7 +26,7 @@ const repoRoot = path.resolve(scriptDir, "..");
 const electronDist = path.join(repoRoot, "node_modules", "electron", "dist");
 const appPayload = path.join(repoRoot, "packages", "desktop", "dist", "app");
 // 便携根放在**仓库外**（`<仓库父目录>\dist-desktop\`）：既不进 zip 快照，也不与源码树混在一起
-const outRoot = path.resolve(repoRoot, "..", "dist-desktop", "aster-desktop");
+const outRoot = path.resolve(repoRoot, "..", "dist-desktop", "chenxi-desktop");
 
 for (const [label, dir] of [
 	["Electron 运行时", electronDist],
@@ -53,11 +53,16 @@ mkdirSync(outRoot, { recursive: true });
 cpSync(electronDist, outRoot, { recursive: true });
 
 // ② 改名：双击时看得懂（Electron 允许改名——它按 **exe 同级的 resources/app** 找入口，与文件名无关）
-const exe = path.join(outRoot, "aster-desktop.exe");
+const exe = path.join(outRoot, "chenxi-desktop.exe");
 if (existsSync(path.join(outRoot, "electron.exe"))) renameSync(path.join(outRoot, "electron.exe"), exe);
 
 // ③ 应用产物 → `resources/app/`（`resources/` 已由运行时带出来，这里只补 app 子树）
 cpSync(appPayload, path.join(outRoot, "resources", "app"), { recursive: true });
+
+// ④ 许可证随分发：Electron 的 LICENSE / LICENSES.chromium.html 由 ① 整树带出；
+//    这里补**本项目** Apache-2.0 与第三方声明（否则收件人只会看到 Electron 的 MIT 文本）。
+copyFileSync(path.join(repoRoot, "LICENSE"), path.join(outRoot, "LICENSE"));
+copyFileSync(path.join(repoRoot, "THIRD_PARTY_NOTICES.md"), path.join(outRoot, "THIRD_PARTY_NOTICES.md"));
 
 const bytes = (p) => {
 	try {

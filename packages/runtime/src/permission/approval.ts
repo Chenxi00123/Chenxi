@@ -7,7 +7,7 @@
  *   因此 `always`（本会话内始终允许）实现为**审批规则**（approval rules），**不是** guard，也**不是**改策略。
  * - 任何情况下 `reject` → deny；解析失败 → deny（fail-closed）。
  */
-import type { PermissionRequest, PermissionVerdict } from "@aster/schema";
+import type { PermissionRequest, PermissionVerdict } from "@chenxi/schema";
 import { resolveCallScope } from "./scope.js";
 import type { CallScope } from "./types.js";
 

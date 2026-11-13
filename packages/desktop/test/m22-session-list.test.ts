@@ -9,7 +9,7 @@
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import { cli, createStubProvider } from "@aster/runtime";
+import { cli, createStubProvider } from "@chenxi/runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { createDesktopHost } from "../src/host.js";
 import { loadTitles, normalizeTitle, saveTitle, titlesPath } from "../src/session-titles.js";
@@ -58,7 +58,7 @@ describe("会话标题：规范化", () => {
 
 describe("会话标题：读写与坏文件", () => {
 	it("保存 / 覆盖 / 清空（空标题 = 恢复 id）", () => {
-		const home = newTemp("aster-m22-titles-");
+		const home = newTemp("chenxi-m22-titles-");
 		expect(loadTitles(home)).toEqual({});
 
 		saveTitle(home, "ses_a", "第一个标题");
@@ -73,7 +73,7 @@ describe("会话标题：读写与坏文件", () => {
 	});
 
 	it("坏 JSON / 不是我们的格式 / 版本不认 ⇒ 空表且不抛", () => {
-		const home = newTemp("aster-m22-bad-");
+		const home = newTemp("chenxi-m22-bad-");
 		const file = titlesPath(home);
 		mkdirSync(join(home, "desktop"), { recursive: true });
 
@@ -86,7 +86,7 @@ describe("会话标题：读写与坏文件", () => {
 		writeFileSync(
 			file,
 			JSON.stringify({
-				format: "aster-desktop-session-titles",
+				format: "chenxi-desktop-session-titles",
 				formatVersion: 99,
 				titles: { a: "x" },
 			}),
@@ -98,7 +98,7 @@ describe("会话标题：读写与坏文件", () => {
 
 describe("列表预览 + 标题：只读 JSONL，不写事实", () => {
 	it("列表带 preview（第一条用户消息）与 title，且会话文件逐字节不变", async () => {
-		const home = newTemp("aster-m22-list-");
+		const home = newTemp("chenxi-m22-list-");
 		const sessionId = await runRecordedSession(home, "帮我看一下 packages/runtime 的入口");
 		const file = onlySessionFile(home);
 		const before = readFileSync(file);
@@ -122,7 +122,7 @@ describe("列表预览 + 标题：只读 JSONL，不写事实", () => {
 	});
 
 	it("没有标题时 title 字段缺席（不塞空串，界面据此回退显示 sessionId）", async () => {
-		const home = newTemp("aster-m22-nolabel-");
+		const home = newTemp("chenxi-m22-nolabel-");
 		const sessionId = await runRecordedSession(home, "hello");
 		const host = createDesktopHost({ home });
 		try {

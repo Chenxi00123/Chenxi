@@ -2,7 +2,7 @@
  * 前端可复用的**呈现层纯函数**（从 `repl.ts` 拆出，见架构门禁的 400 行上限）。
  *
  * 这里只放"格式/文本"这类**纯**函数与**类型转出**；消费者是**非终端前端**
- * （桌面版只被允许 import `@aster/runtime` 根入口 ⇒ 经 `cli` 命名空间转出）：
+ * （桌面版只被允许 import `@chenxi/runtime` 根入口 ⇒ 经 `cli` 命名空间转出）：
  *  - `renderApprovalPrompt`：审批提问正文（**格式单一来源在 `permission` 模块**）；
  *  - `describePermissionRule`：`/policy` 的短标签（桌面版「策略」面板显示**同一段**文本）；
  *  - `formatHistory`：投影后的模型历史（`/history` 与 resume 横幅用）。

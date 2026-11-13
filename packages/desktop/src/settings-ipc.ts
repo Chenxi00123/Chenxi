@@ -49,9 +49,9 @@ export function applyDesktopProviderSettings(options: {
 	const loaded = loadProviderSettings({ home: options.home, secretBox: options.secretBox });
 	const env = providerEnvFromSettings(loaded);
 	if (env !== undefined) {
-		process.env.ASTER_BASE_URL = env.ASTER_BASE_URL;
-		process.env.ASTER_API_KEY = env.ASTER_API_KEY;
-		process.env.ASTER_MODEL = env.ASTER_MODEL;
+		process.env.CHENXI_BASE_URL = env.CHENXI_BASE_URL;
+		process.env.CHENXI_API_KEY = env.CHENXI_API_KEY;
+		process.env.CHENXI_MODEL = env.CHENXI_MODEL;
 	}
 	return describeProviderSettings(loaded, settingsPath(options.home));
 }

@@ -3,8 +3,8 @@
  *
  * 覆盖 ADR-014 明确要求配 CI 断言的部分：
  *  - **优先级**：CLI 参数 > 环境变量 > 配置文件 > 内置默认；
- *  - **发现与合并**：`<home>/config.json` -> `<cwd>/aster.config.json`，**逐键**合并（近者胜）；
- *    `--config`（CLI）> `ASTER_CONFIG`，且显式路径**跳过**自动发现；
+ *  - **发现与合并**：`<home>/config.json` -> `<cwd>/chenxi.config.json`，**逐键**合并（近者胜）；
+ *    `--config`（CLI）> `CHENXI_CONFIG`，且显式路径**跳过**自动发现；
  *  - `permissions` 按模式**整段替换**，**未提供**的模式回退内置默认；
  *  - 未知键 / 非法值 / 非法 JSON -> **可读错误**且快速失败（不含任何敏感取值）；
  *  - 覆盖**真的**落到权限判定上（端到端），且 `/policy` 让它**看得见**。
@@ -19,8 +19,8 @@ import type {
 	PermissionSystem,
 	ToolCallId,
 	ToolCallRef,
-} from "@aster/schema";
-import { AGENT_MODES } from "@aster/schema";
+} from "@chenxi/schema";
+import { AGENT_MODES } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runDoctor } from "../src/cli/doctor.js";
 import { parseArgs } from "../src/cli/main.js";
@@ -142,8 +142,8 @@ describe("M7a 配置 schema（严格校验）", () => {
 			expect(parsed.error.issues.map((issue) => issue.message).join(" ")).toContain("oops");
 		}
 		// 端到端：用户看到的消息里必须出现键名
-		const cwd = newTemp("aster-m7a-unknownkey-");
-		writeJson(join(cwd, "aster.config.json"), { mode: "plan", oops: 1 });
+		const cwd = newTemp("chenxi-m7a-unknownkey-");
+		writeJson(join(cwd, "chenxi.config.json"), { mode: "plan", oops: 1 });
 		expect(() => loadConfig({ home: newTemp("h-"), cwd, env: {} })).toThrow(/oops/);
 	});
 
@@ -178,10 +178,10 @@ describe("M7a 配置 schema（严格校验）", () => {
 
 describe("M7a 发现与合并（逐键，近者胜）", () => {
 	it("自动发现两处并逐键合并：冲突键近者胜，不冲突的键保留", () => {
-		const home = newTemp("aster-m7a-home-");
-		const cwd = newTemp("aster-m7a-cwd-");
+		const home = newTemp("chenxi-m7a-home-");
+		const cwd = newTemp("chenxi-m7a-cwd-");
 		const userFile = writeJson(join(home, "config.json"), { mode: "build", model: "user-model" });
-		const projectFile = writeJson(join(cwd, "aster.config.json"), { mode: "plan" });
+		const projectFile = writeJson(join(cwd, "chenxi.config.json"), { mode: "plan" });
 
 		const loaded = loadConfig({ home, cwd, env: {} });
 		expect(loaded.sources).toEqual([userFile, projectFile]);
@@ -189,27 +189,27 @@ describe("M7a 发现与合并（逐键，近者胜）", () => {
 		expect(loaded.model).toBe("user-model"); // 未被覆盖的键保留
 	});
 
-	it("`ASTER_CONFIG` 显式路径 -> 只读该文件，跳过自动发现", () => {
-		const home = newTemp("aster-m7a-env-home-");
-		const cwd = newTemp("aster-m7a-env-cwd-");
+	it("`CHENXI_CONFIG` 显式路径 -> 只读该文件，跳过自动发现", () => {
+		const home = newTemp("chenxi-m7a-env-home-");
+		const cwd = newTemp("chenxi-m7a-env-cwd-");
 		writeJson(join(home, "config.json"), { mode: "build" }); // 自动发现候选，但不该被读
 		const explicit = writeJson(join(cwd, "explicit.json"), { mode: "plan" });
 
-		const loaded = loadConfig({ home, cwd, env: { ASTER_CONFIG: "explicit.json" } });
+		const loaded = loadConfig({ home, cwd, env: { CHENXI_CONFIG: "explicit.json" } });
 		expect(loaded.sources).toEqual([explicit]);
 		expect(loaded.mode).toBe("plan");
 	});
 
-	it("`--config`（CLI）优先于 `ASTER_CONFIG`", () => {
-		const cwd = newTemp("aster-m7a-cli-cwd-");
-		const home = newTemp("aster-m7a-cli-home-");
+	it("`--config`（CLI）优先于 `CHENXI_CONFIG`", () => {
+		const cwd = newTemp("chenxi-m7a-cli-cwd-");
+		const home = newTemp("chenxi-m7a-cli-home-");
 		writeJson(join(cwd, "env.json"), { mode: "build" });
 		const cliFile = writeJson(join(cwd, "cli.json"), { mode: "plan" });
 
 		const loaded = loadConfig({
 			home,
 			cwd,
-			env: { ASTER_CONFIG: "env.json" },
+			env: { CHENXI_CONFIG: "env.json" },
 			explicitPath: "cli.json",
 		});
 		expect(loaded.sources).toEqual([cliFile]);
@@ -217,22 +217,22 @@ describe("M7a 发现与合并（逐键，近者胜）", () => {
 	});
 
 	it("非法 JSON / 未知键 -> 可读 `ConfigError`（含来源路径）", () => {
-		const cwd = newTemp("aster-m7a-bad-");
-		const broken = join(cwd, "aster.config.json");
+		const cwd = newTemp("chenxi-m7a-bad-");
+		const broken = join(cwd, "chenxi.config.json");
 		writeFileSync(broken, "{ not json", "utf8");
 		expect(() => loadConfig({ home: newTemp("h-"), cwd, env: {} })).toThrow(/not valid JSON/);
 
 		writeJson(broken, { nope: true });
 		expect(() => loadConfig({ home: newTemp("h-"), cwd, env: {} })).toThrow(
-			/config error \[.*aster\.config\.json\]/,
+			/config error \[.*chenxi\.config\.json\]/,
 		);
 		expect(() => loadConfig({ home: newTemp("h-"), cwd, env: {} })).toThrow(/nope/);
 	});
 
-	it("`ASTER_CONFIG` 指向缺失文件 -> 快速失败（不静默忽略）", () => {
-		const cwd = newTemp("aster-m7a-missing-");
+	it("`CHENXI_CONFIG` 指向缺失文件 -> 快速失败（不静默忽略）", () => {
+		const cwd = newTemp("chenxi-m7a-missing-");
 		expect(() =>
-			loadConfig({ home: newTemp("h-"), cwd, env: { ASTER_CONFIG: "nope.json" } }),
+			loadConfig({ home: newTemp("h-"), cwd, env: { CHENXI_CONFIG: "nope.json" } }),
 		).toThrow(/cannot read file/);
 	});
 });
@@ -242,26 +242,26 @@ describe("M7a 默认模式优先级：CLI > env > 配置文件 > 内置", () => 
 		const config = { mode: "build" as const, sources: [] };
 		expect(resolveDefaultMode({ config: { sources: [] } })).toBe("plan");
 		expect(resolveDefaultMode({ config })).toBe("build");
-		expect(resolveDefaultMode({ env: { ASTER_MODE: "plan" }, config })).toBe("plan");
-		expect(resolveDefaultMode({ cliMode: "build", env: { ASTER_MODE: "plan" }, config })).toBe(
+		expect(resolveDefaultMode({ env: { CHENXI_MODE: "plan" }, config })).toBe("plan");
+		expect(resolveDefaultMode({ cliMode: "build", env: { CHENXI_MODE: "plan" }, config })).toBe(
 			"build",
 		);
 	});
 
-	it("`ASTER_MODE` 非法值 -> 可读错误（不回显取值）", () => {
+	it("`CHENXI_MODE` 非法值 -> 可读错误（不回显取值）", () => {
 		expect(() =>
-			resolveDefaultMode({ env: { ASTER_MODE: "yolo" }, config: { sources: [] } }),
+			resolveDefaultMode({ env: { CHENXI_MODE: "yolo" }, config: { sources: [] } }),
 		).toThrow(/must be one of: plan, build/);
 	});
 
-	it("`model` 只作兜底：已设置 `ASTER_MODEL` 时绝不覆盖", () => {
-		expect(withModelFallback({}, { model: "cfg", sources: [] })).toEqual({ ASTER_MODEL: "cfg" });
-		expect(withModelFallback({ ASTER_MODEL: "env" }, { model: "cfg", sources: [] })).toEqual({
-			ASTER_MODEL: "env",
+	it("`model` 只作兜底：已设置 `CHENXI_MODEL` 时绝不覆盖", () => {
+		expect(withModelFallback({}, { model: "cfg", sources: [] })).toEqual({ CHENXI_MODEL: "cfg" });
+		expect(withModelFallback({ CHENXI_MODEL: "env" }, { model: "cfg", sources: [] })).toEqual({
+			CHENXI_MODEL: "env",
 		});
 		// 空白串视为「未设置」
-		expect(withModelFallback({ ASTER_MODEL: "   " }, { model: "cfg", sources: [] })).toEqual({
-			ASTER_MODEL: "cfg",
+		expect(withModelFallback({ CHENXI_MODEL: "   " }, { model: "cfg", sources: [] })).toEqual({
+			CHENXI_MODEL: "cfg",
 		});
 	});
 });
@@ -282,9 +282,9 @@ describe("M7a permissions：按模式整段替换，未提供的模式回退默�
 
 describe("M7a 覆盖真的落到权限判定上（端到端）", () => {
 	it("收紧：把 plan 配成一律拒绝 -> plan 下 `read` 也被拒，理由来自配置", async () => {
-		const cwd = newTemp("aster-m7a-tighten-");
+		const cwd = newTemp("chenxi-m7a-tighten-");
 		writeFileSync(join(cwd, "target.txt"), "hello\n", "utf8");
-		const home = newTemp("aster-m7a-tighten-home-");
+		const home = newTemp("chenxi-m7a-tighten-home-");
 		writeJson(join(home, "config.json"), {
 			permissions: { plan: [{ tool: "*", decision: "deny", reason: "配置：plan 下一律拒绝" }] },
 		});
@@ -303,8 +303,8 @@ describe("M7a 覆盖真的落到权限判定上（端到端）", () => {
 	});
 
 	it("放松（必须显式写出）：plan 配置放行 workspace 内写 -> 写入真的成功", async () => {
-		const cwd = newTemp("aster-m7a-loosen-");
-		const home = newTemp("aster-m7a-loosen-home-");
+		const cwd = newTemp("chenxi-m7a-loosen-");
+		const home = newTemp("chenxi-m7a-loosen-home-");
 		writeJson(join(home, "config.json"), {
 			permissions: {
 				plan: [
@@ -332,7 +332,7 @@ describe("M7a 覆盖真的落到权限判定上（端到端）", () => {
 	});
 
 	it("未提供 permissions 时，plan 下写仍被拒（安全默认未被破坏）", async () => {
-		const cwd = newTemp("aster-m7a-default-");
+		const cwd = newTemp("chenxi-m7a-default-");
 		const result = await runOneTurn({
 			mode: "plan",
 			cwd,
@@ -348,8 +348,8 @@ describe("M7a 覆盖真的落到权限判定上（端到端）", () => {
 
 describe("M7a `/policy` 让覆盖看得见（REPL）", () => {
 	it("打印生效的两模式规则（自定义 build 规则与默认 plan 规则并存）", async () => {
-		const home = newTemp("aster-m7a-policy-home-");
-		const cwd = newTemp("aster-m7a-policy-cwd-");
+		const home = newTemp("chenxi-m7a-policy-home-");
+		const cwd = newTemp("chenxi-m7a-policy-cwd-");
 		writeJson(join(home, "config.json"), {
 			permissions: { build: [{ tool: "bash", decision: "deny", reason: "no bash here" }] },
 		});
@@ -373,9 +373,9 @@ describe("M7a `/policy` 让覆盖看得见（REPL）", () => {
 
 describe("M7a --doctor 配置文件状态", () => {
 	it("找到且合法 -> 退出码 0，并报告来源路径", async () => {
-		const home = newTemp("aster-m7a-doc-home-");
-		const cwd = newTemp("aster-m7a-doc-cwd-");
-		const file = writeJson(join(cwd, "aster.config.json"), { mode: "build" });
+		const home = newTemp("chenxi-m7a-doc-home-");
+		const cwd = newTemp("chenxi-m7a-doc-cwd-");
+		const file = writeJson(join(cwd, "chenxi.config.json"), { mode: "build" });
 
 		const collected = collector();
 		const code = await runDoctor({
@@ -393,9 +393,9 @@ describe("M7a --doctor 配置文件状态", () => {
 	});
 
 	it("配置非法 -> 退出码 1（启动器会因此拒绝启动）", async () => {
-		const home = newTemp("aster-m7a-docbad-home-");
-		const cwd = newTemp("aster-m7a-docbad-cwd-");
-		writeFileSync(join(cwd, "aster.config.json"), "{ not json", "utf8");
+		const home = newTemp("chenxi-m7a-docbad-home-");
+		const cwd = newTemp("chenxi-m7a-docbad-cwd-");
+		writeFileSync(join(cwd, "chenxi.config.json"), "{ not json", "utf8");
 
 		const collected = collector();
 		const code = await runDoctor({
@@ -415,8 +415,8 @@ describe("M7a --doctor 配置文件状态", () => {
 	it("未发现配置文件 -> 退出码 0 且标注 none found", async () => {
 		const collected = collector();
 		const code = await runDoctor({
-			home: newTemp("aster-m7a-docnone-home-"),
-			cwd: newTemp("aster-m7a-docnone-cwd-"),
+			home: newTemp("chenxi-m7a-docnone-home-"),
+			cwd: newTemp("chenxi-m7a-docnone-cwd-"),
 			output: collected.output,
 			env: {},
 			nodeVersion: "22.23.2",

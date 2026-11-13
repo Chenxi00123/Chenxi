@@ -38,7 +38,7 @@ const ENV_ALLOWLIST: readonly string[] = [
 ];
 
 /** 让被执行的脚本自己知道"我是被哪种沙箱跑起来的"（诚实标注给子进程，ADR-027 ②）。 */
-export const SANDBOX_MARKER_ENV = "ASTER_SANDBOX";
+export const SANDBOX_MARKER_ENV = "CHENXI_SANDBOX";
 
 export { ENV_ALLOWLIST };
 

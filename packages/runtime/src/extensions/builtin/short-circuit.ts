@@ -4,7 +4,7 @@
  * 对指定工具**不调用 `next()`**，从而短路内置执行（内置 `execute` 不会被调用）；
  * 其它工具一律委派下去，行为不受影响。
  */
-import type { ToolExecutionResult } from "@aster/schema";
+import type { ToolExecutionResult } from "@chenxi/schema";
 import type { ToolPipelinePayload } from "../../tools/execute.js";
 import type { Extension, ExtensionApi } from "../types.js";
 

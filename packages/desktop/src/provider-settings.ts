@@ -2,7 +2,7 @@
  * 桌面版「模型接入设置」的**纯逻辑**（M21，ADR-039）。
  *
  * 纪律：
- *  - 这是**桌面应用配置**，不是会话事实 ⇒ 只落 `<home>\desktop\aster-settings.json`，**绝不进 JSONL**；
+ *  - 这是**桌面应用配置**，不是会话事实 ⇒ 只落 `<home>\desktop\chenxi-settings.json`，**绝不进 JSONL**；
  *  - 密钥**只以密文落盘**（Windows DPAPI，经 Electron `safeStorage`）；没有可用的加密能力就**拒绝保存**
  *    （绝不静默降级成明文）；
  *  - 本文件**不依赖 Electron**（加密能力由 `SecretBox` 注入）⇒ vitest 能直接测；
@@ -11,9 +11,9 @@
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-export const SETTINGS_FORMAT = "aster-desktop-settings";
+export const SETTINGS_FORMAT = "chenxi-desktop-settings";
 export const SETTINGS_VERSION = 1;
-export const SETTINGS_FILENAME = "aster-settings.json";
+export const SETTINGS_FILENAME = "chenxi-settings.json";
 
 /** 注入的最小加密能力（真实实现是 Electron `safeStorage`，测试里用假盒子）。 */
 export interface SecretBox {
@@ -40,7 +40,7 @@ export interface LoadedProviderSettings {
 	readonly problem?: string;
 }
 
-/** 设置文件的绝对路径（`<home>\desktop\aster-settings.json`）。 */
+/** 设置文件的绝对路径（`<home>\desktop\chenxi-settings.json`）。 */
 export function settingsPath(home: string, filename: string = SETTINGS_FILENAME): string {
 	return join(resolve(home, "desktop"), filename);
 }
@@ -89,7 +89,7 @@ export function loadProviderSettings(options: {
 
 	const record = doc as Record<string, unknown>;
 	if (record.format !== SETTINGS_FORMAT)
-		return { source: "invalid", encryptionAvailable, problem: "不是 Aster 桌面设置文件" };
+		return { source: "invalid", encryptionAvailable, problem: "不是 Chenxi 桌面设置文件" };
 	if (record.formatVersion !== SETTINGS_VERSION)
 		return {
 			source: "invalid",
@@ -135,7 +135,7 @@ export function providerEnvFromSettings(
 	if (baseUrl === undefined || baseUrl === "" || apiKey === undefined || model === undefined) {
 		return undefined;
 	}
-	return { ASTER_BASE_URL: baseUrl, ASTER_API_KEY: apiKey, ASTER_MODEL: model };
+	return { CHENXI_BASE_URL: baseUrl, CHENXI_API_KEY: apiKey, CHENXI_MODEL: model };
 }
 
 /** 可审计的一行（进启动横幅）：**只出现 baseUrl / model，永不出现密钥**。 */

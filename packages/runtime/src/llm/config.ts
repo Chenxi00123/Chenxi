@@ -10,9 +10,9 @@ export interface EnvLike {
 	readonly [key: string]: string | undefined;
 }
 
-const BASE_URL_KEY = "ASTER_BASE_URL";
-const API_KEY_KEY = "ASTER_API_KEY";
-const MODEL_KEY = "ASTER_MODEL";
+const BASE_URL_KEY = "CHENXI_BASE_URL";
+const API_KEY_KEY = "CHENXI_API_KEY";
+const MODEL_KEY = "CHENXI_MODEL";
 
 /** 读取并归一化单个变量：undefined / 空白 一律视为「缺失」。 */
 function readVar(env: EnvLike, key: string): string | undefined {

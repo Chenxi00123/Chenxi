@@ -16,7 +16,7 @@
  */
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { SessionEvent, ToolCallContext, ToolCallId, ToolCallRef } from "@aster/schema";
+import type { SessionEvent, ToolCallContext, ToolCallId, ToolCallRef } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { configFileSchema, loadConfig } from "../src/config/index.js";
 import { createContext } from "../src/events/index.js";
@@ -124,8 +124,8 @@ async function runTask(
 
 describe("M8a `task` 工具：元数据与注册期校验（ADR-005 / ADR-017）", () => {
 	it("能被注册（即 input/output 都是合法 ValueSchema），metadata 与 ADR-017 一致", () => {
-		const home = newTemp("aster-m8a-meta-");
-		const cwd = newTemp("aster-m8a-meta-cwd-");
+		const home = newTemp("chenxi-m8a-meta-");
+		const cwd = newTemp("chenxi-m8a-meta-cwd-");
 		const harness = makeHarness({ home, cwd, writeTarget: join(cwd, "child.txt") });
 
 		expect(harness.registry.get("task")).toBeDefined();
@@ -147,8 +147,8 @@ describe("M8a `task` 工具：元数据与注册期校验（ADR-005 / ADR-017）
 
 describe("M8a 隔离是结构性的：父只看到 summary", () => {
 	it("父投影含子代理 summary，但不含其中间文本 / 工具轨迹；子会话 JSONL 里都在", async () => {
-		const home = newTemp("aster-m8a-iso-home-");
-		const cwd = newTemp("aster-m8a-iso-cwd-");
+		const home = newTemp("chenxi-m8a-iso-home-");
+		const cwd = newTemp("chenxi-m8a-iso-cwd-");
 		const harness = makeHarness({ home, cwd, writeTarget: join(cwd, "child.txt") });
 
 		const result = await runTask(harness, { cwd, mode: "build" });
@@ -222,21 +222,21 @@ describe("M8a 配置面：`subagents` **默认关闭** + 严格校验（ADR-009 
 			false,
 		);
 
-		const cwd = newTemp("aster-m8a-cfg-");
+		const cwd = newTemp("chenxi-m8a-cfg-");
 		writeFileSync(
-			join(cwd, "aster.config.json"),
+			join(cwd, "chenxi.config.json"),
 			JSON.stringify({ subagents: { enabled: true, maxDepth: 3 } }),
 			"utf8",
 		);
-		expect(loadConfig({ home: newTemp("aster-m8a-cfg-home-"), cwd, env: {} }).subagents).toEqual({
+		expect(loadConfig({ home: newTemp("chenxi-m8a-cfg-home-"), cwd, env: {} }).subagents).toEqual({
 			enabled: true,
 			maxDepth: 3,
 		});
 		// 未声明 -> 不含键（= CLI 不会注册 `task`，默认工具集仍是**恰好 4 原语**）
 		expect(
 			loadConfig({
-				home: newTemp("aster-m8a-none-home-"),
-				cwd: newTemp("aster-m8a-none-cwd-"),
+				home: newTemp("chenxi-m8a-none-home-"),
+				cwd: newTemp("chenxi-m8a-none-cwd-"),
 				env: {},
 			}).subagents,
 		).toBeUndefined();
@@ -245,8 +245,8 @@ describe("M8a 配置面：`subagents` **默认关闭** + 严格校验（ADR-009 
 
 describe("M8a 权限组合与模式继承（ADR-017）", () => {
 	it("plan 下 `task` 被拒（permission_denied），且**不产生**子会话（拒绝发生在执行前）", async () => {
-		const home = newTemp("aster-m8a-plan-home-");
-		const cwd = newTemp("aster-m8a-plan-cwd-");
+		const home = newTemp("chenxi-m8a-plan-home-");
+		const cwd = newTemp("chenxi-m8a-plan-cwd-");
 		const harness = makeHarness({ home, cwd, writeTarget: join(cwd, "child.txt") });
 
 		const result = await runTask(harness, { cwd, mode: "plan", prompt: "nope" });
@@ -260,8 +260,8 @@ describe("M8a 权限组合与模式继承（ADR-017）", () => {
 	});
 
 	it("模式取**当次调用**：runner 缺省 plan，但 context.mode=build 时子代理内的写**真的成功**", async () => {
-		const home = newTemp("aster-m8a-mode-home-");
-		const cwd = newTemp("aster-m8a-mode-cwd-");
+		const home = newTemp("chenxi-m8a-mode-home-");
+		const cwd = newTemp("chenxi-m8a-mode-cwd-");
 		const target = join(cwd, "child.txt");
 		const harness = makeHarness({ home, cwd, writeTarget: target });
 		expect(existsSync(target)).toBe(false);
@@ -272,9 +272,9 @@ describe("M8a 权限组合与模式继承（ADR-017）", () => {
 	});
 
 	it("子代理内**没有审批通道**：workspace 之外的写被 fail-closed 拒绝，且理由可读", async () => {
-		const home = newTemp("aster-m8a-nogate-home-");
-		const cwd = newTemp("aster-m8a-nogate-cwd-");
-		const outside = join(newTemp("aster-m8a-outside-"), "outside.txt");
+		const home = newTemp("chenxi-m8a-nogate-home-");
+		const cwd = newTemp("chenxi-m8a-nogate-cwd-");
+		const outside = join(newTemp("chenxi-m8a-outside-"), "outside.txt");
 		const harness = makeHarness({ home, cwd, writeTarget: outside });
 
 		const result = await runTask(harness, { cwd, mode: "build" });

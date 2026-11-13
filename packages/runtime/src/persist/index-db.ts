@@ -10,7 +10,7 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { SessionEvent } from "@aster/schema";
+import type { SessionEvent } from "@chenxi/schema";
 
 /** sessions 表一行（对应一个会话的派生元信息）。 */
 export interface SessionIndexRow {

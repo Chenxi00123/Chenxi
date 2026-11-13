@@ -6,8 +6,8 @@
  * 审批视图同样是 main 侧给出的**结构化字段**（`src/session.ts`）。renderer **不嗅探任何文本**
  * （模式取自卡片的 `mode` 字段，而不是去解析正文）。
  *
- * 无 Node、无网络（CSP `connect-src 'none'`）：唯一外部能力是 `window.aster`（preload 的窄接口）。
- * 主题偏好（`aster.theme`）与折叠状态一样是**纯视图状态**：只落在 localStorage / 闭包里，**绝不进 JSONL**。
+ * 无 Node、无网络（CSP `connect-src 'none'`）：唯一外部能力是 `window.chenxi`（preload 的窄接口）。
+ * 主题偏好（`chenxi.theme`）与折叠状态一样是**纯视图状态**：只落在 localStorage / 闭包里，**绝不进 JSONL**。
  */
 const state = {
 	/** 当前**显示**的会话 id。 */
@@ -31,13 +31,13 @@ const state = {
 	query: "",
 };
 
-const THEME_KEY = "aster.theme";
+const THEME_KEY = "chenxi.theme";
 const MAX_PROMPT_HEIGHT = 180;
 
 /** 语义角色 → 界面标签（英文 role 是事实，中文只是**显示**）。 */
 const ROLE_LABELS = {
 	user: "你",
-	assistant: "Aster",
+	assistant: "Chenxi",
 	tool: "工具",
 	permission: "审批",
 	mode: "模式",
@@ -178,7 +178,7 @@ function hideApproval() {
 /* ---- 规则 / 策略面板（M13d-3）：**只读 main 给的结论**，renderer 不自己算规则 ---- */
 
 async function refreshPanel() {
-	const data = await window.aster.query();
+	const data = await window.chenxi.query();
 	const body = document.getElementById("panel-body");
 	body.textContent = "";
 	body.append(el("li", "panel-section", "审批规则（本会话沉淀）"));
@@ -337,7 +337,7 @@ function startRename(item, session) {
 }
 
 async function applyRename(sessionId, title) {
-	await window.aster.rename(sessionId, title);
+	await window.chenxi.rename(sessionId, title);
 	await refreshList();
 	highlightActive();
 }
@@ -376,7 +376,7 @@ function drawList() {
 }
 
 async function refreshList() {
-	const sessions = await window.aster.list();
+	const sessions = await window.chenxi.list();
 	renderList(sessions);
 }
 
@@ -404,7 +404,7 @@ async function openSession(sessionId) {
 	hideApproval();
 	clearLive();
 	highlightActive();
-	const replay = await window.aster.read(sessionId);
+	const replay = await window.chenxi.read(sessionId);
 	state.cards = replay.cards ?? [];
 	renderCards();
 }
@@ -433,7 +433,7 @@ function onReady(sessionId) {
 /** M13d-1：先只读铺上历史，**再**让这条会话成为活动会话（顺序反过来就有"读到旧快照抹掉新事实"的竞态）。 */
 async function resumeSession(sessionId) {
 	await openSession(sessionId);
-	await window.aster.resume(sessionId);
+	await window.chenxi.resume(sessionId);
 }
 
 function onEvent(card) {
@@ -481,11 +481,11 @@ function renderStatus() {
 		state.boot === "" ? state.guarded : `${state.guarded} · 装配 ${state.boot}`;
 }
 
-window.aster.onEvent(onEvent);
-window.aster.onText(onText);
-window.aster.onApproval(onApproval);
-window.aster.onReady(onReady);
-window.aster.onBoot(onBoot);
+window.chenxi.onEvent(onEvent);
+window.chenxi.onText(onText);
+window.chenxi.onApproval(onApproval);
+window.chenxi.onReady(onReady);
+window.chenxi.onBoot(onBoot);
 
 /* ---- 模型接入设置（M21）：密钥只在 main 进程解密，界面永远拿不到 ---- */
 
@@ -513,7 +513,7 @@ async function openSettings() {
 	settingsStatus("", "");
 	document.getElementById("settings").hidden = false;
 	document.getElementById("s-api-key").value = "";
-	const view = await window.aster.getSettings();
+	const view = await window.chenxi.getSettings();
 	document.getElementById("s-base-url").value = view.baseUrl ?? "";
 	document.getElementById("s-model").value = view.model ?? "";
 	const bits = [];
@@ -538,7 +538,7 @@ async function testSettings() {
 	button.disabled = true;
 	settingsStatus("正在请求 /chat/completions…", "");
 	try {
-		const result = await window.aster.testSettings(settingsInput());
+		const result = await window.chenxi.testSettings(settingsInput());
 		settingsStatus(result.message, result.ok ? "ok" : "err");
 	} catch (error) {
 		settingsStatus(`测试失败：${String(error)}`, "err");
@@ -548,7 +548,7 @@ async function testSettings() {
 }
 
 async function saveSettings() {
-	const result = await window.aster.saveSettings(settingsInput());
+	const result = await window.chenxi.saveSettings(settingsInput());
 	if (!result.ok) {
 		settingsStatus(result.error, "err");
 		return;
@@ -558,18 +558,18 @@ async function saveSettings() {
 		return;
 	}
 	settingsStatus("已保存，正在重启应用（会话文件不受影响）…", "ok");
-	await window.aster.restartApp();
+	await window.chenxi.restartApp();
 }
 
 async function clearSettings() {
 	if (!window.confirm("删除本机保存的模型端点与密钥？删除后回退到环境变量。")) return;
-	const result = await window.aster.saveSettings({ baseUrl: "", apiKey: "", model: "" });
+	const result = await window.chenxi.saveSettings({ baseUrl: "", apiKey: "", model: "" });
 	if (!result.ok) {
 		settingsStatus(result.error, "err");
 		return;
 	}
 	settingsStatus("已清除，正在重启应用…", "ok");
-	await window.aster.restartApp();
+	await window.chenxi.restartApp();
 }
 
 /* ---- 交互 ---- */
@@ -587,11 +587,11 @@ function sendPrompt() {
 	input.value = "";
 	autosizePrompt();
 	state.stick = true;
-	void window.aster.sendPrompt(text);
+	void window.chenxi.sendPrompt(text);
 }
 
 function newSession() {
-	void window.aster.newSession();
+	void window.chenxi.newSession();
 	state.liveId = "";
 	state.sessionId = "";
 	state.cards = [];
@@ -619,7 +619,7 @@ function wireInteractions() {
 		sendPrompt();
 	});
 	document.getElementById("interrupt").addEventListener("click", () => {
-		void window.aster.interrupt();
+		void window.chenxi.interrupt();
 	});
 	document.getElementById("new-session").addEventListener("click", newSession);
 	// M22：搜索（输入即过滤；Esc 清空）
@@ -657,14 +657,14 @@ function wireInteractions() {
 		button.addEventListener("click", () => {
 			if (button.dataset.mode === state.mode) return;
 			// 不乐观更新：选中态等 `mode/changed` 事件回来再变（界面不臆断结果）
-			void window.aster.setMode(button.dataset.mode);
+			void window.chenxi.setMode(button.dataset.mode);
 		});
 	}
 	for (const button of document.querySelectorAll("#approval .approval-actions button")) {
 		button.addEventListener("click", () => {
 			// 乐观隐藏：判定本身仍由 main 侧落 `permission/decision` 事件（界面不臆断结果）
 			hideApproval();
-			void window.aster.answerApproval(button.dataset.choice);
+			void window.chenxi.answerApproval(button.dataset.choice);
 		});
 	}
 	document.getElementById("stream").addEventListener("scroll", () => {
@@ -676,7 +676,7 @@ async function boot() {
 	initTheme();
 	wireInteractions();
 	setBusy(false);
-	const meta = await window.aster.meta();
+	const meta = await window.chenxi.meta();
 	renderMode(meta.agentMode ?? "plan");
 	document.getElementById("data-dir").textContent = meta.home;
 	state.guarded = meta.guarded;

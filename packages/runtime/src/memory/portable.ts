@@ -13,7 +13,7 @@
  *  - 但外部服务器返回的**形状垃圾**按宽容处理：交由 `selectExportableRecords` **丢弃并报数**
  *    （导出永远产出**合法**文档）。
  */
-import type { ExchangeProducer, MemoryAdapter, MemoryRecord, MemoryScope } from "@aster/schema";
+import type { ExchangeProducer, MemoryAdapter, MemoryRecord, MemoryScope } from "@chenxi/schema";
 import { selectExportableRecords } from "./exchange.js";
 
 export interface ExportedMemory {

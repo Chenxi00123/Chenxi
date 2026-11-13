@@ -9,8 +9,8 @@
  *  - **不丢事实**：**未知事件类型回退为 `[event] <type>`**，绝不静默丢弃——
  *    镜像的职责是呈现已有事实，不是替用户筛选。
  */
-import type { StreamFrame } from "@aster/protocol";
-import type { SessionEvent } from "@aster/schema";
+import type { StreamFrame } from "@chenxi/protocol";
+import type { SessionEvent } from "@chenxi/schema";
 import { payloadLines } from "./rich-text.js";
 import type { Theme } from "./theme.js";
 

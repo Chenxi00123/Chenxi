@@ -12,7 +12,7 @@ import type {
 	PermissionDecision,
 	PermissionRequest,
 	PermissionVerdict,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { Disposer } from "../events/index.js";
 
 /** 调用目标范围：workspace 内 / 外。 */

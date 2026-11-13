@@ -14,7 +14,7 @@
 import { EventEmitter } from "node:events";
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import type { SessionEvent, SessionId, ToolCallId } from "@aster/schema";
+import type { SessionEvent, SessionId, ToolCallId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseArgs } from "../src/cli/args.js";
 import { runAttachSession } from "../src/cli/attach.js";
@@ -400,8 +400,8 @@ describe("M11b `--attach` 只读镜像（假流；非 TTY 逐行）", () => {
 
 describe("M11b POST /api/sessions/:id/prompt（真 http：单一写入者 + 事件进流）", () => {
 	it("真的落 user/message 并跑出 assistant/message；seq 连续可重放；事件喂进 SSE 扇出", async () => {
-		const home = newTemp("aster-m11b-prompt-");
-		const cwd = newTemp("aster-m11b-prompt-cwd-");
+		const home = newTemp("chenxi-m11b-prompt-");
+		const cwd = newTemp("chenxi-m11b-prompt-cwd-");
 		const sessionId = await seedSession(home, cwd, "build");
 		const before = readEvents(home, sessionId).length;
 
@@ -480,9 +480,9 @@ describe("M11b POST /api/sessions/:id/prompt（真 http：单一写入者 + 事�
 	});
 
 	it("服务端**无审批通道**：越界写 ask → fail-closed deny；文件未生成；判定经 trace 出口可审计", async () => {
-		const home = newTemp("aster-m11b-deny-");
-		const cwd = newTemp("aster-m11b-deny-cwd-");
-		const target = join(newTemp("aster-m11b-deny-out-"), "outside.txt");
+		const home = newTemp("chenxi-m11b-deny-");
+		const cwd = newTemp("chenxi-m11b-deny-cwd-");
+		const target = join(newTemp("chenxi-m11b-deny-out-"), "outside.txt");
 		const sessionId = await seedSession(home, cwd, "build");
 
 		const published: SessionEvent[] = [];
@@ -524,8 +524,8 @@ describe("M11b POST /api/sessions/:id/prompt（真 http：单一写入者 + 事�
 	});
 
 	it("边界与围栏：501（无 driver）/ 405 / 400 / 422 / 413 / 404 / 409（live）", async () => {
-		const home = newTemp("aster-m11b-edges-");
-		const cwd = newTemp("aster-m11b-edges-cwd-");
+		const home = newTemp("chenxi-m11b-edges-");
+		const cwd = newTemp("chenxi-m11b-edges-cwd-");
 		const sessionId = await seedSession(home, cwd, "build");
 		const feed = createEventFeed();
 

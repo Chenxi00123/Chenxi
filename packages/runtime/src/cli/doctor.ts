@@ -1,5 +1,5 @@
 /**
- * `aster --doctor`：环境自检（M6；M7a 起增加配置文件状态检查）。
+ * `chenxi --doctor`：环境自检（M6；M7a 起增加配置文件状态检查）。
  *
  * 设计约束：
  *   - 只做**只读探测** + **一次可写探针**（写入后立即删除），不修改任何用户数据；
@@ -35,7 +35,7 @@ export interface DoctorOptions {
 export const MIN_NODE: readonly [number, number] = [22, 19];
 
 /** 端点三变量（缺失时进入「仅记录」模式，非阻塞）。 */
-const ENDPOINT_VARS = ["ASTER_BASE_URL", "ASTER_API_KEY", "ASTER_MODEL"] as const;
+const ENDPOINT_VARS = ["CHENXI_BASE_URL", "CHENXI_API_KEY", "CHENXI_MODEL"] as const;
 
 interface CheckResult {
 	readonly name: string;
@@ -212,7 +212,7 @@ export async function runDoctor(options: DoctorOptions): Promise<number> {
 		checkStorage(home),
 	];
 
-	options.output.write("aster doctor — environment self-check\n");
+	options.output.write("chenxi doctor — environment self-check\n");
 	options.output.write(`node v${nodeVersion} | platform ${platform} | home ${home}\n\n`);
 	for (const result of results) {
 		const mark = result.ok ? "✔" : "✖";

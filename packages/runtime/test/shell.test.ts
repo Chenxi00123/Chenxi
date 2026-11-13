@@ -37,10 +37,10 @@ describe("pwsh provider", () => {
 	const pwsh = createPwshProvider();
 
 	it("正常执行：捕获 stdout 与退出码", async () => {
-		const result = await pwsh.run({ command: "Write-Output 'hello-aster'", cwd: repoRoot });
+		const result = await pwsh.run({ command: "Write-Output 'hello-chenxi'", cwd: repoRoot });
 		expect(result.providerId).toBe("pwsh");
 		expect(result.exitCode).toBe(0);
-		expect(result.stdout).toContain("hello-aster");
+		expect(result.stdout).toContain("hello-chenxi");
 	});
 
 	it("失败命令：回传退出码", async () => {

@@ -13,7 +13,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { payloadLines } from "@aster/runtime";
+import { payloadLines } from "@chenxi/runtime";
 import { describe, expect, it } from "vitest";
 import { toEventCard } from "../src/host.js";
 
@@ -95,7 +95,7 @@ describe('M13d-2 工具结果按**载荷本身**渲染（修掉 "[object Object]
 });
 
 describe("M13d-2 「载荷 → 行」的规则是**唯一来源**（与 TUI 折叠同一套）", () => {
-	it("payloadLines 由 @aster/runtime 根入口**定向**转出，行为就是 host 依赖的那套", () => {
+	it("payloadLines 由 @chenxi/runtime 根入口**定向**转出，行为就是 host 依赖的那套", () => {
 		expect(payloadLines(undefined)).toEqual([]);
 		expect(payloadLines(null)).toEqual([]);
 		expect(payloadLines("a\nb")).toEqual(["a", "b"]);
@@ -119,8 +119,8 @@ describe("M13d-2 契约（源码级断言，防漂移）", () => {
 	it("renderer 不自己算折叠：只认卡片给的 defaultFolded / detail（视图状态，不外发）", () => {
 		expect(rendererSource).toContain("card.defaultFolded");
 		expect(rendererSource).toContain("card.detail");
-		// 折叠是纯视图：renderer 不为它调任何 IPC（`aster.*` 里没有 fold/expand 之类动作）
-		expect(rendererSource).not.toMatch(/aster\.(fold|expand|toggle)/i);
+		// 折叠是纯视图：renderer 不为它调任何 IPC（`chenxi.*` 里没有 fold/expand 之类动作）
+		expect(rendererSource).not.toMatch(/chenxi\.(fold|expand|toggle)/i);
 		// 也不注入 HTML 字符串
 		expect(/\.innerHTML\s*=/.test(rendererSource)).toBe(false);
 	});

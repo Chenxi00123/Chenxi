@@ -1,7 +1,7 @@
 /**
  * ACP（Agent Client Protocol）**最小通道**的线协议类型（ADR-036）。
  *
- * 我们只实现 ACP 里"让一个编辑器客户端驱动 Aster 跑会话"所需的那一小块：
+ * 我们只实现 ACP 里"让一个编辑器客户端驱动 Chenxi 跑会话"所需的那一小块：
  *  - 客户端 → agent：`initialize` / `session/new` / `session/prompt` / `session/cancel`；
  *  - agent → 客户端：`session/update` 通知（正文块 + 工具调用状态）。
  *

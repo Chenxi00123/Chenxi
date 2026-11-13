@@ -6,7 +6,7 @@
  * 服务端**完全没有它也能工作**）。
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import type { AgentMode, SessionEvent, SessionId } from "@aster/schema";
+import type { AgentMode, SessionEvent, SessionId } from "@chenxi/schema";
 import { sessionFilePath, sessionIdFromFileName, sessionsDir } from "../persist/index.js";
 
 /** 由磁盘事实源折叠出的会话元数据（与 `persist` 的派生行**同义**，但这里不碰索引）。 */

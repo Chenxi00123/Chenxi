@@ -6,7 +6,7 @@
  *   2. 依次跑**单调 guard**：任一 guard 返回 `false` → 强制 `deny`（guard 永远只降级、不放行）；
  *   3. 返回 `allow / deny / ask`（`ask` 的 fail-closed 转换在 `hook.ts` 完成，因为需要知道有无审批通道）。
  */
-import type { AgentMode, PermissionRequest, PermissionVerdict } from "@aster/schema";
+import type { AgentMode, PermissionRequest, PermissionVerdict } from "@chenxi/schema";
 import type { Context, Disposer } from "../events/index.js";
 import { resolveCallScope } from "./scope.js";
 import type {

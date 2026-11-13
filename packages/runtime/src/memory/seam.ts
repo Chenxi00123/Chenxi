@@ -19,7 +19,7 @@ import {
 	type MemoryRecord,
 	type MemoryScope,
 	type SessionEvent,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { MemoryWriteSeam } from "./write.js";
 
 /** 单次注入条数上限（R13 质量地板的兜底）。 */

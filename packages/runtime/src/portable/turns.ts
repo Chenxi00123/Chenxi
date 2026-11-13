@@ -8,7 +8,7 @@
  * 模式切换等在我们的模型里有事实、在厂商侧**没有对应物**，所以一律不进入这一层
  * （有损清单见 ADR-019）。
  */
-import type { EventDraft, SessionEvent } from "@aster/schema";
+import type { EventDraft, SessionEvent } from "@chenxi/schema";
 
 export interface PortableTurn {
 	/** 厂商侧只区分这两种角色（我们的 `tool` 角色在厂商侧不存在）。 */

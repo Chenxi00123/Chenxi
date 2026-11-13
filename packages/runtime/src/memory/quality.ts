@@ -13,7 +13,7 @@
  * 判官原则（思想借鉴 HaluMem 的指标定义，**文字与实现原创**）：**禁止外部知识**（只看 fixture 给出的事实）；
  * 多元素"缺一即 Omission"（= ①的集合语义）；既有"该有而没有"又有"凭空多出"时**分别报**，本层不做主观加权打分。
  */
-import type { MemoryRecord } from "@aster/schema";
+import type { MemoryRecord } from "@chenxi/schema";
 
 export type L1FindingKind =
 	| "missing" // 该有的记忆没被抽取出来

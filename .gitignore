@@ -2,10 +2,13 @@
 node_modules/
 dist/
 *.tsbuildinfo
-# esbuild 单文件 bundle 构建产物（bin/aster.cmd 启动器属源码，须纳入版本控制，故不忽略）
-bin/aster.mjs
+# esbuild 单文件 bundle 构建产物（bin/chenxi.cmd 启动器属源码，须纳入版本控制，故不忽略）
+bin/chenxi.mjs
 
-# 本地数据与临时目录（ASTER_HOME / 开发缓存）
+# 本地数据与临时目录（CHENXI_HOME / 开发缓存）
+# 两种目录名都忽略：`.chenxi` 是现名，`.aster` 是更名前的历史数据（含 Electron 的 session 缓存）
+.chenxi/
+.chenxi-*/
 .aster/
 .aster-*/
 .dev/

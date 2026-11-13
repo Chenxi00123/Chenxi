@@ -11,7 +11,7 @@ import { existsSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { Readable } from "node:stream";
-import type { SessionEvent, SessionId } from "@aster/schema";
+import type { SessionEvent, SessionId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runSessionRepl } from "../src/cli/repl.js";
 import { createSessionStore } from "../src/persist/index.js";
@@ -21,7 +21,7 @@ import { makeTempDir } from "./helpers/tmp.js";
 const homes: string[] = [];
 
 function newHome(): string {
-	const home = makeTempDir("aster-m1-");
+	const home = makeTempDir("chenxi-m1-");
 	homes.push(home);
 	return home;
 }

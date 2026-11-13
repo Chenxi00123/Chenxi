@@ -17,8 +17,8 @@
  *    `await` 的，没人回答就会把回合卡死）。
  */
 import { Readable } from "node:stream";
-import { cli } from "@aster/runtime";
-import type { AgentMode } from "@aster/schema";
+import { cli } from "@chenxi/runtime";
+import type { AgentMode } from "@chenxi/schema";
 import { type EventCard, toEventCard } from "./host.js";
 
 /** 审批请求的**结构化视图**（renderer 据此画审批卡；不嗅探任何文本）。 */

@@ -15,8 +15,8 @@ import {
 	createStubProvider,
 	deriveMessages,
 	planCompaction,
-} from "@aster/runtime";
-import type { SessionEvent } from "@aster/schema";
+} from "@chenxi/runtime";
+import type { SessionEvent } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { makeTempDir } from "./helpers/tmp.js";
 
@@ -242,7 +242,7 @@ describe("deriveMessages：投影跳过区间并插入摘要", () => {
 
 describe("真会话：压缩是已记录的事实", () => {
 	it("开启 compaction 后，JSONL 出现 context/compacted 且投影减少", async () => {
-		const home = makeTempDir("aster-m23-");
+		const home = makeTempDir("chenxi-m23-");
 		temps.push(home);
 		const result = await cli.runSessionRepl({
 			home,

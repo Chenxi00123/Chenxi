@@ -21,8 +21,8 @@ import type {
 	ToolCallRef,
 	ToolExecutionResult,
 	TurnId,
-} from "@aster/schema";
-import { DEFAULT_AGENT_MODE } from "@aster/schema";
+} from "@chenxi/schema";
+import { DEFAULT_AGENT_MODE } from "@chenxi/schema";
 import type { Context } from "../events/index.js";
 import type { LlmProvider } from "../llm/types.js";
 import { deriveMessages, type EventLog, newTurnId } from "../session/index.js";

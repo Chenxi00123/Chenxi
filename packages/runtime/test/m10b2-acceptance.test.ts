@@ -194,8 +194,8 @@ describe("M10b-2 按键与鼠标解码（纯函数）", () => {
 
 describe("M10b-2 应用层：假 tty 驱动真实 REPL（Tab 补全 + 鼠标）", () => {
 	it("Tab 真补出 `/mode`；滚轮改滚动；点击输入行定位插入点；鼠标上报开启后必定关闭", async () => {
-		const home = newTemp("aster-m10b2-home-");
-		const cwd = newTemp("aster-m10b2-cwd-");
+		const home = newTemp("chenxi-m10b2-home-");
+		const cwd = newTemp("chenxi-m10b2-cwd-");
 		const stdout = new FakeStdout();
 		const stdin = new FakeStdin();
 

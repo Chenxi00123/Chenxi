@@ -96,7 +96,7 @@ export interface MemoryAdapter {
  */
 
 /** 记忆交换文档格式标识（放在文档里第一眼就能认出这是谁写的）。 */
-export const MEMORY_EXCHANGE_FORMAT = "aster-memory-exchange";
+export const MEMORY_EXCHANGE_FORMAT = "chenxi-memory-exchange";
 
 export type MemoryExchangeFormat = typeof MEMORY_EXCHANGE_FORMAT;
 

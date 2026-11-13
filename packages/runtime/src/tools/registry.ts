@@ -10,7 +10,7 @@ import type {
 	ToolMetadata,
 	ToolRiskLevel,
 	ToolSideEffectScope,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { Context, Disposer } from "../events/index.js";
 import { isValueSchema } from "./schema.js";
 
@@ -27,7 +27,7 @@ export class ToolRegistrationError extends Error {
 }
 
 /** 供 llm 请求使用的工具描述（OpenAI 风格；ADR-005 的 prompt 侧投射）。
- *  形状定义在 `@aster/schema`，此处仅 re-export。 */
+ *  形状定义在 `@chenxi/schema`，此处仅 re-export。 */
 
 /** 注册表内部存放的异质工具类型（入参/出参已归一为 unknown）。 */
 export type AnyToolDefinition = ToolDefinition<unknown, unknown>;

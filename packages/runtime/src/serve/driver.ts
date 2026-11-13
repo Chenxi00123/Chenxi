@@ -10,7 +10,7 @@
  *
  * 模式 / cwd **取自会话自身**（最后一条 `mode/changed`，否则 `session/start`），不由客户端指定。
  */
-import type { SessionEvent, SessionId, StopReason } from "@aster/schema";
+import type { SessionEvent, SessionId, StopReason } from "@chenxi/schema";
 import { createTraceAppender, executeTurn, type Output } from "../cli/session-loop.js";
 import type { CompactionConfig, ContextBuilder } from "../context/index.js";
 import type { LlmProvider } from "../llm/types.js";

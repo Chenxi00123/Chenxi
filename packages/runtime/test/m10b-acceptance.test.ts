@@ -16,7 +16,7 @@
 import { EventEmitter } from "node:events";
 import { rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { SessionEvent, ToolCallId } from "@aster/schema";
+import type { SessionEvent, ToolCallId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { createContext } from "../src/events/index.js";
 import { createStubProvider } from "../src/llm/index.js";
@@ -240,8 +240,8 @@ describe("M10b-1 行模型（createTranscript：文本通道 + 事件合流）",
 
 describe("M10b-1 应用层：假 tty 驱动真实 REPL（结构化事件渲染）", () => {
 	it("用户行由事件出现**恰好一次**；工具轨迹来自事件且无文本版本；mode 只出现一行", async () => {
-		const home = newTemp("aster-m10b-home-");
-		const cwd = newTemp("aster-m10b-cwd-");
+		const home = newTemp("chenxi-m10b-home-");
+		const cwd = newTemp("chenxi-m10b-cwd-");
 		const target = join(cwd, "sample.txt");
 		writeFileSync(target, "line1\nline2\nline3\nline4\nline5\nline6\n", "utf8");
 		const stdout = new FakeStdout();

@@ -20,7 +20,7 @@ import {
 	type ExchangeSessionMeta,
 	type SessionEvent,
 	type SessionExchangeDocument,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { z } from "zod";
 
 /** 文档里的一条事件草稿（身份字段已剥离：导入方重建）。 */
@@ -52,7 +52,7 @@ const producerSchema = z.strictObject({
 	version: z.string().min(1),
 });
 
-// `mode` 的取值集合必须与 `@aster/schema` 的 `AGENT_MODES` 一致（m9 验收有断言，避免两处漂移）
+// `mode` 的取值集合必须与 `@chenxi/schema` 的 `AGENT_MODES` 一致（m9 验收有断言，避免两处漂移）
 const sessionSchema = z.strictObject({
 	cwd: z.string().min(1),
 	mode: z.enum(["plan", "build"]),
@@ -161,7 +161,7 @@ export function parseExchangeDocument(raw: unknown): ParsedExchangeDocument {
 		throw new ExchangeFormatError(
 			"version_unsupported",
 			`document formatVersion ${version} is newer than this client supports ` +
-				`(${EXCHANGE_FORMAT_VERSION}); upgrade Aster instead of importing blindly`,
+				`(${EXCHANGE_FORMAT_VERSION}); upgrade Chenxi instead of importing blindly`,
 		);
 	}
 	if (version < EXCHANGE_FORMAT_VERSION) {

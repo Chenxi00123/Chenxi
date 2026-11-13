@@ -9,7 +9,7 @@
  * - 工具清单由 `registry.descriptors()` 动态生成（JSON Schema 本身走请求的 `tools` 字段，不进 prompt）；
  * - 不引入 token 估算启发式（方案 R7）：预算由 provider 实测 `usage.prompt_tokens` 衡量。
  */
-import type { AgentMode, ToolDescriptor } from "@aster/schema";
+import type { AgentMode, ToolDescriptor } from "@chenxi/schema";
 import type { Disposer } from "../events/index.js";
 import type { ToolRegistry } from "../tools/registry.js";
 
@@ -116,7 +116,7 @@ export function createDefaultSections(): readonly PromptSection[] {
 			id: "identity",
 			title: "Identity",
 			stable: true,
-			content: "You are Aster, a minimal and auditable local agent harness.",
+			content: "You are Chenxi, a minimal and auditable local agent harness.",
 		},
 		{
 			id: "guidelines",

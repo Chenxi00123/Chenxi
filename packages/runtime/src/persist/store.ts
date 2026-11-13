@@ -14,8 +14,8 @@ import {
 	readFileSync,
 	writeSync,
 } from "node:fs";
-import type { AgentMode, EventDraft, EventType, SessionEvent, SessionId } from "@aster/schema";
-import { SESSION_FORMAT_VERSION } from "@aster/schema";
+import type { AgentMode, EventDraft, EventType, SessionEvent, SessionId } from "@chenxi/schema";
+import { SESSION_FORMAT_VERSION } from "@chenxi/schema";
 import type { EventLog } from "../session/index.js";
 import { createEventLog, newSessionId } from "../session/index.js";
 import type { RebuildCounts, SessionIndexRow } from "./index-db.js";
@@ -29,7 +29,7 @@ import {
 } from "./paths.js";
 
 export interface PersistOptions {
-	/** ASTER_HOME 数据目录；缺省取 env.ASTER_HOME 或 ~/.aster。 */
+	/** CHENXI_HOME 数据目录；缺省取 env.CHENXI_HOME 或 ~/.chenxi。 */
 	readonly home?: string;
 	/** 索引数据库文件名，仅测试用；缺省 "index.sqlite"。 */
 	readonly indexFile?: string;

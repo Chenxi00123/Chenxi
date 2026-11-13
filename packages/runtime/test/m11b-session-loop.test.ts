@@ -9,7 +9,7 @@
 import { existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import type { ToolCallId } from "@aster/schema";
+import type { ToolCallId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runSessionRepl } from "../src/cli/repl.js";
 import { createContext } from "../src/events/index.js";
@@ -73,9 +73,9 @@ function writeScript(target: string) {
 
 describe("M11b 编排共用：REPL 的每一条事实都经同一个出口", () => {
 	it("`permission/decision` 也进入 onEvent（曾经绕过 → 订阅者静默漏掉审批事件）", async () => {
-		const home = newTemp("aster-m11b-repl-");
-		const cwd = newTemp("aster-m11b-repl-cwd-");
-		const target = join(newTemp("aster-m11b-repl-out-"), "outside.txt");
+		const home = newTemp("chenxi-m11b-repl-");
+		const cwd = newTemp("chenxi-m11b-repl-cwd-");
+		const target = join(newTemp("chenxi-m11b-repl-out-"), "outside.txt");
 		const seen: string[] = [];
 		const out: string[] = [];
 		// 受控输入：等审批提问真的出现后再作答（否则 "n" 会被当成下一条用户消息）

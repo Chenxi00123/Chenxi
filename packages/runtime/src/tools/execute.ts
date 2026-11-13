@@ -17,7 +17,7 @@ import type {
 	ToolCallId,
 	ToolError,
 	ToolExecutionResult,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { Context } from "../events/index.js";
 import type { AnyToolDefinition, ToolRegistry } from "./registry.js";
 

@@ -3,7 +3,7 @@
  *
  * 覆盖：
  *  - **canonical 往返语义无损**：含 bitemporal（`validAt` / `invalidAt` 的 **null 与缺席是两种事实**）
- *    与 `provenance` 的记忆集导出为 `aster-memory-exchange` 文档再解析，**逐字段深等**；
+ *    与 `provenance` 的记忆集导出为 `chenxi-memory-exchange` 文档再解析，**逐字段深等**；
  *  - **版本门禁是真实分支**：更高版本必拒、更早版本（v0，无迁移路径）必拒、错 format / 坏 JSON / 坏记录必拒；
  *  - **解析即规范化**：未知键（如外部塞进来的 `metadata.user`）**被剥掉**——这是 ADR-010「写入时剥离身份键」
  *    的可测形态（不让外部私货渗进下游）；
@@ -17,13 +17,13 @@
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { MemoryAdapter, MemoryRecord, MemoryScope } from "@aster/schema";
+import type { MemoryAdapter, MemoryRecord, MemoryScope } from "@chenxi/schema";
 import {
 	EXCHANGE_FORMAT_VERSION,
 	MEMORY_EXCHANGE_FORMAT,
 	MEMORY_EXCHANGE_FORMAT_VERSION,
 	SESSION_FORMAT_VERSION,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseArgs } from "../src/cli/args.js";
 import { runMemoryPortableCommand } from "../src/cli/memory-portable.js";
@@ -38,7 +38,7 @@ import {
 	selectExportableRecords,
 } from "../src/memory/index.js";
 import { createSessionStore } from "../src/persist/index.js";
-import { ASTER_PRODUCER } from "../src/portable/index.js";
+import { CHENXI_PRODUCER } from "../src/portable/index.js";
 import { makeTempDir } from "./helpers/tmp.js";
 
 const temps: string[] = [];
@@ -60,7 +60,7 @@ const FIXTURE_SERVER = fileURLToPath(
 const T0 = "2026-01-01T00:00:00.000Z";
 const T1 = "2026-01-01T00:00:01.000Z";
 
-const SCOPE: MemoryScope = { user: "u1", agent: "aster", session: "s1" };
+const SCOPE: MemoryScope = { user: "u1", agent: "chenxi", session: "s1" };
 
 /** 一个"什么都有"的记忆集：相似度 / 系统时间 / bitemporal（含显式 null）/ 溯源。 */
 const RICH_RECORDS: readonly MemoryRecord[] = [
@@ -81,7 +81,7 @@ describe("M14 canonical 记忆交换文档：往返语义无损（ADR-030）", (
 		const document = buildMemoryExchangeDocument({
 			scope: SCOPE,
 			records: RICH_RECORDS,
-			producer: ASTER_PRODUCER,
+			producer: CHENXI_PRODUCER,
 		});
 		expect(document.format).toBe(MEMORY_EXCHANGE_FORMAT);
 		expect(document.formatVersion).toBe(MEMORY_EXCHANGE_FORMAT_VERSION);
@@ -90,7 +90,7 @@ describe("M14 canonical 记忆交换文档：往返语义无损（ADR-030）", (
 		const parsed = parseMemoryExchangeJson(`${JSON.stringify(document, null, 2)}\n`);
 		expect(parsed.records).toEqual(RICH_RECORDS);
 		expect(parsed.scope).toEqual(SCOPE);
-		expect(parsed.producer).toEqual(ASTER_PRODUCER);
+		expect(parsed.producer).toEqual(CHENXI_PRODUCER);
 		expect(parsed.formatVersion).toBe(MEMORY_EXCHANGE_FORMAT_VERSION);
 
 		// 显式 null 保留、缺席键不补（absense 与 null 是两种事实，不能被折叠）
@@ -108,8 +108,8 @@ describe("M14 canonical 记忆交换文档：往返语义无损（ADR-030）", (
 			records: [{ id: "m1", content: "hi", metadata: { user: "attacker" }, extra: 1 }],
 		};
 		const parsed = parseMemoryExchangeDocument(foreign);
-		const normalized = normalizeMemoryExchangeDocument(parsed, ASTER_PRODUCER);
-		expect(normalized.producer).toEqual(ASTER_PRODUCER);
+		const normalized = normalizeMemoryExchangeDocument(parsed, CHENXI_PRODUCER);
+		expect(normalized.producer).toEqual(CHENXI_PRODUCER);
 		expect(normalized.records).toEqual([{ id: "m1", content: "hi" }]); // 未知键被剥掉
 		expect(parseMemoryExchangeJson(JSON.stringify(normalized)).records).toEqual([
 			{ id: "m1", content: "hi" },
@@ -122,7 +122,7 @@ describe("M14 版本门禁与记录校验（ADR-030）", () => {
 		return {
 			format: MEMORY_EXCHANGE_FORMAT,
 			formatVersion: MEMORY_EXCHANGE_FORMAT_VERSION,
-			producer: { name: "aster", version: "1.0.0" },
+			producer: { name: "chenxi", version: "1.0.0" },
 			scope: SCOPE,
 			records: [{ id: "m1", content: "hi" }],
 		};
@@ -151,7 +151,7 @@ describe("M14 版本门禁与记录校验（ADR-030）", () => {
 	it("非法文档（错 format / 缺 records / 坏 JSON）一律快速失败且原因可读", () => {
 		expect(() =>
 			parseMemoryExchangeDocument({ ...baseDocument(), format: "mem0-dump" }),
-		).toThrowError(/not a valid aster-memory-exchange document/);
+		).toThrowError(/not a valid chenxi-memory-exchange document/);
 		const missing = baseDocument();
 		missing.formatVersion = undefined;
 		expect(() => parseMemoryExchangeDocument(missing)).toThrowError(/formatVersion/);
@@ -183,7 +183,7 @@ describe("M14 版本门禁与记录校验（ADR-030）", () => {
 		expect(() =>
 			parseMemoryExchangeDocument({
 				...baseDocument(),
-				scope: { user: "u1", agent: "aster" },
+				scope: { user: "u1", agent: "chenxi" },
 			}),
 		).toThrowError(/scope\.session/);
 	});
@@ -193,7 +193,7 @@ describe("M14 版本门禁与记录校验（ADR-030）", () => {
 		expect(typeof EXCHANGE_FORMAT_VERSION).toBe("number");
 		expect(typeof SESSION_FORMAT_VERSION).toBe("number");
 		// 记忆侧与**会话侧**的 format 标识必须能一眼区分（否则门禁会放行"串味"的文档）
-		expect(MEMORY_EXCHANGE_FORMAT).not.toBe("aster-session-exchange");
+		expect(MEMORY_EXCHANGE_FORMAT).not.toBe("chenxi-session-exchange");
 	});
 });
 
@@ -241,7 +241,7 @@ describe("M14 读侧（导出）：只读、如实报错、绝不写（ADR-016/0
 		const exported = await readMemoryLayerForExport({
 			adapter,
 			scope: SCOPE,
-			producer: ASTER_PRODUCER,
+			producer: CHENXI_PRODUCER,
 		});
 		expect(exported.records).toEqual([
 			{ id: "m1", content: "a" },
@@ -257,7 +257,7 @@ describe("M14 读侧（导出）：只读、如实报错、绝不写（ADR-016/0
 			getSessionMemories: () => Promise.reject(new Error("memory server is unreachable")),
 		};
 		await expect(
-			readMemoryLayerForExport({ adapter, scope: SCOPE, producer: ASTER_PRODUCER }),
+			readMemoryLayerForExport({ adapter, scope: SCOPE, producer: CHENXI_PRODUCER }),
 		).rejects.toThrowError(/unreachable/);
 	});
 
@@ -267,7 +267,7 @@ describe("M14 读侧（导出）：只读、如实报错、绝不写（ADR-016/0
 			const exported = await readMemoryLayerForExport({
 				adapter,
 				scope: SCOPE,
-				producer: ASTER_PRODUCER,
+				producer: CHENXI_PRODUCER,
 			});
 			expect(exported.records).toEqual([]);
 		}
@@ -307,7 +307,7 @@ describe("M14 读侧（导出）：只读、如实报错、绝不写（ADR-016/0
 		const exported = await readMemoryLayerForExport({
 			adapter,
 			scope: SCOPE,
-			producer: ASTER_PRODUCER,
+			producer: CHENXI_PRODUCER,
 		});
 		expect(exported.records).toEqual([
 			{
@@ -342,7 +342,7 @@ describe("M14 CLI 接线：--export-memory / --import-memory（ADR-030）", () =
 	});
 
 	it("--import-memory：校验 + 规范化重写，且**明说不写记忆层**（ADR-016）", async () => {
-		const dir = newTemp("aster-m14-imp-");
+		const dir = newTemp("chenxi-m14-imp-");
 		const source = join(dir, "in.json");
 		const out = join(dir, "normalized.json");
 		writeFileSync(
@@ -360,17 +360,17 @@ describe("M14 CLI 接线：--export-memory / --import-memory（ADR-030）", () =
 		await runMemoryPortableCommand({ importMemoryPath: source, out, output });
 		const printed = lines.join("");
 		expect(printed).toContain("1 record(s)");
-		expect(printed).toContain("scope: user=u1 agent=aster session=s1");
+		expect(printed).toContain("scope: user=u1 agent=chenxi session=s1");
 		expect(printed).toContain("normalized (canonical form, unknown keys stripped)");
 		expect(printed).toContain("deferred by design (ADR-016)"); // **绝不让用户以为"导进去了"**
 
 		const written = JSON.parse(readFileSync(out, "utf8")) as Record<string, unknown>;
-		expect(written.producer).toEqual(ASTER_PRODUCER);
+		expect(written.producer).toEqual(CHENXI_PRODUCER);
 		expect(written.records).toEqual([{ id: "m1", content: "hi" }]);
 	});
 
 	it("--import-memory：坏文档快速失败（不产出半截文件）", async () => {
-		const dir = newTemp("aster-m14-bad-");
+		const dir = newTemp("chenxi-m14-bad-");
 		const source = join(dir, "bad.json");
 		const out = join(dir, "should-not-exist.json");
 		writeFileSync(source, "{ not json");
@@ -387,11 +387,11 @@ describe("M14 CLI 接线：--export-memory / --import-memory（ADR-030）", () =
 				importMemoryPath: source,
 				output: { write: () => undefined },
 			}),
-		).rejects.toThrowError(/aster-memory-exchange/);
+		).rejects.toThrowError(/chenxi-memory-exchange/);
 	});
 
 	it("--export-memory：**真进程**桥接夹具记忆层，导出文档含记录与丢弃计数", async () => {
-		const home = newTemp("aster-m14-exp-");
+		const home = newTemp("chenxi-m14-exp-");
 		writeFileSync(
 			join(home, "config.json"),
 			JSON.stringify({
@@ -409,17 +409,17 @@ describe("M14 CLI 接线：--export-memory / --import-memory（ADR-030）", () =
 		await handle.close();
 		await store.dispose();
 
-		const out = join(home, "memory.aster.json");
+		const out = join(home, "memory.chenxi.json");
 		const { lines, output } = collectingOutput();
 		await runMemoryPortableCommand({ home, exportMemory: true, out, output });
 		const printed = lines.join("");
 		expect(printed).toContain("exported 2 memory record(s)");
-		expect(printed).toContain("lossless for Aster");
+		expect(printed).toContain("lossless for Chenxi");
 		expect(printed).toContain(`session=${sessionId}`); // 缺省作用域 = 最近更新的已记录会话
 
 		const document = parseMemoryExchangeJson(readFileSync(out, "utf8"));
 		expect(document.formatVersion).toBe(MEMORY_EXCHANGE_FORMAT_VERSION);
-		expect(document.producer).toEqual(ASTER_PRODUCER);
+		expect(document.producer).toEqual(CHENXI_PRODUCER);
 		expect(document.scope.session).toBe(sessionId);
 		expect(document.scope.user).not.toBe("");
 		expect(document.records.map((record) => record.id)).toEqual(["m1", "m2"]);
@@ -434,7 +434,7 @@ describe("M14 CLI 接线：--export-memory / --import-memory（ADR-030）", () =
 	});
 
 	it("--export-memory：未配置记忆层 / 缺 --out 都快速失败且原因可读", async () => {
-		const home = newTemp("aster-m14-none-");
+		const home = newTemp("chenxi-m14-none-");
 		await expect(
 			runMemoryPortableCommand({
 				home,

@@ -13,7 +13,7 @@ import { readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
-import { cli, createStubProvider } from "@aster/runtime";
+import { cli, createStubProvider } from "@chenxi/runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { createDesktopHost, toEventCard, toEventCards } from "../src/host.js";
 import {
@@ -64,7 +64,7 @@ function sessionFile(home: string): string {
 // 在 Linux runner 上 `node:path` 会把 `D:\...` 当相对路径解析（CI 首次运行已实证），故整组只在 win32 上跑。
 describe.skipIf(process.platform !== "win32")("M13a 「绝不碰 C 盘」守卫（纯函数）", () => {
 	it("路径布局：四个受管路径都在 `<home>\\desktop` 之下", () => {
-		const home = join("D:", "data", "aster", "desktop");
+		const home = join("D:", "data", "chenxi", "desktop");
 		const paths = desktopPaths(home);
 		expect(Object.keys(paths).sort()).toEqual(["cache", "logs", "sessionData", "userData"]);
 		for (const value of Object.values(paths)) expect(isInside(home, value)).toBe(true);
@@ -72,7 +72,7 @@ describe.skipIf(process.platform !== "win32")("M13a 「绝不碰 C 盘」守卫�
 	});
 
 	it("越界 / 缺路径 / 全在内：三种判定与可读原因", () => {
-		const home = desktopDataRoot("D:\\data\\aster");
+		const home = desktopDataRoot("D:\\data\\chenxi");
 		const paths = desktopPaths(home);
 		const all = auditDesktopPaths(home, (key) => paths[key as "userData"]);
 		expect(all.ok).toBe(true);
@@ -94,17 +94,17 @@ describe.skipIf(process.platform !== "win32")("M13a 「绝不碰 C 盘」守卫�
 		expect(missing.entries.find((entry) => entry.key === "logs")?.path).toBe("(缺)");
 	});
 
-	it("数据根解析：显式 `ASTER_HOME` 优先；否则落在仓库所在的盘", () => {
-		expect(resolveDesktopHome({ ASTER_HOME: "D:\\elsewhere" }, "D:\\repo")).toBe("D:\\elsewhere");
-		expect(resolveDesktopHome({}, "D:\\repo")).toBe("D:\\repo\\.aster");
-		expect(desktopDataRoot("D:\\repo\\.aster")).toBe("D:\\repo\\.aster\\desktop");
+	it("数据根解析：显式 `CHENXI_HOME` 优先；否则落在仓库所在的盘", () => {
+		expect(resolveDesktopHome({ CHENXI_HOME: "D:\\elsewhere" }, "D:\\repo")).toBe("D:\\elsewhere");
+		expect(resolveDesktopHome({}, "D:\\repo")).toBe("D:\\repo\\.chenxi");
+		expect(desktopDataRoot("D:\\repo\\.chenxi")).toBe("D:\\repo\\.chenxi\\desktop");
 		expect(isInside("D:\\repo", "D:\\repo2")).toBe(false); // 前缀陷阱：`repo2` 不在 `repo` 内
 	});
 });
 
 describe("M13a 会话宿主（纯 Node；只读）", () => {
 	it("列会话 + 读事件：能拿到真实会话的已记录事件，且**读路径零写入**（JSONL 逐字节不变）", async () => {
-		const home = newTemp("aster-m13a-home-");
+		const home = newTemp("chenxi-m13a-home-");
 		const sessionId = await runRecordedSession(home);
 		const file = sessionFile(home);
 		const before = readFileSync(file);
@@ -186,7 +186,7 @@ describe("M13a 契约与纪律（源码级断言，防漂移）", () => {
 	const rendererSource = readFileSync(join(PKG, "renderer", "app.js"), "utf8");
 
 	it("IPC 频道名 main ↔ preload **一致**（preload 是 CJS，故只能用源码比对钉住）", () => {
-		const channels = [...mainSource.matchAll(/"(aster:[a-z:]+)"/g)].map((match) => match[1]);
+		const channels = [...mainSource.matchAll(/"(chenxi:[a-z:]+)"/g)].map((match) => match[1]);
 		expect(channels.length).toBeGreaterThanOrEqual(3);
 		for (const channel of new Set(channels)) {
 			expect(preloadSource).toContain(channel);
@@ -196,7 +196,7 @@ describe("M13a 契约与纪律（源码级断言，防漂移）", () => {
 		for (const api of ["meta:", "list:", "read:"]) expect(preloadSource).toContain(api);
 	});
 
-	it("renderer 拿不到 Node / 不碰 ipcRenderer：只有 `window.aster` 这一条窄接口", () => {
+	it("renderer 拿不到 Node / 不碰 ipcRenderer：只有 `window.chenxi` 这一条窄接口", () => {
 		expect(rendererSource).not.toContain("require(");
 		expect(rendererSource).not.toContain("ipcRenderer");
 		// 只做 DOM 组装 ⇒ 不注入 HTML 字符串（没有注入面）

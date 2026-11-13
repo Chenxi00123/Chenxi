@@ -9,8 +9,8 @@
  *  - 两者都**不进 REPL**：打印结果并退出（与 `--export` / `--import` 一致）。
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import type { MemoryScope, SessionId } from "@aster/schema";
-import { MEMORY_EXCHANGE_FORMAT, MEMORY_EXCHANGE_FORMAT_VERSION } from "@aster/schema";
+import type { MemoryScope, SessionId } from "@chenxi/schema";
+import { MEMORY_EXCHANGE_FORMAT, MEMORY_EXCHANGE_FORMAT_VERSION } from "@chenxi/schema";
 import { loadConfig } from "../config/index.js";
 import { createContext } from "../events/index.js";
 import { bridgeMcpServer } from "../mcp/index.js";
@@ -22,7 +22,7 @@ import {
 	readMemoryLayerForExport,
 } from "../memory/index.js";
 import { createSessionStore } from "../persist/index.js";
-import { ASTER_PRODUCER, resolveLatestSession } from "../portable/index.js";
+import { CHENXI_PRODUCER, resolveLatestSession } from "../portable/index.js";
 import { createToolRegistry } from "../tools/index.js";
 import type { Output } from "./repl.js";
 
@@ -48,7 +48,7 @@ export interface MemoryPortableCliOptions {
 
 /** 作用域里的 user 键：与 `bootstrap.ts` 的记忆缝**同一口径**（一处算不出两种身份）。 */
 export function resolveMemoryUser(): string {
-	return process.env.ASTER_USER ?? process.env.USER ?? process.env.USERNAME ?? "local";
+	return process.env.CHENXI_USER ?? process.env.USER ?? process.env.USERNAME ?? "local";
 }
 
 async function runExport(options: MemoryPortableCliOptions): Promise<void> {
@@ -63,7 +63,7 @@ async function runExport(options: MemoryPortableCliOptions): Promise<void> {
 		throw new Error(
 			"--export-memory: no memory layer is configured — declare memory.{server,searchTool} in " +
 				`a config file (looked at: ${loaded.sources.length === 0 ? "none found" : loaded.sources.join(", ")}); ` +
-				"aster does not own a memory store (ADR-010) and will not invent one",
+				"chenxi does not own a memory store (ADR-010) and will not invent one",
 		);
 	}
 	const declaration = loaded.memory;
@@ -87,7 +87,7 @@ async function runExport(options: MemoryPortableCliOptions): Promise<void> {
 	} finally {
 		await store.dispose();
 	}
-	const scope: MemoryScope = { user: resolveMemoryUser(), agent: "aster", session };
+	const scope: MemoryScope = { user: resolveMemoryUser(), agent: "chenxi", session };
 
 	// 只桥接**这一个**声明过的服务器：不建工具运行时、不装配 REPL（导出只要一条读连接）
 	const ctx = createContext();
@@ -115,7 +115,7 @@ async function runExport(options: MemoryPortableCliOptions): Promise<void> {
 				searchTool: declaration.searchTool,
 			}),
 			scope,
-			producer: ASTER_PRODUCER,
+			producer: CHENXI_PRODUCER,
 		});
 		const document = buildMemoryExchangeDocument({
 			scope: exported.scope,
@@ -125,7 +125,7 @@ async function runExport(options: MemoryPortableCliOptions): Promise<void> {
 		writeFileSync(out, `${JSON.stringify(document, null, 2)}\n`, "utf8");
 		options.output.write(
 			`exported ${exported.records.length} memory record(s) as ${MEMORY_EXCHANGE_FORMAT} ` +
-				`v${MEMORY_EXCHANGE_FORMAT_VERSION} (lossless for Aster) -> ${out}\n`,
+				`v${MEMORY_EXCHANGE_FORMAT_VERSION} (lossless for Chenxi) -> ${out}\n`,
 		);
 		options.output.write(
 			`scope: user=${scope.user} agent=${scope.agent} session=${scope.session}` +
@@ -170,7 +170,7 @@ async function runImport(options: MemoryPortableCliOptions): Promise<void> {
 
 	if (options.out !== undefined) {
 		// 规范化重写（= 主张 4 的「迁移」落点）：未知键剥掉、产出方换成本仓、版本锚到当前
-		const document = normalizeMemoryExchangeDocument(parsed, ASTER_PRODUCER);
+		const document = normalizeMemoryExchangeDocument(parsed, CHENXI_PRODUCER);
 		writeFileSync(options.out, `${JSON.stringify(document, null, 2)}\n`, "utf8");
 		options.output.write(`normalized (canonical form, unknown keys stripped) -> ${options.out}\n`);
 	}

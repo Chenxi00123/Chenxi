@@ -4,7 +4,7 @@
  * 布局（**全屏 + 差分**，动作片式地克制）：
  *
  * ```
- *   row 0           状态条：aster · 模式徽标 · cwd · 模型 · 会话 id      （accent + muted）
+ *   row 0           状态条：chenxi · 模式徽标 · cwd · 模型 · 会话 id      （accent + muted）
  *   row 1           细分隔线（muted）
  *   row 2..k        会话视图：**下对齐**的尾部窗口，可滚动（PageUp/PageDown）
  *   row k+1..rows-1 输入区：**1..MAX_INPUT_ROWS 行**（ADR-025：多行草稿；首行 `› `，续行同宽缩进）
@@ -72,9 +72,9 @@ const RULE = "─";
 /** 光标移动的按下限。 */
 const MIN_RENDER_INTERVAL_MS = 16;
 
-/** 状态条：`aster` 徽标 + 模式 + **忙碌指示（本地测量）** + cwd + 模型 + 会话 id（越靠后越弱化）。 */
+/** 状态条：`chenxi` 徽标 + 模式 + **忙碌指示（本地测量）** + cwd + 模型 + 会话 id（越靠后越弱化）。 */
 function composeStatus(facts: StatusFacts, columns: number, theme: Theme): string {
-	const parts: string[] = [theme.bold(theme.paint("accent", "aster"))];
+	const parts: string[] = [theme.bold(theme.paint("accent", "chenxi"))];
 	parts.push(theme.paint("ok", facts.mode));
 	// 忙碌指示紧跟模式：它在**窄终端**里也要活下来（cwd / 模型名比它长得多，排在它后面才不会被先截掉）
 	if (facts.busy !== undefined) {

@@ -1,15 +1,15 @@
 {
-  "name": "@aster/desktop",
+  "name": "@chenxi/desktop",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Aster desktop GUI (Electron shell; experimental) — the third front end next to CLI and TUI.",
+  "description": "Chenxi desktop GUI (Electron shell; experimental) — the third front end next to CLI and TUI.",
   "license": "Apache-2.0",
   "engines": { "node": ">=22.19" },
   "main": "./dist/main.js",
   "dependencies": {
-    "@aster/runtime": "*",
-    "@aster/schema": "*"
+    "@chenxi/runtime": "*",
+    "@chenxi/schema": "*"
   },
   "scripts": {
     "build": "tsc -b",

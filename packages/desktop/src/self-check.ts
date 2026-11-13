@@ -46,7 +46,7 @@ export async function runSelfCheck(
 			// M20：双主题 + 模式工具栏的可断言形态（都只是呈现层，不改变任何事实）
 			theme: document.documentElement.dataset.theme || "",
 			themeStored: (() => {
-				try { return localStorage.getItem("aster.theme") || ""; } catch { return ""; }
+				try { return localStorage.getItem("chenxi.theme") || ""; } catch { return ""; }
 			})(),
 			modes: document.querySelectorAll("#mode-switch button").length,
 			modePressed: Array.from(document.querySelectorAll('#mode-switch button[aria-pressed="true"]'))

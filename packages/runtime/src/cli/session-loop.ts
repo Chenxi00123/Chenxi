@@ -17,7 +17,7 @@ import type {
 	PermissionRequest,
 	PermissionVerdict,
 	SessionEvent,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { CompactionConfig, ContextBuilder } from "../context/index.js";
 import { planCompaction } from "../context/index.js";
 import type { LlmProvider } from "../llm/types.js";

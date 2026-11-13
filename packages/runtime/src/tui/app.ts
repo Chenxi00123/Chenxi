@@ -38,7 +38,7 @@
  *  - 渲染是**合帧**的（16ms），但输入回显**立即 flush**（打字必须跟手）。
  */
 import { Readable } from "node:stream";
-import { DEFAULT_AGENT_MODE } from "@aster/schema";
+import { DEFAULT_AGENT_MODE } from "@chenxi/schema";
 import {
 	NEWLINE_ESCAPE,
 	REPL_COMMANDS,

@@ -1,5 +1,5 @@
 /**
- * @aster/schema —— 纯类型/契约层。
+ * @chenxi/schema —— 纯类型/契约层。
  *
  * 依赖纪律：本包**不得依赖任何运行时模块**，且不得 `import` protocol / runtime（01 §1）。
  */

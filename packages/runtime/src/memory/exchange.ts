@@ -16,7 +16,7 @@ import {
 	type MemoryExchangeDocument,
 	type MemoryRecord,
 	type MemoryScope,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { z } from "zod";
 
 /** 记忆交换文档格式错误（稳定 code 供测试与 CLI 断言）。 */
@@ -139,7 +139,7 @@ export function parseMemoryExchangeDocument(raw: unknown): ParsedMemoryExchangeD
 		throw new MemoryExchangeFormatError(
 			"version_unsupported",
 			`document formatVersion ${version} is newer than this client supports ` +
-				`(${MEMORY_EXCHANGE_FORMAT_VERSION}); upgrade Aster instead of importing blindly`,
+				`(${MEMORY_EXCHANGE_FORMAT_VERSION}); upgrade Chenxi instead of importing blindly`,
 		);
 	}
 	if (version < MEMORY_EXCHANGE_FORMAT_VERSION) {

@@ -160,7 +160,7 @@ export async function connectMcpHttp(options: McpHttpClientOptions): Promise<Mcp
 		const result = await request("initialize", {
 			protocolVersion: PROTOCOL_VERSION,
 			capabilities: {},
-			clientInfo: { name: "aster-mcp-http-client", version: "1.0.0" },
+			clientInfo: { name: "chenxi-mcp-http-client", version: "1.0.0" },
 		});
 		await notify("notifications/initialized");
 		const record = asRecord(result);

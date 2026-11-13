@@ -15,8 +15,8 @@ import {
 	payloadLines,
 	type SessionStore,
 	sessionFilePath,
-} from "@aster/runtime";
-import type { SessionEvent, SessionId } from "@aster/schema";
+} from "@chenxi/runtime";
+import type { SessionEvent, SessionId } from "@chenxi/schema";
 import { loadTitles, type TitleMap } from "./session-titles.js";
 
 /** 会话列表项（只取 GUI 需要的字段，不从别的表"顺手"多读）。 */
@@ -209,7 +209,7 @@ export function toEventCard(event: SessionEvent): EventCard {
 		case "tool/result": {
 			const payload = event.payload;
 			// M13d-2：正文由**载荷本身**决定（字符串按行 / 其余 JSON 缩进）——与 TUI 的折叠**同一套规则**
-			// （`payloadLines` 由 @aster/runtime 根入口定向转出，避免两处漂移）。
+			// （`payloadLines` 由 @chenxi/runtime 根入口定向转出，避免两处漂移）。
 			// ⚠️ 旧实现是 `String(payload.output)`：工具返回**对象**时会渲染成 "[object Object]"（真缺陷，本批修掉）。
 			const body = payload.ok
 				? payloadLines(payload.output)

@@ -11,7 +11,7 @@
  *  - 新区间从**上一段压缩的 `toSeq + 1`** 开始 ⇒ 区间永不重叠；
  *  - 摘要文本确定性生成：同样的输入永远得到同样的文本（回放 / resume 后投影一致）。
  */
-import type { SessionEvent } from "@aster/schema";
+import type { SessionEvent } from "@chenxi/schema";
 
 export interface CompactionConfig {
 	/** 触发阈值：所有消息事件正文的字符总数超过它才压缩。 */

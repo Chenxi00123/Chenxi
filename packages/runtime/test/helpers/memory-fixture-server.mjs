@@ -229,7 +229,7 @@ reader.on("line", (line) => {
 				result: {
 					protocolVersion: PROTOCOL_VERSION,
 					capabilities: { tools: {} },
-					serverInfo: { name: "aster-memory-fixture", version: "1.0.0" },
+					serverInfo: { name: "chenxi-memory-fixture", version: "1.0.0" },
 				},
 			});
 			break;

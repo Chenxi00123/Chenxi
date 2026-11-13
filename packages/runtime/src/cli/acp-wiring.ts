@@ -1,5 +1,5 @@
 /**
- * Aster 的 `--acp` 装配（ADR-036）：把"一个回合"接到 ACP 最小通道上。
+ * Chenxi 的 `--acp` 装配（ADR-036）：把"一个回合"接到 ACP 最小通道上。
  *
  * 复用**同一份**会话编排（`executeTurn` / 权限 / 记忆 / context 构建），不新增后端：
  *  - **stdout 只走协议**（JSON-RPC）；所有诊断（config / mcp / memory 横幅）走 **stderr**；
@@ -9,7 +9,7 @@
  *    （与 `--serve` 同一条结构性理由）；
  *  - `session/cancel` 只 abort **该会话**的 `AbortController`（不是进程级 SIGINT）。
  */
-import type { SessionId } from "@aster/schema";
+import type { SessionId } from "@chenxi/schema";
 import type { AcpSessionHost, AcpSessionUpdate } from "../acp/index.js";
 import { createAcpServer } from "../acp/index.js";
 import type { SessionHandle } from "../persist/index.js";
@@ -58,7 +58,7 @@ export async function startAcpCommand(options: CliOptions, streams: AcpStreams):
 			if (session === undefined) throw new Error(`unknown session: ${input.sessionId}`);
 			if (runtime.provider === undefined) {
 				throw new Error(
-					"no model provider configured (set ASTER_BASE_URL / ASTER_API_KEY / ASTER_MODEL)",
+					"no model provider configured (set CHENXI_BASE_URL / CHENXI_API_KEY / CHENXI_MODEL)",
 				);
 			}
 			const controller = new AbortController();

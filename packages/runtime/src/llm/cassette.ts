@@ -5,15 +5,15 @@
  * 严格解析在 `cassette-parse.ts`（本文件**不 import 它**，避免循环依赖）。
  */
 import { createHash } from "node:crypto";
-import type { ModelMessage, ToolDescriptor } from "@aster/schema";
+import type { ModelMessage, ToolDescriptor } from "@chenxi/schema";
 import type { LlmStreamEvent } from "./types.js";
 
 /** 文件标识（第一行 header 的 `format`）。 */
-export const CASSETTE_FORMAT = "aster-llm-cassette";
+export const CASSETTE_FORMAT = "chenxi-llm-cassette";
 /** 格式版本（与包版本解耦；破坏性格式变更才递增）。 */
 export const CASSETTE_FORMAT_VERSION = 1;
 
-const PRODUCER_NAME = "aster";
+const PRODUCER_NAME = "chenxi";
 
 /** 第一行 header（版本化 JSONL 的元数据）。 */
 export interface CassetteHeader {

@@ -122,7 +122,7 @@ export const configContextSchema = z.strictObject({
 /**
  * 配置文件 v1 字段面（ADR-014 / ADR-015 / ADR-016 / ADR-017）。
  *
- * 注：`mode` 的取值集合必须与 `@aster/schema` 的 `AGENT_MODES` 保持一致
+ * 注：`mode` 的取值集合必须与 `@chenxi/schema` 的 `AGENT_MODES` 保持一致
  * （`m7a-acceptance.test.ts` 有断言，避免两处漂移）。
  */
 export const configFileSchema = z.strictObject({

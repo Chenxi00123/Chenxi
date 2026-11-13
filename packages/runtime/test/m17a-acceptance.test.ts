@@ -18,8 +18,8 @@ import type {
 	MemoryAdapter,
 	MemoryRecord,
 	MemoryScope,
-} from "@aster/schema";
-import { MEMORY_ANY_SESSION } from "@aster/schema";
+} from "@chenxi/schema";
+import { MEMORY_ANY_SESSION } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../src/config/index.js";
 import {
@@ -45,7 +45,7 @@ afterEach(() => {
 	for (const dir of temps.splice(0)) rmSync(dir, { recursive: true, force: true });
 });
 
-const SCOPE: MemoryScope = { user: "u1", agent: "aster", session: "s1" };
+const SCOPE: MemoryScope = { user: "u1", agent: "chenxi", session: "s1" };
 
 type CapturedEvent = { type: string; payload: Record<string, unknown> };
 
@@ -313,7 +313,7 @@ describe("M17a 跨会话检索（ADR-033）", () => {
 		const seam = createMemorySeam({ adapter, source: "test", scope: SCOPE });
 		const { append } = collector();
 		await seam.beforeTurn("编辑器", append);
-		expect(scopes[0]).toEqual({ user: "u1", agent: "aster", session: MEMORY_ANY_SESSION });
+		expect(scopes[0]).toEqual({ user: "u1", agent: "chenxi", session: MEMORY_ANY_SESSION });
 	});
 
 	it("未配置 writer => **没有** `afterTurn`（默认行为逐字节不变）", () => {
@@ -329,7 +329,7 @@ describe("M17a 跨会话检索（ADR-033）", () => {
 
 describe("M17a 配置面与 MCP 适配器（ADR-033）", () => {
 	it("`write.enabled: true` 但没给 addTool ⇒ **快速失败**且指出键路径", () => {
-		const home = newTemp("aster-m17a-cfg-");
+		const home = newTemp("chenxi-m17a-cfg-");
 		mkdirSync(join(home, "sessions"), { recursive: true });
 		writeFileSync(
 			join(home, "config.json"),
@@ -347,7 +347,7 @@ describe("M17a 配置面与 MCP 适配器（ADR-033）", () => {
 	});
 
 	it("`write` 缺省 ⇒ 配置里就没有这个键（默认关闭）", () => {
-		const home = newTemp("aster-m17a-cfg2-");
+		const home = newTemp("chenxi-m17a-cfg2-");
 		writeFileSync(
 			join(home, "config.json"),
 			JSON.stringify({
@@ -418,7 +418,7 @@ describe("M17a 配置面与 MCP 适配器（ADR-033）", () => {
 		expect(calls[0]?.args).toMatchObject({
 			content: "x",
 			user: "u1",
-			agent: "aster",
+			agent: "chenxi",
 			session: "s1",
 		});
 		expect(calls[1]).toEqual({
@@ -426,7 +426,7 @@ describe("M17a 配置面与 MCP 适配器（ADR-033）", () => {
 			args: {
 				id: "m9",
 				user: "u1",
-				agent: "aster",
+				agent: "chenxi",
 				session: "s1",
 				invalidAt: "2026-10-21T00:00:00.000Z",
 			},

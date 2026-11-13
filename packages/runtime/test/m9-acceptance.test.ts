@@ -3,7 +3,7 @@
  *
  * 覆盖：
  *  - **canonical 往返语义无损**：真实会话（含工具轨迹 / 审批 / 模式切换 / 记忆注入）导出为
- *    `aster-session-exchange` v1 文档再导入，**除 `sessionId` 外的事件序列逐字段深等**，
+ *    `chenxi-session-exchange` v1 文档再导入，**除 `sessionId` 外的事件序列逐字段深等**，
  *    且 `deriveMessages` 投影逐条深等；索引的 `created_at` 也保留（否则会出现 created_at > updated_at）；
  *  - **版本门禁是真实分支**：更高版本必拒、更早版本（v0，无迁移路径）必拒、缺字段/非法 JSON 必拒；
  *  - **载荷校验**：篡改会进模型历史的载荷（如 `user/message.content`）必拒且原因可读；
@@ -15,21 +15,21 @@
  */
 import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import type { SessionEvent, SessionId, ToolCallId } from "@aster/schema";
+import type { SessionEvent, SessionId, ToolCallId } from "@chenxi/schema";
 import {
 	AGENT_MODES,
 	EXCHANGE_FORMAT,
 	EXCHANGE_FORMAT_VERSION,
 	PORTABLE_FORMATS,
 	SESSION_FORMAT_VERSION,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseArgs } from "../src/cli/args.js";
 import { runPortableCommand } from "../src/cli/portable.js";
 import { createSessionStore } from "../src/persist/index.js";
 import {
-	ASTER_PRODUCER,
 	buildExchangeDocument,
+	CHENXI_PRODUCER,
 	ExchangeFormatError,
 	exportClaudeCodeJsonl,
 	importClaudeCodeJsonl,
@@ -163,16 +163,16 @@ async function makeRichSession(home: string, cwd: string): Promise<SessionId> {
 
 describe("M9 canonical 交换文档：往返语义无损（ADR-019）", () => {
 	it("导出 -> 解析 -> 导入后，除 sessionId 外的事件序列逐字段深等，且投影与 created_at 一致", async () => {
-		const sourceHome = newTemp("aster-m9-src-");
-		const targetHome = newTemp("aster-m9-dst-");
-		const cwd = newTemp("aster-m9-cwd-");
+		const sourceHome = newTemp("chenxi-m9-src-");
+		const targetHome = newTemp("chenxi-m9-dst-");
+		const cwd = newTemp("chenxi-m9-cwd-");
 		const sessionId = await makeRichSession(sourceHome, cwd);
 
 		const sourceStore = createSessionStore({ home: sourceHome });
 		const exported = await readSessionForExport({
 			store: sourceStore,
 			sessionId,
-			producer: ASTER_PRODUCER,
+			producer: CHENXI_PRODUCER,
 		});
 		await sourceStore.dispose();
 
@@ -219,7 +219,7 @@ describe("M9 版本门禁与载荷校验（ADR-019）", () => {
 		return {
 			format: EXCHANGE_FORMAT,
 			formatVersion: EXCHANGE_FORMAT_VERSION,
-			producer: { name: "aster", version: "1.0.0" },
+			producer: { name: "chenxi", version: "1.0.0" },
 			session: { cwd: "D:\\x", mode: "build", createdAt: T0, updatedAt: T1 },
 			events: [
 				{
@@ -254,7 +254,7 @@ describe("M9 版本门禁与载荷校验（ADR-019）", () => {
 
 	it("非法文档（错 format / 缺 version / 坏 JSON）一律快速失败且原因可读", () => {
 		expect(() => parseExchangeDocument({ ...baseDocument(), format: "someone-else" })).toThrowError(
-			/not a valid aster-session-exchange document/,
+			/not a valid chenxi-session-exchange document/,
 		);
 		const missing = baseDocument() as Record<string, unknown>;
 		missing.formatVersion = undefined;
@@ -296,8 +296,8 @@ describe("M9 版本门禁与载荷校验（ADR-019）", () => {
 		const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
 			version: string;
 		};
-		expect(ASTER_PRODUCER.version).toBe(pkg.version);
-		expect(PORTABLE_FORMATS).toEqual(["aster", "claude-code", "zcode"]);
+		expect(CHENXI_PRODUCER.version).toBe(pkg.version);
+		expect(PORTABLE_FORMATS).toEqual(["chenxi", "claude-code", "zcode"]);
 		// 对外交换版本与**我们自己**的事实源版本解耦（各自独立演进）
 		expect(typeof EXCHANGE_FORMAT_VERSION).toBe("number");
 		expect(typeof SESSION_FORMAT_VERSION).toBe("number");
@@ -333,7 +333,7 @@ describe("M9 厂商适配器（best-effort、有损清单显式）", () => {
 		]);
 
 		// 落成我们自己的会话后：投影里只应有这 5 条，且**没有** tool 角色
-		const home = newTemp("aster-m9-cc-home-");
+		const home = newTemp("chenxi-m9-cc-home-");
 		const store = createSessionStore({ home });
 		const result = await importTurns({
 			store,
@@ -421,32 +421,32 @@ describe("M9 CLI 接线：--export / --import（ADR-019）", () => {
 	});
 
 	it("端到端：会话 -> 导出文件 -> 导入到另一个数据根；厂商路径打印有损清单", async () => {
-		const cwd = newTemp("aster-m9-cli-cwd-");
-		const sourceHome = newTemp("aster-m9-cli-src-");
-		const targetHome = newTemp("aster-m9-cli-dst-");
-		const outDir = newTemp("aster-m9-cli-out-");
+		const cwd = newTemp("chenxi-m9-cli-cwd-");
+		const sourceHome = newTemp("chenxi-m9-cli-src-");
+		const targetHome = newTemp("chenxi-m9-cli-dst-");
+		const outDir = newTemp("chenxi-m9-cli-out-");
 		const sessionId = await makeRichSession(sourceHome, cwd);
 
 		const lines: string[] = [];
 		const output = { write: (text: string) => lines.push(text) };
 
 		// 1) 导出可移植文档
-		const asterOut = join(outDir, "session.aster.json");
+		const chenxiOut = join(outDir, "session.chenxi.json");
 		await runPortableCommand({
 			home: sourceHome,
 			exportTarget: sessionId,
-			format: "aster",
-			out: asterOut,
+			format: "chenxi",
+			out: chenxiOut,
 			output,
 		});
-		expect(lines.join("")).toContain("lossless for Aster");
+		expect(lines.join("")).toContain("lossless for Chenxi");
 
 		// 2) 导入到另一个数据根（新会话 id，事件数一致）
 		lines.length = 0;
-		await runPortableCommand({ home: targetHome, importPath: asterOut, format: "aster", output });
+		await runPortableCommand({ home: targetHome, importPath: chenxiOut, format: "chenxi", output });
 		const printed = lines.join("");
 		expect(printed).toContain("imported");
-		expect(printed).toContain("resume with: aster --resume");
+		expect(printed).toContain("resume with: chenxi --resume");
 
 		const targetStore = createSessionStore({ home: targetHome });
 		const metas = await targetStore.list();
@@ -469,7 +469,7 @@ describe("M9 CLI 接线：--export / --import（ADR-019）", () => {
 		expect(noteText).toContain("tool calls + tool results");
 
 		lines.length = 0;
-		const ccHome = newTemp("aster-m9-cli-cc-");
+		const ccHome = newTemp("chenxi-m9-cli-cc-");
 		await runPortableCommand({ home: ccHome, importPath: ccOut, format: "claude-code", output });
 		expect(lines.join("")).toContain("best-effort adapter");
 
@@ -485,13 +485,13 @@ describe("M9 CLI 接线：--export / --import（ADR-019）", () => {
 	});
 
 	it("--export 缺 --out 会快速失败（不产生半截文件）", async () => {
-		const home = newTemp("aster-m9-noout-");
-		const sessionId = await makeRichSession(home, newTemp("aster-m9-noout-cwd-"));
+		const home = newTemp("chenxi-m9-noout-");
+		const sessionId = await makeRichSession(home, newTemp("chenxi-m9-noout-cwd-"));
 		await expect(
 			runPortableCommand({
 				home,
 				exportTarget: sessionId,
-				format: "aster",
+				format: "chenxi",
 				output: { write: () => undefined },
 			}),
 		).rejects.toThrowError(/--export requires --out/);

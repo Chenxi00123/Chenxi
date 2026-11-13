@@ -5,7 +5,7 @@
  * 并与之 `Promise.race`；超时则返回可读的 `timeout` 错误。
  * **不修改主循环 / execute 即生效**——这正是扩展缝的验收点。
  */
-import type { ToolExecutionResult } from "@aster/schema";
+import type { ToolExecutionResult } from "@chenxi/schema";
 import type { ToolPipelinePayload } from "../../tools/execute.js";
 import type { Extension, ExtensionApi } from "../types.js";
 

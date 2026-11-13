@@ -12,7 +12,7 @@ import type {
 	ToolCallRef,
 	TurnEndPayload,
 	TurnStartPayload,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { describe, expect, it, vi } from "vitest";
 import type { LlmProvider, LlmRequest, LlmStreamEvent } from "../src/llm/types.js";
 import { type RunTurnParams, runTurn } from "../src/loop/index.js";

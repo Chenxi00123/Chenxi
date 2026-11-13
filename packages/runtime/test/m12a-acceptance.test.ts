@@ -4,7 +4,7 @@
  * 覆盖（**只断言本批真做的三件事 + "默认 off = 恒等"**，绝不断言"隔离"）：
  *  - **默认 off**：`createNullSandbox()` 的 `prepare` 与不启用时**逐字节相同**、`killTree` 恒 false、
  *    未知模式**返回 undefined**（调用方快速失败，绝不静默退回 off）；
- *  - **best-effort 环境收敛**：环境变量**白名单**（密钥类不外传）+ 显式 `ASTER_SANDBOX=best-effort` +
+ *  - **best-effort 环境收敛**：环境变量**白名单**（密钥类不外传）+ 显式 `CHENXI_SANDBOX=best-effort` +
  *    `cwd` 越界给出**可读拒绝**（且**真的不执行**）；
  *  - **进程树击杀（真进程、真断言）**：父进程 + 孙子进程在超时/中止时**一起消失**（这是本批唯一真正减少事故面的部分）；
  *  - **provider 接线**：超时确实走 `killTree`；越界 cwd 由**两个 provider** 一致地可读拒绝（exitCode 126）；
@@ -47,7 +47,7 @@ function newTemp(prefix: string): string {
  * 说明拒绝判定是**纯字符串逻辑**，不需要目标真的存在——本机不允许写死绝对路径，故相对构造）。
  */
 function workspacePair(): { readonly workspaceRoot: string; readonly outside: string } {
-	const workspaceRoot = newTemp("aster-m12a-ws-");
+	const workspaceRoot = newTemp("chenxi-m12a-ws-");
 	return { workspaceRoot, outside: dirname(workspaceRoot) };
 }
 
@@ -107,20 +107,20 @@ describe("M12a 默认 off = 恒等（任何'默认行为变了'都是 bug）", (
 });
 
 describe("M12a best-effort：环境收敛 + cwd 越界可读拒绝", () => {
-	it("环境变量**白名单**：密钥类不外传、PATH 保留、并显式打标 `ASTER_SANDBOX`", () => {
-		process.env.ASTER_TEST_SECRET = "leak-me";
+	it("环境变量**白名单**：密钥类不外传、PATH 保留、并显式打标 `CHENXI_SANDBOX`", () => {
+		process.env.CHENXI_TEST_SECRET = "leak-me";
 		try {
 			const sandbox = createBestEffortSandbox();
 			expect(sandbox.altersExecution).toBe(true);
 			expect(sandbox.label).toContain("experimental");
 			expect(sandbox.label).toContain("非隔离");
 			const prepared = sandbox.prepare({ command: "echo hi", cwd: "D:\\w", env: { EXTRA: "x" } });
-			expect(prepared.env.ASTER_TEST_SECRET).toBeUndefined(); // 白名单外：不传给子进程
+			expect(prepared.env.CHENXI_TEST_SECRET).toBeUndefined(); // 白名单外：不传给子进程
 			expect(prepared.env.PATH).toBe(process.env.PATH);
 			expect(prepared.env.EXTRA).toBe("x"); // 调用方显式给的照旧生效
 			expect(prepared.env[SANDBOX_MARKER_ENV]).toBe("best-effort"); // 让脚本知道自己没被真隔离
 		} finally {
-			delete process.env.ASTER_TEST_SECRET;
+			delete process.env.CHENXI_TEST_SECRET;
 		}
 	});
 
@@ -257,7 +257,7 @@ describe("M12a 数据根权限体检（**只读**：我们只检测 + 给命令�
 		const broad = runnerOf(`${"D:\\x"} Everyone:(OI)(CI)(F)`);
 		const unreadable = () => ({ status: 5, stdout: "", stderr: "Access is denied.", failed: true });
 
-		const dir = newTemp("aster-m12a-acl-");
+		const dir = newTemp("chenxi-m12a-acl-");
 		if (process.platform === "win32") {
 			expect(auditDataRootAcl(dir, tight).tight).toBe(true);
 			expect(auditDataRootAcl(dir, tight).hint).toContain("icacls");
@@ -277,7 +277,7 @@ describe("M12a 数据根权限体检（**只读**：我们只检测 + 给命令�
 	});
 
 	it("真机 icacls 实测一次：结论必须**可读**且**不改动任何 ACL**（不做手术 = 不会把用户锁在门外）", () => {
-		const dir = newTemp("aster-m12a-acl-real-");
+		const dir = newTemp("chenxi-m12a-acl-real-");
 		const file = join(dir, "session.jsonl");
 		writeFileSync(file, "{}\n", "utf8");
 		const before = spawnSync("icacls", [dir], { encoding: "utf8", windowsHide: true }).stdout ?? "";

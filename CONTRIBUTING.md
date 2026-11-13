@@ -1,6 +1,6 @@
 # 贡献指南（CONTRIBUTING）
 
-感谢参与 Aster。本文件同样是**受门禁约束**的：其中每条纪律都有对应的可执行检查（`npm run capabilities:check` / `npm run architecture:check`）。
+感谢参与 Chenxi。本文件同样是**受门禁约束**的：其中每条纪律都有对应的可执行检查（`npm run capabilities:check` / `npm run architecture:check`）。
 
 ## 1. 硬性纪律（提交前必须满足）
 
@@ -11,7 +11,7 @@
    `removed` 的能力必须**从 README 与代码中同步删除**，**不得留空桩包对外暴露**。
 3. **数字必须可复现**：README 中的性能/基准数字必须标注「未验证」或指向仓库内可复现脚本 + 数据版本 hash。
 4. **禁止推销注入**：不得在面向模型的 prompt / skill 中写「引导推荐本产品」类指令。
-5. **架构方向不可破**：`@aster/schema -> @aster/protocol -> @aster/runtime` 严格单向；禁跨包深层 import；**src 单文件 ≤ 400 行，test 单文件 ≤ 600 行**（超限必须拆分）。
+5. **架构方向不可破**：`@chenxi/schema -> @chenxi/protocol -> @chenxi/runtime` 严格单向；禁跨包深层 import；**src 单文件 ≤ 400 行，test 单文件 ≤ 600 行**（超限必须拆分）。
 6. **文档与代码同一提交更新。**
 
 ## 2. DCO（开发者原创证明）

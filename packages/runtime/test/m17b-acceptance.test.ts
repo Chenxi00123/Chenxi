@@ -14,7 +14,7 @@ import type {
 	MemoryAdapter,
 	MemoryRecord,
 	MemoryScope,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { describe, expect, it } from "vitest";
 import {
 	createMemoryWriter,
@@ -22,7 +22,7 @@ import {
 	normalizeMemoryText,
 } from "../src/memory/index.js";
 
-const SCOPE: MemoryScope = { user: "u1", agent: "aster", session: "s1" };
+const SCOPE: MemoryScope = { user: "u1", agent: "chenxi", session: "s1" };
 const NOW = "2026-10-21T00:00:00.000Z";
 
 type CapturedEvent = { type: string; payload: Record<string, unknown> };

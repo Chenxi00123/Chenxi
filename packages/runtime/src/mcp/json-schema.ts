@@ -18,7 +18,7 @@
  *  2. `mcpEnvelopeValueSchema`：声明 MCP `CallToolResult` **信封**形状并做执行期校验
  *     （ADR-005 要求 output 必填；我们**只声称知道信封，不声称知道内部载荷**）。
  */
-import type { JsonSchema, SchemaIssue, SchemaParseResult, ValueSchema } from "@aster/schema";
+import type { JsonSchema, SchemaIssue, SchemaParseResult, ValueSchema } from "@chenxi/schema";
 import { z } from "zod";
 import { valueSchema } from "../tools/schema.js";
 
@@ -111,7 +111,7 @@ function validate(
  */
 export function jsonSchemaValueSchema(schema: unknown): ValueSchema<unknown> {
 	return {
-		kind: "aster/value-schema",
+		kind: "chenxi/value-schema",
 		parse(input: unknown): SchemaParseResult<unknown> {
 			const issues: SchemaIssue[] = [];
 			validate(schema, input, [], issues);

@@ -104,7 +104,7 @@ reader.on("line", (line) => {
 						...(noPromptsCapability ? {} : { prompts: {} }),
 						resources: {},
 					},
-					serverInfo: { name: "aster-mcp-fixture", version: "1.0.0" },
+					serverInfo: { name: "chenxi-mcp-fixture", version: "1.0.0" },
 				},
 			});
 			break;

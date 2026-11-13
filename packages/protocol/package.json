@@ -1,9 +1,9 @@
 {
-  "name": "@aster/protocol",
+  "name": "@chenxi/protocol",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Aster protocol: wire/IPC shapes. Depends on @aster/schema only.",
+  "description": "Chenxi protocol: wire/IPC shapes. Depends on @chenxi/schema only.",
   "license": "Apache-2.0",
   "engines": { "node": ">=22.19" },
   "main": "./dist/index.js",
@@ -13,7 +13,7 @@
   },
   "files": ["dist"],
   "dependencies": {
-    "@aster/schema": "*"
+    "@chenxi/schema": "*"
   },
   "scripts": {
     "build": "tsc -b",

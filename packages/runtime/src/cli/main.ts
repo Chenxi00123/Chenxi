@@ -1,23 +1,23 @@
 /**
- * Aster CLI 入口（M1：最小 REPL + 索引维护命令；M6：`--doctor`；M7a：本地配置；
+ * Chenxi CLI 入口（M1：最小 REPL + 索引维护命令；M6：`--doctor`；M7a：本地配置；
  * M7b：按 `mcp.servers` 桥接 MCP 服务器）。
  *
  * 参数解析见 `./args.js`，provider 解析见 `./provider.js`，**会话运行时装配**见 `./bootstrap.js`
  * （M13b 起与桌面版共用同一份装配，见 ADR-029 增补）。
  *
  * 用法：
- *   aster [--home <dir>] [--mode plan|build] [--config <file>] [--resume <sessionId|latest>]
- *   aster [--home <dir>] --list
- *   aster [--home <dir>] --rebuild-index
- *   aster [--home <dir>] --doctor
- *   aster [--home <dir>] --export <sessionId|latest> [--format aster|claude-code|zcode] --out <file>
- *   aster [--home <dir>] --import <file> [--format aster|claude-code|zcode]
- *   aster [--home <dir>] --export-memory --out <file> [--memory-session <id>]
- *   aster [--home <dir>] --import-memory <file> [--out <file>]   # 校验 + 规范化（不写记忆层，ADR-016/030）
- *   aster [--home <dir>] --serve [--port N] [--host H]   # SSE 服务端（回环下另开远端写路径）
- *   aster --attach <url>                                  # 只读镜像远端会话（不进 REPL）
- *   aster [--home <dir>] --record <cassette.jsonl> [--mode …] [--stub … | --demo-*]  # 录制（ADR-037）
- *   aster [--home <dir>] --replay <cassette.jsonl>        # 回放（不需要密钥、不发网络请求）
+ *   chenxi [--home <dir>] [--mode plan|build] [--config <file>] [--resume <sessionId|latest>]
+ *   chenxi [--home <dir>] --list
+ *   chenxi [--home <dir>] --rebuild-index
+ *   chenxi [--home <dir>] --doctor
+ *   chenxi [--home <dir>] --export <sessionId|latest> [--format chenxi|claude-code|zcode] --out <file>
+ *   chenxi [--home <dir>] --import <file> [--format chenxi|claude-code|zcode]
+ *   chenxi [--home <dir>] --export-memory --out <file> [--memory-session <id>]
+ *   chenxi [--home <dir>] --import-memory <file> [--out <file>]   # 校验 + 规范化（不写记忆层，ADR-016/030）
+ *   chenxi [--home <dir>] --serve [--port N] [--host H]   # SSE 服务端（回环下另开远端写路径）
+ *   chenxi --attach <url>                                  # 只读镜像远端会话（不进 REPL）
+ *   chenxi [--home <dir>] --record <cassette.jsonl> [--mode …] [--stub … | --demo-*]  # 录制（ADR-037）
+ *   chenxi [--home <dir>] --replay <cassette.jsonl>        # 回放（不需要密钥、不发网络请求）
  */
 import { argv, stdout } from "node:process";
 import { pathToFileURL } from "node:url";
@@ -197,7 +197,7 @@ async function main(): Promise<void> {
  * 被打进**别的 App**（如桌面版的 `dist/app/main.mjs`）时置 `false`。
  * 未定义（`tsx` / `tsc` 直跑）时下面的守卫不生效，退回 URL 比较。
  */
-declare const ASTER_CLI_ENTRY: boolean | undefined;
+declare const CHENXI_CLI_ENTRY: boolean | undefined;
 
 /**
  * 仅在被当作**可执行入口**运行时才启动，避免被 import 时误读 stdin。
@@ -208,7 +208,7 @@ declare const ASTER_CLI_ENTRY: boolean | undefined;
  * （读 stdin、开一条野生 REPL、往数据根里写会话）。⇒ 额外用构建期常量把这条路**关死**。
  */
 function isMainModule(): boolean {
-	if (typeof ASTER_CLI_ENTRY === "boolean" && ASTER_CLI_ENTRY === false) return false;
+	if (typeof CHENXI_CLI_ENTRY === "boolean" && CHENXI_CLI_ENTRY === false) return false;
 	const entry = argv[1];
 	if (entry === undefined) return false;
 	try {
@@ -227,7 +227,7 @@ if (isMainModule()) {
 			return;
 		}
 		const message = error instanceof Error ? error.message : String(error);
-		process.stderr.write(`aster: ${message}\n`);
+		process.stderr.write(`chenxi: ${message}\n`);
 		process.exitCode = 1;
 	});
 }

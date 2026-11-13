@@ -5,7 +5,7 @@
  * stub provider 则完全不碰网络。
  */
 import { createServer, type Server, type ServerResponse } from "node:http";
-import type { ModelMessage } from "@aster/schema";
+import type { ModelMessage } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import type { LlmFinalMessage, LlmProvider, LlmRequest, LlmStreamEvent } from "../src/llm/index.js";
 import {
@@ -66,30 +66,30 @@ function textDeltas(events: LlmStreamEvent[]): string[] {
 }
 
 describe("resolveLlmConfig", () => {
-	it("缺 ASTER_API_KEY / ASTER_MODEL 时抛 LlmConfigError 且 missing 正确", () => {
+	it("缺 CHENXI_API_KEY / CHENXI_MODEL 时抛 LlmConfigError 且 missing 正确", () => {
 		let caught: unknown;
 		try {
-			resolveLlmConfig({ ASTER_BASE_URL: "https://api.example.com/v1" });
+			resolveLlmConfig({ CHENXI_BASE_URL: "https://api.example.com/v1" });
 		} catch (error) {
 			caught = error;
 		}
 		expect(caught).toBeInstanceOf(LlmConfigError);
 		const err = caught as LlmConfigError;
 		expect(err.name).toBe("LlmConfigError");
-		expect([...err.missing]).toEqual(["ASTER_API_KEY", "ASTER_MODEL"]);
+		expect([...err.missing]).toEqual(["CHENXI_API_KEY", "CHENXI_MODEL"]);
 	});
 
 	it("错误文本绝不包含已提供的 key 值", () => {
 		const secret = "SUPER-SECRET-KEY-9182736450";
 		let caught: unknown;
 		try {
-			resolveLlmConfig({ ASTER_BASE_URL: "https://api.example.com", ASTER_API_KEY: secret });
+			resolveLlmConfig({ CHENXI_BASE_URL: "https://api.example.com", CHENXI_API_KEY: secret });
 		} catch (error) {
 			caught = error;
 		}
 		expect(caught).toBeInstanceOf(LlmConfigError);
 		const err = caught as LlmConfigError;
-		expect([...err.missing]).toEqual(["ASTER_MODEL"]);
+		expect([...err.missing]).toEqual(["CHENXI_MODEL"]);
 		expect(err.message).not.toContain(secret);
 		expect(JSON.stringify(err.missing)).not.toContain(secret);
 	});
@@ -98,22 +98,22 @@ describe("resolveLlmConfig", () => {
 		let caught: unknown;
 		try {
 			resolveLlmConfig({
-				ASTER_BASE_URL: "https://api.example.com",
-				ASTER_API_KEY: "   ",
-				ASTER_MODEL: "m",
+				CHENXI_BASE_URL: "https://api.example.com",
+				CHENXI_API_KEY: "   ",
+				CHENXI_MODEL: "m",
 			});
 		} catch (error) {
 			caught = error;
 		}
 		expect(caught).toBeInstanceOf(LlmConfigError);
-		expect([...(caught as LlmConfigError).missing]).toEqual(["ASTER_API_KEY"]);
+		expect([...(caught as LlmConfigError).missing]).toEqual(["CHENXI_API_KEY"]);
 	});
 
 	it("完整 env -> baseUrl 去掉尾部斜杠", () => {
 		const config = resolveLlmConfig({
-			ASTER_BASE_URL: "https://api.example.com/v1///",
-			ASTER_API_KEY: "sk-local-only",
-			ASTER_MODEL: "gpt-4o-mini",
+			CHENXI_BASE_URL: "https://api.example.com/v1///",
+			CHENXI_API_KEY: "sk-local-only",
+			CHENXI_MODEL: "gpt-4o-mini",
 		});
 		expect(config.baseUrl).toBe("https://api.example.com/v1");
 		expect(config.apiKey).toBe("sk-local-only");

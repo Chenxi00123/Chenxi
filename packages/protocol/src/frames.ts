@@ -2,7 +2,7 @@
  * 事件流帧（ADR-021：client/server 采用「单全局订阅 + 每连接有界队列」）。
  * ADR-022 追加一条 §POST /api/sessions/:id/prompt§ 的**响应**形状（只加形状，不改既有帧）。
  */
-import type { SessionEvent, SessionId, StopReason } from "@aster/schema";
+import type { SessionEvent, SessionId, StopReason } from "@chenxi/schema";
 
 export const PROTOCOL_VERSION = 1 as const;
 

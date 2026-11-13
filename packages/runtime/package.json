@@ -1,23 +1,23 @@
 {
-  "name": "@aster/runtime",
+  "name": "@chenxi/runtime",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Aster runtime: kernel modules, CLI and extension seams.",
+  "description": "Chenxi runtime: kernel modules, CLI and extension seams.",
   "license": "Apache-2.0",
   "engines": { "node": ">=22.19" },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "aster": "./dist/cli/main.js"
+    "chenxi": "./dist/cli/main.js"
   },
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
   },
   "files": ["dist"],
   "dependencies": {
-    "@aster/protocol": "*",
-    "@aster/schema": "*"
+    "@chenxi/protocol": "*",
+    "@chenxi/schema": "*"
   },
   "scripts": {
     "build": "tsc -b",

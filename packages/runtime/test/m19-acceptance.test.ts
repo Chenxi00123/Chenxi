@@ -17,7 +17,7 @@ import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, type Server, type ServerResponse } from "node:http";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import type { SessionEvent, SessionId } from "@aster/schema";
+import type { SessionEvent, SessionId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runSessionRepl } from "../src/cli/repl.js";
 import { createContext } from "../src/events/index.js";
@@ -34,10 +34,10 @@ import { selectShellProvider } from "../src/shell/index.js";
 import { createDefaultToolset, createToolRegistry } from "../src/tools/index.js";
 import { makeTempDir } from "./helpers/tmp.js";
 
-const API_KEY = "sk-aster-m19-LOCAL-ONLY-7f3a9c1d";
+const API_KEY = "sk-chenxi-m19-LOCAL-ONLY-7f3a9c1d";
 const MODEL = "m19-local";
 const PROMPT = "read note.txt and summarize it";
-const NOTE = "Aster M19 note.\nsecond line\n";
+const NOTE = "Chenxi M19 note.\nsecond line\n";
 
 const servers: Server[] = [];
 const temps: string[] = [];
@@ -139,10 +139,10 @@ function normalize(events: readonly SessionEvent[]): LooseEvent[] {
 
 describe("M19 验收：录制一次真实流式会话，再离线回放", () => {
 	it("同一 cwd / prompt / 工具集：事件序列逐字段深等，回放期间 0 次网络请求", async () => {
-		const workspace = newTemp("aster-m19-cwd-");
-		const homeRecord = newTemp("aster-m19-home-record-");
-		const homeReplay = newTemp("aster-m19-home-replay-");
-		const cassettePath = join(newTemp("aster-m19-cassette-"), "session.cassette.jsonl");
+		const workspace = newTemp("chenxi-m19-cwd-");
+		const homeRecord = newTemp("chenxi-m19-home-record-");
+		const homeReplay = newTemp("chenxi-m19-home-replay-");
+		const cassettePath = join(newTemp("chenxi-m19-cassette-"), "session.cassette.jsonl");
 		writeFileSync(join(workspace, "note.txt"), NOTE, "utf8");
 
 		const server = await startSseServer();
@@ -191,7 +191,7 @@ describe("M19 验收：录制一次真实流式会话，再离线回放", () => 
 		if (toolResult?.type === "tool/result") {
 			expect(toolResult.payload.ok).toBe(true);
 			expect((toolResult.payload.output as { content?: string }).content).toContain(
-				"Aster M19 note.",
+				"Chenxi M19 note.",
 			);
 		}
 

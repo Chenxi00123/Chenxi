@@ -35,7 +35,7 @@ const isWindows = process.platform === "win32";
 
 describe("M16 输出编码（真进程）", () => {
 	it("cmdlet 的输出是 UTF-8：中文 + 引号 + 全角标点逐字符相等", async () => {
-		const home = newTemp("aster-m16-cmdlet-");
+		const home = newTemp("chenxi-m16-cmdlet-");
 		const provider = createPwshProvider({});
 		const payload = '中文 "引号" 与 & 百分号 % 【全角】';
 		const result = await provider.run({ command: `Write-Output '${payload}'`, cwd: home });
@@ -45,7 +45,7 @@ describe("M16 输出编码（真进程）", () => {
 
 	// `cmd /c` 只在 Windows 存在；Linux runner 上这条没有对应物（cmdlet 路径仍照常验证）
 	it.skipIf(!isWindows)("**原生命令**的输出也是 UTF-8（控制台代码页确实被改了）", async () => {
-		const home = newTemp("aster-m16-native-");
+		const home = newTemp("chenxi-m16-native-");
 		const provider = createPwshProvider({});
 		const result = await provider.run({ command: "cmd /c echo 中文-原生命令", cwd: home });
 		expect(result.exitCode).toBe(0);
@@ -53,7 +53,7 @@ describe("M16 输出编码（真进程）", () => {
 	});
 
 	it("ASCII 与退出码回归：纯英文输出不变、`exit 7` 仍透传", async () => {
-		const home = newTemp("aster-m16-regress-");
+		const home = newTemp("chenxi-m16-regress-");
 		const provider = createPwshProvider({});
 		const plain = await provider.run({ command: "Write-Output plain-ascii", cwd: home });
 		expect(plain.stdout.trim()).toBe("plain-ascii");
@@ -63,7 +63,7 @@ describe("M16 输出编码（真进程）", () => {
 
 	describe.skipIf(!isWindows)("windows-job 下同样 UTF-8（前言与包装路径共用同一份脚本）", () => {
 		it("沙箱内中文输出正确回来", async () => {
-			const home = newTemp("aster-m16-job-");
+			const home = newTemp("chenxi-m16-job-");
 			const sandbox = createWindowsJobSandbox({ home });
 			const provider = createPwshProvider({ sandbox });
 			const payload = "沙箱里的中文【123】";

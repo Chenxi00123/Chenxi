@@ -10,7 +10,7 @@
 import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import type { SessionEvent, SessionId } from "@aster/schema";
+import type { SessionEvent, SessionId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runSessionRepl } from "../src/cli/repl.js";
 import { createStubProvider } from "../src/llm/index.js";
@@ -20,7 +20,7 @@ import { makeTempDir } from "./helpers/tmp.js";
 const homes: string[] = [];
 
 function newHome(): string {
-	const home = makeTempDir("aster-m2-");
+	const home = makeTempDir("chenxi-m2-");
 	homes.push(home);
 	return home;
 }

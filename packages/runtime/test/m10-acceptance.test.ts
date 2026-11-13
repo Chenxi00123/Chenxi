@@ -17,7 +17,7 @@
 import { EventEmitter } from "node:events";
 import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import type { SessionEvent } from "@aster/schema";
+import type { SessionEvent } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseArgs } from "../src/cli/args.js";
 import { createStubProvider } from "../src/llm/index.js";
@@ -138,7 +138,7 @@ describe("M10 布局与配色（纯函数，可逐行断言）", () => {
 	it("帧恰好 rows 行；视图下对齐（顶部补空行）；输入行带前缀", () => {
 		const frame = compose(baseState, 40, 8, plain);
 		expect(frame).toHaveLength(8);
-		expect(frame[0]).toContain("aster");
+		expect(frame[0]).toContain("chenxi");
 		expect(frame[0]).toContain("build");
 		expect(frame[0]).toContain("ses_1");
 		expect(frame[7]).toBe("› hi");
@@ -272,7 +272,7 @@ describe("M10 合帧调度（16ms）与屏幕", () => {
 		expect(written).toHaveLength(2);
 		const second = written[1] as string;
 		expect(second).toContain("› h");
-		expect(second).not.toContain("aster");
+		expect(second).not.toContain("chenxi");
 		expect(second).not.toContain("ses");
 	});
 });
@@ -315,8 +315,8 @@ async function waitFor(predicate: () => boolean, timeoutMs = 3000): Promise<void
 
 describe("M10 应用层：假 tty 驱动真实 REPL（alt screen 还原 + 差分 + 真实落事件）", () => {
 	it("回车输入真实落 user/message；退出时离开 alt screen 并恢复 raw mode", async () => {
-		const home = newTemp("aster-m10-home-");
-		const cwd = newTemp("aster-m10-cwd-");
+		const home = newTemp("chenxi-m10-home-");
+		const cwd = newTemp("chenxi-m10-cwd-");
 		const stdout = new FakeStdout();
 		// 这条用例要断言"静态内容不重画"：屏幕必须**装得下**首屏 + 新回复，否则发生滚动就是整屏重画（合理行为）。
 		stdout.rows = 30;
@@ -382,8 +382,8 @@ describe("M10 应用层：假 tty 驱动真实 REPL（alt screen 还原 + 差分
 		const stdout = new FakeStdout();
 		const stdin = new FakeStdin();
 		const session = runTuiSession({
-			home: newTemp("aster-m10-cc-home-"),
-			cwd: newTemp("aster-m10-cc-cwd-"),
+			home: newTemp("chenxi-m10-cc-home-"),
+			cwd: newTemp("chenxi-m10-cc-cwd-"),
 			input: stdin as never,
 			sink: stdout as never,
 			keys: stdin as never,

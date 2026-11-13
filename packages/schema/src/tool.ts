@@ -38,7 +38,7 @@ export interface ToolDescriptor {
  * 同一个 `parse` 同时服务于「注册期校验」与「执行期校验」，二者不会漂移。
  */
 export interface ValueSchema<T> {
-	readonly kind: "aster/value-schema";
+	readonly kind: "chenxi/value-schema";
 	parse(input: unknown): SchemaParseResult<T>;
 	toJsonSchema(): JsonSchema;
 }

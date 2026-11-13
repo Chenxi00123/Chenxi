@@ -15,7 +15,7 @@
  * 不变量：`lines` 的**末元素永远是"未收全的流式半行"**（可为空串）——差分重绘依赖它；
  * `owner` 与 `lines` **等长**且一一对应（转录行 → 渲染它的那条事件 `seq`，非事件行是 `undefined`）。
  */
-import type { SessionEvent } from "@aster/schema";
+import type { SessionEvent } from "@chenxi/schema";
 import type { Output } from "../cli/session-loop.js";
 import { type DescribeOptions, describeEvent, toolResultHiddenLines } from "./events.js";
 import { formatLine } from "./format.js";

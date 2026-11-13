@@ -14,7 +14,7 @@
  *  - **spinner（纯函数 + 节拍器）**：帧选择确定、忙碌才走、结束即停（空闲不空转）；
  *  - **屏幕**：状态条按**本地测量**显示 `◐ 1.3s (local)`；`transcriptIndexAt` 与 `compose` **同一套窗口算法**。
  */
-import type { SessionEvent } from "@aster/schema";
+import type { SessionEvent } from "@chenxi/schema";
 import { describe, expect, it, vi } from "vitest";
 import {
 	busyFacts,

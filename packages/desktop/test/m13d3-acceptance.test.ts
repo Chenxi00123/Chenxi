@@ -5,15 +5,15 @@
  *  - **规则**：`runSessionRepl` 建好闸门后把**活的** `ApprovalRules` 对象交给前端一次
  *    （`RunReplOptions.onApprovalRules`）⇒ 刚答过「本次会话始终允许」就**立刻**读得到（无需轮询、无需重放）；
  *  - **策略**：生效的「模式 → 权限」表由 main 侧用 `describePermissionRule`（与 `/policy` **同一份实现**）格式化成文本行；
- *  - **renderer 不自己算**：它只 `window.aster.query()` 拿结论，然后做 DOM。
+ *  - **renderer 不自己算**：它只 `window.chenxi.query()` 拿结论，然后做 DOM。
  *
  * `vitest` 里**不**拉 Electron ⇒ 这一层测纯 Node 的 `src/session.ts` + `cli` 的两个出口。
  */
 import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { cli } from "@aster/runtime";
-import type { AgentMode } from "@aster/schema";
+import { cli } from "@chenxi/runtime";
+import type { AgentMode } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import type { LiveSession } from "../src/session.js";
 import { createDesktopSessions, createLiveSession } from "../src/session.js";
@@ -48,9 +48,9 @@ async function bootstrap(extra: Partial<cli.CliOptions>) {
 
 describe("M13d-3 审批规则实时可见（等价于 `/approvals`）", () => {
 	it("答「本次会话始终允许」后，`approvalRules()` 立刻读到 `write@outside`（同一份**活的**规则对象）", async () => {
-		const home = newTemp("aster-m13d3-home-");
-		const cwd = newTemp("aster-m13d3-cwd-");
-		const outside = join(newTemp("aster-m13d3-out-"), "out.txt");
+		const home = newTemp("chenxi-m13d3-home-");
+		const cwd = newTemp("chenxi-m13d3-cwd-");
+		const outside = join(newTemp("chenxi-m13d3-out-"), "out.txt");
 		const runtime = await bootstrap({ home, demoWrite: outside });
 		const sessions = createDesktopSessions({
 			runtime,
@@ -84,7 +84,7 @@ describe("M13d-3 审批规则实时可见（等价于 `/approvals`）", () => {
 
 describe("M13d-3 `onApprovalRules` 的回调语义（既有前端不受影响）", () => {
 	it("有权限系统 ⇒ 闸门建好后回调**一次**（给的是那份活的规则对象，不抛）", async () => {
-		const home = newTemp("aster-m13d3-callback-");
+		const home = newTemp("chenxi-m13d3-callback-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const list: { toolName: string; scope: string }[][] = [];
 		const session: LiveSession = createLiveSession({
@@ -110,7 +110,7 @@ describe("M13d-3 `onApprovalRules` 的回调语义（既有前端不受影响）
 
 describe("M13d-3 策略表（等价于 `/policy`）", () => {
 	it("生效的「模式 → 权限」表按模式给出**可读文本行**（与 `/policy` 同一份 formatter）", async () => {
-		const home = newTemp("aster-m13d3-policy-");
+		const home = newTemp("chenxi-m13d3-policy-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const policy = runtime.permission.policy();
 		const modes: AgentMode[] = ["plan", "build"];
@@ -138,16 +138,16 @@ describe("M13d-3 契约（源码级断言，防漂移）", () => {
 		expect(replSource).toContain("ApprovalRules");
 	});
 
-	it("IPC 只增：main 的 `aster:query` 在 preload 里有对应方法；策略文本复用同一 formatter", () => {
-		expect(mainSource).toContain('"aster:query"');
-		expect(preloadSource).toContain("aster:query");
+	it("IPC 只增：main 的 `chenxi:query` 在 preload 里有对应方法；策略文本复用同一 formatter", () => {
+		expect(mainSource).toContain('"chenxi:query"');
+		expect(preloadSource).toContain("chenxi:query");
 		expect(preloadSource).toContain("query:");
 		expect(mainSource).toContain("describePermissionRule");
 	});
 
 	it("renderer 不自己算规则/策略：只 `query()` 拿结论再做 DOM", () => {
-		expect(rendererSource).toContain("window.aster.query");
+		expect(rendererSource).toContain("window.chenxi.query");
 		// 规则/策略是 main 给的；renderer 里不该出现"自己查策略/规则"的动作
-		expect(rendererSource).not.toMatch(/aster\.(policy|approvals)/i);
+		expect(rendererSource).not.toMatch(/chenxi\.(policy|approvals)/i);
 	});
 });

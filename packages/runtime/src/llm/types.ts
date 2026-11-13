@@ -7,7 +7,7 @@
  *   必须对 key / 请求头做**脱敏**。
  * - 流式 chunk 不落事件；只有**最终** `assistant/message` 落事件（保证投影确定性）。
  */
-import type { ModelMessage, StopReason, ToolCallRef, ToolDescriptor } from "@aster/schema";
+import type { ModelMessage, StopReason, ToolCallRef, ToolDescriptor } from "@chenxi/schema";
 
 export interface LlmRequest {
 	readonly model: string;

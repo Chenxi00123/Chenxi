@@ -111,7 +111,7 @@ describe("M15 口径与取值域（ADR-031）", () => {
 	it("Windows 下建得出来：**内核强制**要写清，**不是**文件/网络隔离也要写清", () => {
 		const sandbox = createSandbox("windows-job", {
 			platform: "win32",
-			home: newTemp("aster-m15-home-"),
+			home: newTemp("chenxi-m15-home-"),
 		});
 		expect(sandbox?.mode).toBe("windows-job");
 		expect(isWindowsJobAvailable("win32")).toBe(true);
@@ -140,13 +140,13 @@ describe("M15 口径与取值域（ADR-031）", () => {
 
 describe("M15 包装资产落盘（幂等 / BOM / 指纹）", () => {
 	it("ps1 **带 UTF-8 BOM**、C# 源**不带 BOM**、重复落盘幂等、指纹稳定", () => {
-		const home = newTemp("aster-m15-assets-");
+		const home = newTemp("chenxi-m15-assets-");
 		const first = materializeJobAssets(home);
 		expect(existsSync(first.scriptPath)).toBe(true);
 		expect(existsSync(first.csPath)).toBe(true);
 		const ps1 = readFileSync(first.scriptPath, "utf8");
 		expect(ps1.charCodeAt(0)).toBe(0xfeff); // PowerShell 5.1 无 BOM 会按 ANSI 读 ⇒ 中文注释会崩
-		expect(ps1).toContain("ASTER_JOB_INNER_B64");
+		expect(ps1).toContain("CHENXI_JOB_INNER_B64");
 		expect(readFileSync(first.csPath, "utf8").charCodeAt(0)).not.toBe(0xfeff);
 		expect(readFileSync(first.csPath, "utf8")).toContain("CreateJobObjectW");
 
@@ -174,7 +174,7 @@ describe.skipIf(!isWindows)("M15 包装执行（真进程）", () => {
 	}
 
 	it("正常命令：exitCode 0，且命令文本**一字不改**（中文 + 引号 + 换行；经内层写文件按 UTF-8 读回）", async () => {
-		const home = newTemp("aster-m15-run-");
+		const home = newTemp("chenxi-m15-run-");
 		const { provider } = providerFor(home);
 		const payload = '中文 " 引号 & 百分号 %';
 		const outFile = join(home, "echoed.txt");
@@ -191,14 +191,14 @@ describe.skipIf(!isWindows)("M15 包装执行（真进程）", () => {
 	}, 30000);
 
 	it("退出码透传：`exit 7` ⇒ exitCode 7", async () => {
-		const home = newTemp("aster-m15-exit-");
+		const home = newTemp("chenxi-m15-exit-");
 		const { provider } = providerFor(home);
 		const result = await provider.run({ command: "exit 7", cwd: home, workspaceRoot: home });
 		expect(result.exitCode).toBe(7);
 	}, 30000);
 
 	it("围栏是活的：内层进程自检 `IsProcessInJob` 为真", async () => {
-		const home = newTemp("aster-m15-injob-");
+		const home = newTemp("chenxi-m15-injob-");
 		const { provider } = providerFor(home);
 		const result = await provider.run({
 			command: JOB_MEMBERSHIP_PROBE,
@@ -209,7 +209,7 @@ describe.skipIf(!isWindows)("M15 包装执行（真进程）", () => {
 	}, 30000);
 
 	it("整树击杀：中止当前回合 ⇒ 内层起的**孙进程**随之消失（内核 kill-on-close）", async () => {
-		const home = newTemp("aster-m15-kill-");
+		const home = newTemp("chenxi-m15-kill-");
 		const { provider } = providerFor(home);
 		killAllPing();
 		await sleep(300);
@@ -230,7 +230,7 @@ describe.skipIf(!isWindows)("M15 包装执行（真进程）", () => {
 	}, 30000);
 
 	it("进程数上限被内核强制：超限的进程**入不了作业**", async () => {
-		const home = newTemp("aster-m15-limit-");
+		const home = newTemp("chenxi-m15-limit-");
 		const { provider } = providerFor(home, { processLimit: 4 });
 		const spawner = [
 			"$ok=0",
@@ -247,7 +247,7 @@ describe.skipIf(!isWindows)("M15 包装执行（真进程）", () => {
 	}, 30000);
 
 	it("拿不到围栏就**拒绝执行**：包装计划抛错 ⇒ 可读失败 + exitCode 126，内层命令没跑", async () => {
-		const home = newTemp("aster-m15-refuse-");
+		const home = newTemp("chenxi-m15-refuse-");
 		const { provider } = providerFor(home, {
 			materialize: () => {
 				throw new Error("disk is full (simulated)");
@@ -265,8 +265,8 @@ describe.skipIf(!isWindows)("M15 包装执行（真进程）", () => {
 	});
 
 	it("cwd 越界仍走同一套**可读拒绝**（与 best-effort 同源）", async () => {
-		const home = newTemp("aster-m15-cwd-");
-		const outside = newTemp("aster-m15-outside-");
+		const home = newTemp("chenxi-m15-cwd-");
+		const outside = newTemp("chenxi-m15-outside-");
 		const { provider } = providerFor(home);
 		const result = await provider.run({
 			command: "Write-Output 'x'",

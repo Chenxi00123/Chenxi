@@ -48,7 +48,7 @@ function promptText(blocks: unknown): string {
 }
 
 export function createAcpServer(options: AcpServerOptions): AcpServer {
-	const agentInfo = options.agentInfo ?? { name: "aster", version: "1.0.0" };
+	const agentInfo = options.agentInfo ?? { name: "chenxi", version: "1.0.0" };
 	const busy = new Set<string>();
 	let closed = false;
 

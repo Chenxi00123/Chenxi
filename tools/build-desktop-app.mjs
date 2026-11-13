@@ -1,8 +1,8 @@
 /**
- * 桌面版「应用目录」构建（M13c）：把 Electron main（含 `@aster/runtime` / schema / protocol）打成**单文件 ESM**，
+ * 桌面版「应用目录」构建（M13c）：把 Electron main（含 `@chenxi/runtime` / schema / protocol）打成**单文件 ESM**，
  * 并把 `renderer/` 与 `preload.cjs` 摆到**同一目录**，产出 `packages/desktop/dist/app/`。
  *
- * 为什么必须打单文件：本仓库是 **npm workspaces**（`node_modules/@aster/runtime` 是**符号链接**）——
+ * 为什么必须打单文件：本仓库是 **npm workspaces**（`node_modules/@chenxi/runtime` 是**符号链接**）——
  * 便携目录里解析不到它。打成单文件后该目录**自洽**，不再依赖任何 `node_modules`，
  * 也就不需要 electron-builder 那种"把依赖树搬过去"的重型打包器。
  *
@@ -14,7 +14,16 @@
  *
  * 运行：node tools/build-desktop-app.mjs（前置：`npm run desktop-build` = tsc -b，产出各包的 dist）
  */
-import { copyFileSync, cpSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+	appendFileSync,
+	copyFileSync,
+	cpSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	statSync,
+	writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -53,12 +62,12 @@ const result = await build({
 	format: "esm",
 	platform: "node",
 	target: "node22",
-	// `@aster/*` 与 zod 都是普通依赖 ⇒ 默认全内联；`node:*` 由 platform=node 自动 external；
+	// `@chenxi/*` 与 zod 都是普通依赖 ⇒ 默认全内联；`node:*` 由 platform=node 自动 external；
 	// 只有 Electron 运行时本身必须 external（它由宿主进程提供，打进文件反而会坏）。
 	external: ["electron"],
 	// ⚠️ 关键：本 bundle 的入口文件**就是** `argv[1]`，若不关掉 `cli/main.ts` 的入口守卫，
 	// CLI 的 main() 会在 GUI 进程里被误触发（读 stdin、开野生 REPL、往数据根写会话）——实测抓到过。
-	define: { ASTER_CLI_ENTRY: "false" },
+	define: { CHENXI_CLI_ENTRY: "false" },
 	sourcemap: false,
 	minify: false,
 	legalComments: "eof",
@@ -70,18 +79,32 @@ if (result.errors.length > 0) {
 	process.exit(1);
 }
 
+// 分发义务：桌面 main.mjs 同样内联了 zod（MIT），许可声明必须随产物走。
+const notices = readFileSync(path.join(repoRoot, "THIRD_PARTY_NOTICES.md"), "utf8").trimEnd();
+appendFileSync(
+	outfile,
+	`\n\n// ===== THIRD-PARTY NOTICES（随产物分发，勿删） =====\n${notices
+		.split("\n")
+		.map((line) => (line.length === 0 ? "//" : `// ${line}`))
+		.join("\n")}\n`,
+	"utf8",
+);
+
 // 把 renderer/ 与 preload.cjs 摆到与 main 同目录（便携形态下会被整目录拷进 resources/app）
 rmSync(path.join(outDir, "renderer"), { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 cpSync(path.join(desktopDir, "renderer"), path.join(outDir, "renderer"), { recursive: true });
 copyFileSync(path.join(desktopDir, "preload.cjs"), path.join(outDir, "preload.cjs"));
+// 项目自身的 Apache-2.0 与第三方声明一并放进 app payload（便携目录与安装包会整目录带走）
+copyFileSync(path.join(repoRoot, "LICENSE"), path.join(outDir, "LICENSE"));
+copyFileSync(path.join(repoRoot, "THIRD_PARTY_NOTICES.md"), path.join(outDir, "THIRD_PARTY_NOTICES.md"));
 
 // 最小清单：Electron 在 `<out>/resources/app/` 形态下据它找入口（`main` 指向单文件 bundle）
 const manifest = {
-	name: "aster-desktop-app",
+	name: "chenxi-desktop-app",
 	version: "1.0.0",
 	private: true,
-	description: "Aster desktop app payload (built by tools/build-desktop-app.mjs; do not edit).",
+	description: "Chenxi desktop app payload (built by tools/build-desktop-app.mjs; do not edit).",
 	main: "main.mjs",
 };
 writeFileSync(path.join(outDir, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");

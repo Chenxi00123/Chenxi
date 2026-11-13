@@ -82,17 +82,17 @@ export function auditDesktopPaths(
 }
 
 /**
- * 数据根本体（与 CLI 的 `ASTER_HOME` 语义一致，但**不覆盖**已显式设置的环境变量）。
- * 缺省 `<仓库>/\.aster`，即**仓库所在盘**（本机为 D 盘）。
+ * 数据根本体（与 CLI 的 `CHENXI_HOME` 语义一致，但**不覆盖**已显式设置的环境变量）。
+ * 缺省 `<仓库>/\.chenxi`，即**仓库所在盘**（本机为 D 盘）。
  */
 export function resolveDesktopHome(
 	env: NodeJS.ProcessEnv = process.env,
 	fallbackRepoRoot?: string,
 ): string {
-	const fromEnv = env.ASTER_HOME;
+	const fromEnv = env.CHENXI_HOME;
 	if (fromEnv !== undefined && fromEnv.trim() !== "") return resolve(fromEnv);
-	if (fallbackRepoRoot !== undefined) return resolve(fallbackRepoRoot, ".aster");
-	return resolve(process.cwd(), ".aster");
+	if (fallbackRepoRoot !== undefined) return resolve(fallbackRepoRoot, ".chenxi");
+	return resolve(process.cwd(), ".chenxi");
 }
 
 /** 桌面数据根（`<home>\desktop`）——与 CLI 的会话数据同根，GUI 只是多一层子目录。 */

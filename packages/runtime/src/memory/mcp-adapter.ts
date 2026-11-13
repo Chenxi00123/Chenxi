@@ -6,7 +6,7 @@
  *  - 返回的 `content[0].text` 是 **JSON**：`{ records: [{ id, content, score? }] }` **或裸数组**；
  *  - **可选字段**（ADR-030 起）：服务端若额外给出 `createdAt` / `validAt` / `invalidAt` / `provenance`，
  *    我们**原样携带**——它们是 bitemporal 与溯源事实（主张 1/3），
- *    记忆交换格式（`aster-memory-exchange`）要靠它们才是**无损**的；
+ *    记忆交换格式（`chenxi-memory-exchange`）要靠它们才是**无损**的；
  *    服务端**没给**就不带（绝不臆造时间），形状不符的字段**丢掉这一个字段**（不连累整条记录）。
  *
  * 宽容与失败语义（ADR-016 / ADR-033 / ADR-034）：
@@ -25,7 +25,7 @@ import type {
 	MemoryScope,
 	MemorySearchRequest,
 	MemorySearchResult,
-} from "@aster/schema";
+} from "@chenxi/schema";
 
 /** 调用一个 MCP 工具（通常来自 `BridgedMcpServer.callTool`）。 */
 export type McpToolCaller = (name: string, args: unknown) => Promise<unknown>;

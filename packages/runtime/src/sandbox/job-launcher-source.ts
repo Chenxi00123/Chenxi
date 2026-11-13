@@ -2,7 +2,7 @@
  * windows-job 包装进程的**源码模板**（ADR-031 / 兑现 ADR-027 修订的 Windows 真围栏）。
  *
  * 为什么把 C# 与 ps1 **内嵌成字符串**而不是放成资产文件：
- *  - 本仓的 `bin/aster.mjs` 是**单文件 bundle**，资产文件在打包形态下找不到；
+ *  - 本仓的 `bin/chenxi.mjs` 是**单文件 bundle**，资产文件在打包形态下找不到；
  *  - 内嵌后 esbuild 直接把它**打进单文件**，零资产解析问题（零新依赖、零外部文件）。
  *
  * 载体为什么是**内盒 PowerShell + `Add-Type`**（而不是 native binding）：
@@ -19,7 +19,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-public static class AsterJob {
+public static class ChenxiJob {
   [StructLayout(LayoutKind.Sequential)]
   public struct JOBOBJECT_BASIC_LIMIT_INFORMATION {
     public long PerProcessUserTimeLimit, PerJobUserTimeLimit;
@@ -145,7 +145,7 @@ public static class AsterJob {
  * 包装进程脚本（ASCII 引号 + 中文注释；落盘时由调用方加 BOM）。
  *
  * 纪律：**拿不到围栏就拒绝执行**（stderr 可读原因 + exit 126），绝不静默退回"没围栏也跑"。
- * 内层命令经环境变量 `ASTER_JOB_INNER_B64`（UTF-8 base64）传入，再以 `-EncodedCommand` 交给内层 pwsh
+ * 内层命令经环境变量 `CHENXI_JOB_INNER_B64`（UTF-8 base64）传入，再以 `-EncodedCommand` 交给内层 pwsh
  * ⇒ **零 argv 引号转义风险**（命令文本一个字节都不改）。
  */
 export const JOB_LAUNCHER_PS1 = String.raw`
@@ -158,12 +158,12 @@ param(
 )
 
 # windows-job 包装进程（ADR-031）：建作业 -> 把内层命令放进去跑 -> 透传退出码。
-# Node 侧只传路径与参数；命令文本走 env ASTER_JOB_INNER_B64。
+# Node 侧只传路径与参数；命令文本走 env CHENXI_JOB_INNER_B64。
 $ErrorActionPreference = "Stop"
 
 $cs = [IO.File]::ReadAllText($CsSourcePath, [Text.Encoding]::UTF8)
 $sha = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($cs))).Replace("-", "").Substring(0, 16).ToLower()
-$dll = Join-Path $DllDir ("aster-job-" + $sha + ".dll")
+$dll = Join-Path $DllDir ("chenxi-job-" + $sha + ".dll")
 try {
   if (Test-Path $dll) {
     [void][Reflection.Assembly]::LoadFrom($dll)   # 缓存命中：实测 ~13ms（现编 ~140ms）
@@ -176,9 +176,9 @@ try {
   exit 126
 }
 
-$inner = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($env:ASTER_JOB_INNER_B64))
+$inner = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($env:CHENXI_JOB_INNER_B64))
 try {
-  $job = [AsterJob]::CreateFencedJob([uint32]$ProcessLimit, [uint32]$UiFlags)
+  $job = [ChenxiJob]::CreateFencedJob([uint32]$ProcessLimit, [uint32]$UiFlags)
 } catch {
   [Console]::Error.WriteLine("sandbox refused: cannot establish the windows-job fence -> " + $_.Exception.Message)
   exit 126
@@ -188,7 +188,7 @@ try {
   # 注意用**单引号**字面量：双引号里 PowerShell 会把 $ProgressPreference 当变量插值（实测踩过）。
   $script = '$ProgressPreference = ''SilentlyContinue''' + [char]10 + $inner
   $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($script))
-  $code = [AsterJob]::RunInJob($job, $InnerExe, "-NoProfile -NonInteractive -EncodedCommand $encoded")
+  $code = [ChenxiJob]::RunInJob($job, $InnerExe, "-NoProfile -NonInteractive -EncodedCommand $encoded")
   exit $code
 } catch {
   [Console]::Error.WriteLine("sandbox refused: windows-job launcher failed -> " + $_.Exception.Message)

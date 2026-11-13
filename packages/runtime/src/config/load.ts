@@ -6,8 +6,8 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { AgentMode } from "@aster/schema";
-import { DEFAULT_AGENT_MODE } from "@aster/schema";
+import type { AgentMode } from "@chenxi/schema";
+import { DEFAULT_AGENT_MODE } from "@chenxi/schema";
 import type { ZodError } from "zod";
 import type { PermissionRule } from "../permission/types.js";
 import { resolveHome } from "../persist/paths.js";
@@ -23,11 +23,11 @@ import {
 /** 用户级配置文件名（位于 `<home>/`）。 */
 export const USER_CONFIG_FILE = "config.json";
 /** 项目级配置文件名（位于 `<cwd>/`）。 */
-export const PROJECT_CONFIG_FILE = "aster.config.json";
+export const PROJECT_CONFIG_FILE = "chenxi.config.json";
 /** 显式指定配置文件的变量名（设置后跳过自动发现）。 */
-export const CONFIG_PATH_VAR = "ASTER_CONFIG";
+export const CONFIG_PATH_VAR = "CHENXI_CONFIG";
 /** 默认启动模式的环境变量（优先级低于 `--mode`）。 */
-export const MODE_VAR = "ASTER_MODE";
+export const MODE_VAR = "CHENXI_MODE";
 
 /** 与 `process.env` 形状兼容的最小环境变量视图。 */
 export interface EnvLike {
@@ -35,7 +35,7 @@ export interface EnvLike {
 }
 
 /**
- * 配置错误。`source` 为**出错来源标签**（文件路径，或 `env ASTER_MODE` 这类变量），
+ * 配置错误。`source` 为**出错来源标签**（文件路径，或 `env CHENXI_MODE` 这类变量），
  * 消息**只含来源与键路径**，绝不回显任何取值（对齐 `llm/config` 的密钥纪律）。
  */
 export class ConfigError extends Error {
@@ -48,9 +48,9 @@ export class ConfigError extends Error {
 }
 
 export interface LoadedConfig {
-	/** 默认启动模式（可被 `--mode` / `ASTER_MODE` 覆盖）。 */
+	/** 默认启动模式（可被 `--mode` / `CHENXI_MODE` 覆盖）。 */
 	readonly mode?: AgentMode;
-	/** 模型 id **兜底**（仅当 `ASTER_MODEL` 未设置时生效）。 */
+	/** 模型 id **兜底**（仅当 `CHENXI_MODEL` 未设置时生效）。 */
 	readonly model?: string;
 	/** 按模式整段替换后的规则（**未提供**的模式不含键 -> 调用方回退内置默认）。 */
 	readonly permissions?: Partial<Record<AgentMode, readonly PermissionRule[]>>;
@@ -195,7 +195,7 @@ function assertUniqueServerNames(source: string, servers: ConfigFileData["mcp"])
 
 /**
  * 发现配置文件（返回顺序 = **优先级从低到高**）。
- * 优先级：`explicitPath`（CLI `--config`）> `ASTER_CONFIG` > 自动发现 `<home>/config.json` -> `<cwd>/aster.config.json`。
+ * 优先级：`explicitPath`（CLI `--config`）> `CHENXI_CONFIG` > 自动发现 `<home>/config.json` -> `<cwd>/chenxi.config.json`。
  */
 export function discoverConfigPaths(options: {
 	home: string;
@@ -255,7 +255,7 @@ export function loadConfig(options: LoadConfigOptions = {}): LoadedConfig {
 }
 
 /**
- * 解析**默认启动模式**：`--mode`（CLI）> `ASTER_MODE`（env）> 配置文件 > 内置默认（`plan`）。
+ * 解析**默认启动模式**：`--mode`（CLI）> `CHENXI_MODE`（env）> 配置文件 > 内置默认（`plan`）。
  */
 export function resolveDefaultMode(options: {
 	cliMode?: AgentMode;
@@ -272,10 +272,10 @@ export function resolveDefaultMode(options: {
 }
 
 /**
- * 把 `config.model` 作为 `ASTER_MODEL` 的**兜底**（只补缺，绝不覆盖已设置的值）。
+ * 把 `config.model` 作为 `CHENXI_MODEL` 的**兜底**（只补缺，绝不覆盖已设置的值）。
  * 返回新对象，不改动入参。
  */
 export function withModelFallback(env: EnvLike, config: LoadedConfig): EnvLike {
-	if (config.model === undefined || readVar(env, "ASTER_MODEL") !== undefined) return env;
-	return { ...env, ASTER_MODEL: config.model };
+	if (config.model === undefined || readVar(env, "CHENXI_MODEL") !== undefined) return env;
+	return { ...env, CHENXI_MODEL: config.model };
 }

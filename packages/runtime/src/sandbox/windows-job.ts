@@ -146,7 +146,7 @@ export function createWindowsJobSandbox(options: WindowsJobOptions = {}): Sandbo
 				],
 				env: {
 					// 命令文本一字不改地经 base64 传给包装层（避免 argv 引号转义）
-					ASTER_JOB_INNER_B64: Buffer.from(inner.command, "utf8").toString("base64"),
+					CHENXI_JOB_INNER_B64: Buffer.from(inner.command, "utf8").toString("base64"),
 				},
 			};
 		},

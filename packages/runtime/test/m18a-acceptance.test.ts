@@ -69,8 +69,8 @@ describe("M18a stdio 客户端：提示词与资源（ADR-035）", () => {
 					arguments: [{ name: "who", description: "Who to greet", required: true }],
 				},
 			]);
-			expect(await client.getPrompt("greet", { who: "Aster" })).toMatchObject({
-				messages: [{ role: "user", content: { type: "text", text: "Hello Aster" } }],
+			expect(await client.getPrompt("greet", { who: "Chenxi" })).toMatchObject({
+				messages: [{ role: "user", content: { type: "text", text: "Hello Chenxi" } }],
 			});
 			const resources = await client.listResources();
 			expect(resources).toEqual([
@@ -115,7 +115,7 @@ describe("M18a 配置面：stdio 与 HTTP 互斥（ADR-035）", () => {
 
 describe("M18a CLI：--mcp-prompts / --mcp-resources（不进 REPL）", () => {
 	it("打印提示词与资源（真进程夹具）", async () => {
-		const dir = newTemp("aster-m18a-cli-");
+		const dir = newTemp("chenxi-m18a-cli-");
 		const config = writeConfig(dir, {
 			name: "fixture",
 			command: process.execPath,
@@ -147,7 +147,7 @@ describe("M18a CLI：--mcp-prompts / --mcp-resources（不进 REPL）", () => {
 	});
 
 	it("服务端没声明 prompts 能力 ⇒ **明确说清**，不硬调后报 JSON-RPC error", async () => {
-		const dir = newTemp("aster-m18a-cap-");
+		const dir = newTemp("chenxi-m18a-cap-");
 		const config = writeConfig(dir, {
 			name: "fixture",
 			command: process.execPath,
@@ -165,7 +165,7 @@ describe("M18a CLI：--mcp-prompts / --mcp-resources（不进 REPL）", () => {
 	});
 
 	it("服务器名未声明 ⇒ 报错并列出已声明清单", async () => {
-		const dir = newTemp("aster-m18a-miss-");
+		const dir = newTemp("chenxi-m18a-miss-");
 		const config = writeConfig(dir, {
 			name: "fixture",
 			command: process.execPath,

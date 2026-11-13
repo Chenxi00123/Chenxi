@@ -8,8 +8,8 @@
  * 工具执行在 `tools`、回合推进在 `loop`，横切能力经缝插入。
  */
 import { createInterface } from "node:readline";
-import type { AgentMode, SessionEvent, SessionId } from "@aster/schema";
-import { AGENT_MODES, DEFAULT_AGENT_MODE, SESSION_FORMAT_VERSION } from "@aster/schema";
+import type { AgentMode, SessionEvent, SessionId } from "@chenxi/schema";
+import { AGENT_MODES, DEFAULT_AGENT_MODE, SESSION_FORMAT_VERSION } from "@chenxi/schema";
 import type { CompactionConfig, ContextBuilder } from "../context/index.js";
 import type { LlmProvider } from "../llm/types.js";
 import type { ToolRuntime } from "../loop/index.js";
@@ -180,7 +180,7 @@ export async function runSessionRepl(options: RunReplOptions): Promise<RunReplRe
 	if (options.provider === undefined) {
 		options.output.write(
 			"no model endpoint configured — recording only. " +
-				"set ASTER_BASE_URL / ASTER_API_KEY / ASTER_MODEL to enable streaming.\n",
+				"set CHENXI_BASE_URL / CHENXI_API_KEY / CHENXI_MODEL to enable streaming.\n",
 		);
 	} else {
 		options.output.write(

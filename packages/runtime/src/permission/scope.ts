@@ -9,7 +9,7 @@
  */
 import { isAbsolute, relative, resolve } from "node:path";
 import { platform } from "node:process";
-import type { PermissionRequest } from "@aster/schema";
+import type { PermissionRequest } from "@chenxi/schema";
 import type { CallScope } from "./types.js";
 
 const PATH_KEYS = new Set(["path", "file", "filepath", "file_path", "files", "paths"]);

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { SessionEvent } from "@aster/schema";
+import type { SessionEvent } from "@chenxi/schema";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createSessionStore } from "../src/persist/index.js";
 import { makeTempDir } from "./helpers/tmp.js";
@@ -9,7 +9,7 @@ import { makeTempDir } from "./helpers/tmp.js";
 let home: string;
 
 beforeEach(() => {
-	home = makeTempDir("aster-persist-");
+	home = makeTempDir("chenxi-persist-");
 });
 
 afterEach(() => {

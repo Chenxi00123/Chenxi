@@ -4,17 +4,17 @@
  * 只负责「字符串 -> 结构化选项」；**不做**任何 IO、不读环境变量、不读配置文件
  * （优先级合并由调用方按 ADR-014 处理）。
  */
-import type { AgentMode, PortableFormat } from "@aster/schema";
-import { AGENT_MODES, PORTABLE_FORMATS } from "@aster/schema";
+import type { AgentMode, PortableFormat } from "@chenxi/schema";
+import { AGENT_MODES, PORTABLE_FORMATS } from "@chenxi/schema";
 import { SANDBOX_MODES } from "../sandbox/index.js";
 import type { ResumeTarget } from "./repl.js";
 
 export interface CliOptions {
 	home?: string;
 	resume?: ResumeTarget;
-	/** CLI `--config`：显式指定配置文件（优先级高于 `ASTER_CONFIG`，并跳过自动发现）。 */
+	/** CLI `--config`：显式指定配置文件（优先级高于 `CHENXI_CONFIG`，并跳过自动发现）。 */
 	config?: string;
-	/** CLI `--mode`：**未提供时为 undefined**（留给 `ASTER_MODE` / 配置文件 / 内置默认）。 */
+	/** CLI `--mode`：**未提供时为 undefined**（留给 `CHENXI_MODE` / 配置文件 / 内置默认）。 */
 	mode?: AgentMode;
 	list: boolean;
 	rebuildIndex: boolean;
@@ -42,7 +42,7 @@ export interface CliOptions {
 	exportTarget?: string;
 	/** 会话可移植（ADR-019）：`--import <path>`。 */
 	importPath?: string;
-	/** 会话可移植（ADR-019）：`--format aster|claude-code|zcode`（缺省 `aster`）。 */
+	/** 会话可移植（ADR-019）：`--format chenxi|claude-code|zcode`（缺省 `chenxi`）。 */
 	format?: PortableFormat;
 	/** 会话可移植（ADR-019）：`--export` 的输出路径。 */
 	out?: string;

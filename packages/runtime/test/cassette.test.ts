@@ -3,7 +3,7 @@
  *
  * 全程 keyless、零网络：内层用 stub provider，文件 IO 不参与（本模块**不 import fs**）。
  */
-import type { ModelMessage, ToolDescriptor } from "@aster/schema";
+import type { ModelMessage, ToolDescriptor } from "@chenxi/schema";
 import { describe, expect, it } from "vitest";
 import {
 	CASSETTE_FORMAT,
@@ -239,7 +239,7 @@ describe("M19 录制 -> 回放", () => {
 	});
 
 	it("录制请求不含 signal；cassette 文本不含任何密钥串", async () => {
-		const secret = "sk-aster-m19-LOCAL-ONLY-7f3a9c";
+		const secret = "sk-chenxi-m19-LOCAL-ONLY-7f3a9c";
 		const sink = capture();
 		const recorder = createRecordingProvider(createStubProvider({ content: "ok" }), sink);
 		const controller = new AbortController();
@@ -373,7 +373,7 @@ describe("M19 cassette 格式与严格解析", () => {
 	});
 
 	it("缺失 header / 错 format 的错误信息不含任何被解析出的值（不可回显密钥）", () => {
-		const secret = "sk-aster-m19-SECRET-123";
+		const secret = "sk-chenxi-m19-SECRET-123";
 		const error = loadError(JSON.stringify({ format: secret }));
 		expect(error.message).not.toContain(secret);
 	});

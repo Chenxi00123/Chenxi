@@ -19,7 +19,7 @@ import type {
 	ToolCallContext,
 	ToolDefinition,
 	ValueSchema,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { z } from "zod";
 import type { AnyToolDefinition } from "../tools/registry.js";
 import { valueSchema } from "../tools/schema.js";
@@ -63,7 +63,7 @@ export function createTaskTool(runner: SubagentRunner): AnyToolDefinition {
 			background: z.boolean().optional(),
 		}),
 	);
-	// `stopReason` 用 `z.string()`：`@aster/schema` 只导出 `StopReason` **类型**，未导出取值常量，
+	// `stopReason` 用 `z.string()`：`@chenxi/schema` 只导出 `StopReason` **类型**，未导出取值常量，
 	// 故不臆造枚举值，交由上游类型系统约束。
 	const output: ValueSchema<TaskOutput> = valueSchema(
 		z.object({

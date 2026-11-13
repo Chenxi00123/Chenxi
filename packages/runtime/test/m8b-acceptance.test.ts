@@ -23,7 +23,7 @@ import type {
 	ToolCallContext,
 	ToolCallId,
 	ToolCallRef,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { createContext } from "../src/events/index.js";
 import { createStubProvider } from "../src/llm/index.js";
@@ -145,8 +145,8 @@ async function runTask(
 
 describe("M8b `fork`：导入即记录（ADR-018）", () => {
 	it("子会话落 `subagent/context-imported`，payload 逐条 = 派发那刻的父投影，且先于 prompt", async () => {
-		const home = newTemp("aster-m8b-fork-home-");
-		const cwd = newTemp("aster-m8b-fork-cwd-");
+		const home = newTemp("chenxi-m8b-fork-home-");
+		const cwd = newTemp("chenxi-m8b-fork-cwd-");
 		const harness = makeHarness({ home, cwd });
 		const parent = await makeParent({ home, cwd });
 
@@ -198,8 +198,8 @@ describe("M8b `fork`：导入即记录（ADR-018）", () => {
 	});
 
 	it("缺父会话访问权 -> 快速失败（可读原因），且**不产生**子会话（绝不静默降级成 fresh）", async () => {
-		const home = newTemp("aster-m8b-forkfail-home-");
-		const cwd = newTemp("aster-m8b-forkfail-cwd-");
+		const home = newTemp("chenxi-m8b-forkfail-home-");
+		const cwd = newTemp("chenxi-m8b-forkfail-cwd-");
 		const harness = makeHarness({ home, cwd });
 
 		// 直接派发：不给 sessionLog
@@ -227,8 +227,8 @@ describe("M8b `fork`：导入即记录（ADR-018）", () => {
 
 describe("M8b `background`：立刻返回句柄 + 结果落父会话（ADR-018）", () => {
 	it('工具只回 `status:"running"`；drain 后父会话**恰好一条** `subagent/result`，seq 与索引一致', async () => {
-		const home = newTemp("aster-m8b-bg-home-");
-		const cwd = newTemp("aster-m8b-bg-cwd-");
+		const home = newTemp("chenxi-m8b-bg-home-");
+		const cwd = newTemp("chenxi-m8b-bg-cwd-");
 		const harness = makeHarness({ home, cwd, script: [step("BG-SUMMARY")] });
 		const parent = await makeParent({ home, cwd });
 		const parentId = parent.handle.sessionId;
@@ -284,8 +284,8 @@ describe("M8b `background`：立刻返回句柄 + 结果落父会话（ADR-018�
 	});
 
 	it("父句柄写不进去时**静默丢弃**：drain 正常返回，绝不抛出未处理异常", async () => {
-		const home = newTemp("aster-m8b-bgdropped-home-");
-		const cwd = newTemp("aster-m8b-bgdropped-cwd-");
+		const home = newTemp("chenxi-m8b-bgdropped-home-");
+		const cwd = newTemp("chenxi-m8b-bgdropped-cwd-");
 		const harness = makeHarness({ home, cwd });
 
 		// 模拟"父句柄已关闭 / 已封禁"：append 一律失败
@@ -306,8 +306,8 @@ describe("M8b `background`：立刻返回句柄 + 结果落父会话（ADR-018�
 	});
 
 	it("权限沿用 ADR-017：`plan` 下 background 的 task 仍被拒，且**不产生**子会话", async () => {
-		const home = newTemp("aster-m8b-bgplan-home-");
-		const cwd = newTemp("aster-m8b-bgplan-cwd-");
+		const home = newTemp("chenxi-m8b-bgplan-home-");
+		const cwd = newTemp("chenxi-m8b-bgplan-cwd-");
 		const harness = makeHarness({ home, cwd });
 		const parent = await makeParent({ home, cwd });
 

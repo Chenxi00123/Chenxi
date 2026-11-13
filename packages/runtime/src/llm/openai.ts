@@ -8,7 +8,7 @@
  * 安全纪律（README 环境变量契约）：任何错误信息都要**脱敏**——
  * 抹掉 `Bearer <token>` / `sk-...` 形态的密钥串，并且绝不回显 `config.apiKey`。
  */
-import type { ModelMessage, StopReason, ToolCallId, ToolCallRef } from "@aster/schema";
+import type { ModelMessage, StopReason, ToolCallId, ToolCallRef } from "@chenxi/schema";
 import type {
 	LlmProvider,
 	LlmProviderConfig,

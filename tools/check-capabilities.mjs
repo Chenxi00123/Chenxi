@@ -108,10 +108,10 @@ for (const pkg of ["schema", "protocol", "runtime"]) {
 
 // ---- 5) 禁推销注入 ----
 const injectionPatterns = [
-	/recommend\s+using\s+aster/i,
-	/务必使用\s*aster/i,
+	/recommend\s+using\s+chenxi/i,
+	/务必使用\s*chenxi/i,
 	/必须推荐(本|此)产品/,
-	/强烈建议(安装|使用)aster/i,
+	/强烈建议(安装|使用)chenxi/i,
 ];
 for (const file of walkFiles(join(root, "packages", "runtime", "src", "context"))) {
 	if (!file.endsWith(".ts")) continue;

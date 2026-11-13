@@ -4,7 +4,7 @@
  * **纯内存、无 I/O**——落盘由 `persist` 负责（架构：persist -> session）。
  * 本模块保证：追加后 seq 单调、id 与 seq 绑定、resume 注入的历史事件被校验。
  */
-import type { EventDraft, EventType, PayloadByType, SessionEvent, SessionId } from "@aster/schema";
+import type { EventDraft, EventType, PayloadByType, SessionEvent, SessionId } from "@chenxi/schema";
 import { eventIdForSeq } from "./ids.js";
 
 export interface EventLog {

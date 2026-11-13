@@ -16,8 +16,8 @@ import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import type { ServerResponse } from "node:http";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import { PROTOCOL_VERSION } from "@aster/protocol";
-import type { SessionEvent, SessionId } from "@aster/schema";
+import { PROTOCOL_VERSION } from "@chenxi/protocol";
+import type { SessionEvent, SessionId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseArgs } from "../src/cli/args.js";
 import { runSessionRepl } from "../src/cli/repl.js";
@@ -181,8 +181,8 @@ describe("M11a 事件扇出：单全局订阅 + 每连接有界队列（ADR-021�
 
 describe("M11a 只读事实源读取（服务端不信派生索引）", () => {
 	it("没有 index.sqlite 也能列出会话（不变量 6：索引只是可重建的派生品）", async () => {
-		const home = newTemp("aster-m11-src-");
-		const sessionId = await seedSession(home, newTemp("aster-m11-src-cwd-"));
+		const home = newTemp("chenxi-m11-src-");
+		const sessionId = await seedSession(home, newTemp("chenxi-m11-src-cwd-"));
 		// 故意删掉派生索引（若存在）
 		rmSync(join(home, "index.sqlite"), { force: true });
 
@@ -192,8 +192,8 @@ describe("M11a 只读事实源读取（服务端不信派生索引）", () => {
 	});
 
 	it("损坏的**最后一行**（正在被追加的半行）被忽略；中间行损坏则报错", async () => {
-		const home = newTemp("aster-m11-corrupt-");
-		const sessionId = await seedSession(home, newTemp("aster-m11-corrupt-cwd-"));
+		const home = newTemp("chenxi-m11-corrupt-");
+		const sessionId = await seedSession(home, newTemp("chenxi-m11-corrupt-cwd-"));
 		const file = join(home, "sessions", `${sessionId}.jsonl`);
 		const good = readFileSync(file, "utf8");
 		const goodLineCount = good.trim().split("\n").length;
@@ -238,8 +238,8 @@ class BlockedResponse extends EventEmitter {
 
 describe("M11a HTTP 服务端（真客户端，端到端）", () => {
 	it("回放是**只读**的：调用前后事实源逐字节相同；列表/回放/404/405 都可读", async () => {
-		const home = newTemp("aster-m11-http-");
-		const cwd = newTemp("aster-m11-http-cwd-");
+		const home = newTemp("chenxi-m11-http-");
+		const cwd = newTemp("chenxi-m11-http-cwd-");
 		const sessionId = await seedSession(home, cwd);
 		const file = join(home, "sessions", `${sessionId}.jsonl`);
 		const before = readFileSync(file, "utf8");
@@ -279,8 +279,8 @@ describe("M11a HTTP 服务端（真客户端，端到端）", () => {
 	});
 
 	it("SSE：先 `hello`（明示不回放续传），再把**已记录事件**逐条转发给订阅者", async () => {
-		const home = newTemp("aster-m11-sse-");
-		const sessionId = await seedSession(home, newTemp("aster-m11-sse-cwd-"));
+		const home = newTemp("chenxi-m11-sse-");
+		const sessionId = await seedSession(home, newTemp("chenxi-m11-sse-cwd-"));
 		const feed = createEventFeed();
 		const server = await startServer({ home, feed, port: 0 });
 		try {
@@ -334,8 +334,8 @@ describe("M11a HTTP 服务端（真客户端，端到端）", () => {
 	});
 
 	it("回归（M11a 冒烟抓到的真 bug）：**REPL 的每条已记录事件**都喂给订阅者（含 `/mode` 与 `session/end`）", async () => {
-		const home = newTemp("aster-m11-producer-");
-		const cwd = newTemp("aster-m11-producer-cwd-");
+		const home = newTemp("chenxi-m11-producer-");
+		const cwd = newTemp("chenxi-m11-producer-cwd-");
 		const publish: SessionEvent[] = [];
 		const seen = new Set<string>();
 
@@ -383,13 +383,13 @@ describe("M11a HTTP 服务端（真客户端，端到端）", () => {
 	it("顺带修复（M11 批次声明）：带 UTF-8 BOM 的配置文件不再被误判成『非法 JSON』", () => {
 		// 复现路径：M8b 冒烟时用 PowerShell `Set-Content -Encoding utf8` 写配置 -> 带 BOM ->
 		// 原先直接 JSON.parse 会抛 "Unexpected token '\ufeff'"，让人以为配置写错了。
-		const cwd = newTemp("aster-m11-bom-");
+		const cwd = newTemp("chenxi-m11-bom-");
 		writeFileSync(
-			join(cwd, "aster.config.json"),
+			join(cwd, "chenxi.config.json"),
 			`\ufeff${JSON.stringify({ mode: "build", subagents: { enabled: true } })}`,
 			"utf8",
 		);
-		const loaded = loadConfig({ home: newTemp("aster-m11-bom-home-"), cwd, env: {} });
+		const loaded = loadConfig({ home: newTemp("chenxi-m11-bom-home-"), cwd, env: {} });
 		expect(loaded.mode).toBe("build");
 		expect(loaded.subagents).toEqual({ enabled: true });
 	});

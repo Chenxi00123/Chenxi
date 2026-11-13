@@ -7,9 +7,9 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			// 测试直接跑源码，避免依赖 dist 构建产物
-			"@aster/schema": r("./packages/schema/src/index.ts"),
-			"@aster/protocol": r("./packages/protocol/src/index.ts"),
-			"@aster/runtime": r("./packages/runtime/src/index.ts"),
+			"@chenxi/schema": r("./packages/schema/src/index.ts"),
+			"@chenxi/protocol": r("./packages/protocol/src/index.ts"),
+			"@chenxi/runtime": r("./packages/runtime/src/index.ts"),
 		},
 	},
 	test: {

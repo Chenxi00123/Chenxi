@@ -20,7 +20,7 @@ export interface SelfCheckProbe {
 	note: string;
 	/** M20：`auto` / `light` / `dark`（`<html data-theme>`；只是呈现，不进会话文件）。 */
 	theme: string;
-	/** M20：落盘的偏好（localStorage `aster.theme`）。 */
+	/** M20：落盘的偏好（localStorage `chenxi.theme`）。 */
 	themeStored: string;
 	/** M20：模式工具栏按钮数（应为 2：plan / build）。 */
 	modes: number;

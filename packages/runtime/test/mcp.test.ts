@@ -6,7 +6,7 @@
  */
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ToolCallContext, ToolCallId } from "@aster/schema";
+import type { ToolCallContext, ToolCallId } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { createContext } from "../src/events/index.js";
 import {
@@ -118,7 +118,7 @@ function stubTool(name: string): AnyToolDefinition {
 describe("MCP stdio 客户端", () => {
 	it("initialize 协商出 serverInfo（协议版本 2025-11-25）", async () => {
 		const client = await connect();
-		expect(client.serverInfo.name).toBe("aster-mcp-fixture");
+		expect(client.serverInfo.name).toBe("chenxi-mcp-fixture");
 		expect(client.serverInfo.version).toBe("1.0.0");
 		expect(client.serverInfo.protocolVersion).toBe("2025-11-25");
 	});
@@ -172,7 +172,7 @@ describe("MCP 工具桥", () => {
 		const bridged = await bridge(registry, ctx);
 
 		expect(bridged.serverName).toBe("fixture");
-		expect(bridged.serverInfo).toEqual({ name: "aster-mcp-fixture", version: "1.0.0" });
+		expect(bridged.serverInfo).toEqual({ name: "chenxi-mcp-fixture", version: "1.0.0" });
 		expect(bridged.toolNames).toEqual(["mcp__fixture__echo", "mcp__fixture__add"]);
 		expect(registry.get("mcp__fixture__echo")).toBeDefined();
 
@@ -204,7 +204,7 @@ describe("MCP 工具桥", () => {
 		await bridge(registry, ctx);
 		const tool = getTool(registry, "mcp__fixture__echo");
 		const result = asResult(
-			await tool.execute({ text: "yo" }, toolContext(makeTempDir("aster-mcp-"))),
+			await tool.execute({ text: "yo" }, toolContext(makeTempDir("chenxi-mcp-"))),
 		);
 		expect(result).toEqual({ content: [{ type: "text", text: "echo:yo" }] });
 	});

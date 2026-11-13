@@ -23,7 +23,7 @@ import type {
 	MemoryScope,
 	MemorySearchRequest,
 	SessionEvent,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import { runSessionRepl } from "../src/cli/repl.js";
 import { configFileSchema, loadConfig } from "../src/config/index.js";
@@ -52,7 +52,7 @@ function collector() {
 	};
 }
 
-const SCOPE: MemoryScope = { user: "tester", agent: "aster", session: "ses_m7b2" };
+const SCOPE: MemoryScope = { user: "tester", agent: "chenxi", session: "ses_m7b2" };
 
 /** 固定返回给定记录的假适配器；`throwError` 用于验证失败不阻塞。 */
 function fakeAdapter(options: {
@@ -344,9 +344,9 @@ describe("M7b-2 配置：memory.server 必须指向已声明的 MCP 服务器", 
 			configFileSchema.safeParse({ memory: { server: "m", searchTool: "s", limit: 99 } }).success,
 		).toBe(false);
 
-		const cwd = newTemp("aster-m7b2-cfg-");
+		const cwd = newTemp("chenxi-m7b2-cfg-");
 		writeFileSync(
-			join(cwd, "aster.config.json"),
+			join(cwd, "chenxi.config.json"),
 			JSON.stringify({ memory: { server: "ghost", searchTool: "s" } }),
 			"utf8",
 		);
@@ -354,7 +354,7 @@ describe("M7b-2 配置：memory.server 必须指向已声明的 MCP 服务器", 
 		expect(() => loadConfig({ home: newTemp("h-"), cwd, env: {} })).toThrow(/declared: \(none\)/);
 
 		writeFileSync(
-			join(cwd, "aster.config.json"),
+			join(cwd, "chenxi.config.json"),
 			JSON.stringify({
 				mcp: { servers: [{ name: "mem", command: "node" }] },
 				memory: { server: "mem", searchTool: "search_memory", limit: 3 },
@@ -368,7 +368,7 @@ describe("M7b-2 配置：memory.server 必须指向已声明的 MCP 服务器", 
 
 describe("M7b-2 端到端：REPL 里模型**真的**看到记忆前缀", () => {
 	it("provider 收到的用户消息以 `<memory …>` 开头，且输出提示了注入", async () => {
-		const home = newTemp("aster-m7b2-home-");
+		const home = newTemp("chenxi-m7b2-home-");
 		const provider = createStubProvider([{ content: "ok", stopReason: "end_turn" }]);
 		const collected = collector();
 
@@ -382,7 +382,7 @@ describe("M7b-2 端到端：REPL 里模型**真的**看到记忆前缀", () => {
 						records: [{ id: "m1", content: "The user prefers metric units." }],
 					}),
 					source: "mcp:mem/search",
-					scope: { user: "t", agent: "aster", session: "ses_e2e" },
+					scope: { user: "t", agent: "chenxi", session: "ses_e2e" },
 				}),
 			input: Readable.from(["how far is it?\n", "/exit\n"]),
 			output: collected.output,

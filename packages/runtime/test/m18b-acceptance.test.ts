@@ -136,7 +136,7 @@ describe("M18b ACP 最小通道（ADR-036）", () => {
 					loadSession: false,
 					promptCapabilities: { image: false, audio: false, embeddedContext: false },
 				},
-				agentInfo: { name: "aster", version: "1.0.0" },
+				agentInfo: { name: "chenxi", version: "1.0.0" },
 			},
 		});
 	});

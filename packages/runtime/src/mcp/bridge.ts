@@ -1,7 +1,7 @@
 /**
  * MCP 工具桥（ADR-015）。
  *
- * 把一个 stdio MCP 服务端暴露的工具，适配为 Aster 的工具契约后注册进 `ToolRegistry`：
+ * 把一个 stdio MCP 服务端暴露的工具，适配为 Chenxi 的工具契约后注册进 `ToolRegistry`：
  *  - 命名空间：一律 `mcp__<serverName>__<toolName>`；**与已有工具重名即注册失败**
  *    （由 `registry.register` 抛 `ToolRegistrationError`，不做改名兜底）；
  *  - 权限映射（ADR-006：元数据是判定唯一事实源）：`sideEffectScope: "host"`、
@@ -11,7 +11,7 @@
  *  - `execute` 把 `client.callTool` 的结果**原样**作为 output 返回（信封即 output 契约）；
  *  - `dispose` 幂等：卸载全部已注册工具 + 关闭子进程。
  */
-import type { ToolMetadata } from "@aster/schema";
+import type { ToolMetadata } from "@chenxi/schema";
 import type { Context, Disposer } from "../events/index.js";
 import type { AnyToolDefinition, ToolRegistry } from "../tools/registry.js";
 import {
@@ -105,7 +105,7 @@ function buildMetadata(fullName: string, tool: McpToolInfo, serverName: string):
 	};
 }
 
-/** 把一个 MCP 工具适配为 Aster 工具定义。 */
+/** 把一个 MCP 工具适配为 Chenxi 工具定义。 */
 function toDefinition(
 	fullName: string,
 	tool: McpToolInfo,

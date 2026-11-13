@@ -2,7 +2,7 @@
 /**
  * 架构治理门禁（05-工程规范 §2）。离线、零依赖。检查：
  *  1. 依赖方向铁律：`schema -> protocol -> runtime` **严格单向**（禁止 forbiddenEdges）；
- *  2. 禁止跨包深层 import（只允许 `@aster/<pkg>`，不允许 `@aster/<pkg>/<sub>`）；
+ *  2. 禁止跨包深层 import（只允许 `@chenxi/<pkg>`，不允许 `@chenxi/<pkg>/<sub>`）；
  *  3. 禁止相对路径逃出本包目录（等价于绕过包边界）；
  *  4. 单文件行数上限（global.maxFileLines）；
  *  5. 包级依赖图无环。
@@ -61,15 +61,15 @@ for (const module of policy.modules) {
 		for (const match of content.matchAll(importRe)) {
 			const spec = match[1];
 
-			// 2) 深层 import：@aster/<pkg>/<sub>
-			const deep = /^@aster\/([a-z0-9-]+)\/(.+)$/.exec(spec);
+			// 2) 深层 import：@chenxi/<pkg>/<sub>
+			const deep = /^@chenxi\/([a-z0-9-]+)\/(.+)$/.exec(spec);
 			if (deep !== null) {
-				failures.push(`${rel}: deep cross-package import "${spec}" is forbidden (use "@aster/${deep[1]}")`);
+				failures.push(`${rel}: deep cross-package import "${spec}" is forbidden (use "@chenxi/${deep[1]}")`);
 				continue;
 			}
 
 			// 1) 依赖方向
-			const bare = /^@aster\/([a-z0-9-]+)$/.exec(spec);
+			const bare = /^@chenxi\/([a-z0-9-]+)$/.exec(spec);
 			if (bare !== null) {
 				const target = bare[1];
 				if (!knownPackages.has(target)) {

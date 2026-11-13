@@ -12,8 +12,8 @@
 import { existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { cli } from "@aster/runtime";
-import type { SessionEvent } from "@aster/schema";
+import { cli } from "@chenxi/runtime";
+import type { SessionEvent } from "@chenxi/schema";
 import { afterEach, describe, expect, it } from "vitest";
 import type { EventCard } from "../src/host.js";
 import { createDesktopSessions, createLiveSession, type LiveSession } from "../src/session.js";
@@ -90,7 +90,7 @@ async function record(home: string, prompt: string): Promise<string> {
 
 describe("M13d-1 续跑（resume）：接着跑同一条会话", () => {
 	it("resume 后新 prompt 落进**同一条 JSONL**：同一 sessionId、seq 继续、两条 user/message 同文件", async () => {
-		const home = newTemp("aster-m13d1-resume-");
+		const home = newTemp("chenxi-m13d1-resume-");
 		const recordedId = await record(home, "first message");
 		const before = readEvents(home, recordedId);
 
@@ -138,7 +138,7 @@ describe("M13d-1 续跑（resume）：接着跑同一条会话", () => {
 	});
 
 	it("resume 会先收掉**当前**会话（EOF，不中断），新活动会话改成被恢复的那条", async () => {
-		const home = newTemp("aster-m13d1-switch-");
+		const home = newTemp("chenxi-m13d1-switch-");
 		const recordedId = await record(home, "recorded only");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const seen = collector();
@@ -181,7 +181,7 @@ describe("M13d-1 续跑（resume）：接着跑同一条会话", () => {
 	});
 
 	it("已经就是当前会话 ⇒ no-op（**不**关掉再重开：不产生多余的 session/end）", async () => {
-		const home = newTemp("aster-m13d1-noop-");
+		const home = newTemp("chenxi-m13d1-noop-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const sessions = createDesktopSessions({
 			runtime,
@@ -211,7 +211,7 @@ describe("M13d-1 续跑（resume）：接着跑同一条会话", () => {
 	});
 
 	it("**先 reset 再 resume 同一条**（真窗口自检就是这个顺序）⇒ 绝不出现两个写入者：seq 严格递增、无重复", async () => {
-		const home = newTemp("aster-m13d1-reset-resume-");
+		const home = newTemp("chenxi-m13d1-reset-resume-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const sessions = createDesktopSessions({
 			runtime,
@@ -245,7 +245,7 @@ describe("M13d-1 续跑（resume）：接着跑同一条会话", () => {
 	});
 
 	it("恢复不存在的会话 ⇒ 快速失败（可读错误），且不产生半条写入", async () => {
-		const home = newTemp("aster-m13d1-missing-");
+		const home = newTemp("chenxi-m13d1-missing-");
 		const runtime = await bootstrap({ home, stub: "hi", noTools: true });
 		const sessions = createDesktopSessions({
 			runtime,
@@ -272,9 +272,9 @@ describe("M13d-1 契约（源码级断言，防漂移）", () => {
 	const rendererSource = readFileSync(join(PKG, "renderer", "app.js"), "utf8");
 	const sessionSource = readFileSync(join(PKG, "src", "session.ts"), "utf8");
 
-	it("IPC 频道只增：main 的 `aster:resume` 在 preload 里有对应方法", () => {
-		expect(mainSource).toContain('"aster:resume"');
-		expect(preloadSource).toContain("aster:resume");
+	it("IPC 频道只增：main 的 `chenxi:resume` 在 preload 里有对应方法", () => {
+		expect(mainSource).toContain('"chenxi:resume"');
+		expect(preloadSource).toContain("chenxi:resume");
 		expect(preloadSource).toContain("resume:");
 	});
 
@@ -286,7 +286,7 @@ describe("M13d-1 契约（源码级断言，防漂移）", () => {
 	});
 
 	it("renderer 的「恢复」是结构化动作：只调 narrow API，不嗅探文本", () => {
-		expect(rendererSource).toContain("window.aster.resume");
+		expect(rendererSource).toContain("window.chenxi.resume");
 		expect(rendererSource).not.toContain("require(");
 		expect(rendererSource).not.toContain("ipcRenderer");
 		expect(/\.innerHTML\s*=/.test(rendererSource)).toBe(false);

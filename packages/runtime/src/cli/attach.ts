@@ -8,7 +8,7 @@
  *  - 断线（含 `subscriber_overflow`）一律提示「重连并**整段回放** `GET <url>/api/sessions/<id>`」；
  *  - **客户端不做任何写入**（镜像 = 只订阅）。
  */
-import type { SessionId } from "@aster/schema";
+import type { SessionId } from "@chenxi/schema";
 import type { EventStream } from "../serve/index.js";
 import { connectEventStream } from "../serve/index.js";
 import {

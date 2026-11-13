@@ -17,7 +17,7 @@ import type {
 	SessionEvent,
 	SessionId,
 	SessionStartPayload,
-} from "@aster/schema";
+} from "@chenxi/schema";
 import type { SessionStore } from "../persist/index.js";
 import { draftFromExchange, type ExchangeEventDraft } from "./exchange.js";
 import { eventsToTurns, type PortableTurn, turnsToDrafts } from "./turns.js";
@@ -35,7 +35,7 @@ export interface ExportedSession {
  * 版本号是**字面量**（与本仓既有做法一致：`mcp/client.ts` 的 `clientInfo.version` 同样是写死的），
  * `m9` 验收有断言把它与 `package.json` 对齐，避免两处漂移。
  */
-export const ASTER_PRODUCER: ExchangeProducer = { name: "aster", version: "1.0.0" };
+export const CHENXI_PRODUCER: ExchangeProducer = { name: "chenxi", version: "1.0.0" };
 
 /** 会话尚未结束时的收尾原因（导入会把未结束的会话补成已结束，保证事实源完整）。 */
 const IMPORT_END_REASON = "exit";

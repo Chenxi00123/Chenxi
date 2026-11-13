@@ -7,7 +7,7 @@
  */
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import type { SessionId } from "@aster/schema";
+import type { SessionId } from "@chenxi/schema";
 
 /** 索引数据库文件名（仅测试覆盖）。 */
 export const DEFAULT_INDEX_FILE = "index.sqlite";
@@ -19,13 +19,13 @@ export const SESSIONS_DIR_NAME = "sessions";
 export const JSONL_EXT = ".jsonl";
 
 /**
- * 解析数据根目录：显式 `home` > 环境变量 `ASTER_HOME` > `~/.aster`。
+ * 解析数据根目录：显式 `home` > 环境变量 `CHENXI_HOME` > `~/.chenxi`。
  */
 export function resolveHome(home?: string): string {
 	if (home !== undefined && home.trim() !== "") return resolve(home);
-	const fromEnv: string | undefined = process.env.ASTER_HOME;
+	const fromEnv: string | undefined = process.env.CHENXI_HOME;
 	if (fromEnv !== undefined && fromEnv.trim() !== "") return resolve(fromEnv);
-	return join(homedir(), ".aster");
+	return join(homedir(), ".chenxi");
 }
 
 /** `<home>/sessions`。 */
